@@ -26,8 +26,8 @@ const TOOL_INFO: Record<string, { name: string; description: string; placeholder
 
 const schema = z.object({
   prompt: z.string().min(3, "အနည်းဆုံး စာလုံး ၃ လုံး ထည့်ပါ"),
-  tone: z.string().default("casual"),
-  length: z.string().default("medium"),
+  tone: z.string(),
+  length: z.string(),
   audience: z.string().optional(),
 })
 
