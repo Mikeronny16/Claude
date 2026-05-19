@@ -90,6 +90,7 @@ export default function LandingPage() {
             <a href="#how" className="hover:text-white transition-colors">How it works</a>
             <a href="#eggs" className="hover:text-white transition-colors">Eggs</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <Link href="/about" className="hover:text-white transition-colors">About</Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/auth/signin" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5">Sign in</Link>
