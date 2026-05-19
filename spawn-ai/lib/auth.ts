@@ -18,6 +18,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!user || !user.hashedPassword) return null
         const valid = await bcrypt.compare(credentials.password as string, user.hashedPassword)
         if (!valid) return null
+        // Auto-promote ADMIN_EMAIL to admin if not already
+        if (user.email === process.env.ADMIN_EMAIL && !user.isAdmin) {
+          await prisma.user.update({ where: { id: user.id }, data: { isAdmin: true } })
+        }
         return { id: user.id, email: user.email, name: user.name }
       },
     }),
