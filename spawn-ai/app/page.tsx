@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { Egg, Heart, Sparkles, Zap, Star, ArrowRight, ChevronDown } from "lucide-react"
 
 const fadeUp = {
@@ -62,6 +63,7 @@ const PLANS = [
 ]
 
 export default function LandingPage() {
+  const { data: session } = useSession()
   return (
     <div className="relative overflow-hidden">
       {/* Floating particles */}
@@ -93,10 +95,18 @@ export default function LandingPage() {
             <Link href="/about" className="hover:text-white transition-colors">About</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth/signin" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5">Sign in</Link>
-            <Link href="/auth/signup" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium">
-              Get your egg
-            </Link>
+            {session ? (
+              <Link href="/dashboard" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium flex items-center gap-1.5">
+                My Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/signin" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5">Sign in</Link>
+                <Link href="/auth/signup" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium">
+                  Get your egg
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
