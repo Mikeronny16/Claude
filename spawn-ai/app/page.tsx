@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { Egg, Heart, Sparkles, Zap, Star, ArrowRight, ChevronDown } from "lucide-react"
 
 const fadeUp = {
@@ -62,6 +63,7 @@ const PLANS = [
 ]
 
 export default function LandingPage() {
+  const { data: session } = useSession()
   return (
     <div className="relative overflow-hidden">
       {/* Floating particles */}
@@ -93,10 +95,18 @@ export default function LandingPage() {
             <Link href="/about" className="hover:text-white transition-colors">About</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth/signin" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5">Sign in</Link>
-            <Link href="/auth/signup" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium">
-              Get your egg
-            </Link>
+            {session ? (
+              <Link href="/dashboard" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium flex items-center gap-1.5">
+                My Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/signin" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5">Sign in</Link>
+                <Link href="/auth/signup" className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition-colors font-medium">
+                  Get your egg
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -119,12 +129,21 @@ export default function LandingPage() {
             It remembers you. It grows because of you.
           </motion.p>
           <motion.div custom={4} variants={fadeUp} className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <Link href="/auth/signup"
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-full text-base font-semibold transition-all hover:scale-105"
-              style={{ boxShadow: "0 0 30px rgba(139,92,246,0.4)" }}
-            >
-              <Egg className="w-5 h-5" /> Hatch your first egg — Free
-            </Link>
+            {session ? (
+              <Link href="/dashboard"
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-full text-base font-semibold transition-all hover:scale-105"
+                style={{ boxShadow: "0 0 30px rgba(139,92,246,0.4)" }}
+              >
+                <Egg className="w-5 h-5" /> Go to my Dashboard →
+              </Link>
+            ) : (
+              <Link href="/auth/signup"
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-full text-base font-semibold transition-all hover:scale-105"
+                style={{ boxShadow: "0 0 30px rgba(139,92,246,0.4)" }}
+              >
+                <Egg className="w-5 h-5" /> Hatch your first egg — Free
+              </Link>
+            )}
             <a href="#how" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
               How does it work? <ArrowRight className="w-4 h-4" />
             </a>
@@ -236,6 +255,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Philosophy */}
+      <section className="py-20 px-4" style={{ background: "rgba(139,92,246,0.04)" }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-5xl mb-8">🌱</p>
+            <blockquote className="text-2xl sm:text-3xl font-semibold text-white leading-relaxed mb-6">
+              &ldquo;In a world that scrolls past everything —<br/>
+              <span className="text-gradient">how much care do we still have left?&rdquo;</span>
+            </blockquote>
+            <p className="text-gray-400 leading-relaxed max-w-xl mx-auto">
+              Spawn AI is not just a game. It&apos;s a quiet experiment in caring. In patience.
+              In choosing to invest your attention in something small that grows slowly —
+              and means more because of it.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Founder */}
+      <section id="founder" className="py-24 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="glass rounded-3xl p-8 sm:p-12 flex flex-col sm:flex-row gap-8 items-center sm:items-start">
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
+                style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", boxShadow: "0 0 30px rgba(139,92,246,0.4)" }}>
+                MR
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-purple-400 uppercase tracking-widest mb-2">The founder</p>
+              <h2 className="text-2xl font-bold text-white mb-1">Mike Ronny</h2>
+              <p className="text-sm text-gray-500 mb-5">Myanmar · Founder of Spawn AI</p>
+              <div className="space-y-3 text-gray-300 leading-relaxed text-sm">
+                <p>
+                  I built Spawn AI because I had a question I couldn&apos;t stop thinking about.
+                  We live in a time when everything is instant, disposable, forgettable.
+                </p>
+                <p>
+                  But the things that actually matter — the things we <span className="text-white">remember</span> — are the ones
+                  we waited for. The ones we invested in. A pet you raise from birth
+                  is different from one you just encounter.
+                </p>
+                <p>
+                  This app is my answer to that. It&apos;s a small, quiet thing.
+                  But it&apos;s built with all my care.
+                </p>
+              </div>
+              <Link href="/about" className="inline-flex items-center gap-1.5 mt-5 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                Read the full story <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 px-4 text-center relative">
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(139,92,246,0.18) 0%, transparent 70%)" }} />
@@ -244,11 +318,19 @@ export default function LandingPage() {
           <h2 className="text-4xl sm:text-5xl font-bold text-white mt-6 mb-4">An egg. A choice.</h2>
           <p className="text-xl text-gray-400 mb-2 italic">&ldquo;A quiet little life.&rdquo;</p>
           <p className="text-gray-500 mb-10 max-w-md mx-auto">Your pet is waiting. It doesn&apos;t know your name yet. But it will.</p>
-          <Link href="/auth/signup"
-            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-10 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105"
-            style={{ boxShadow: "0 0 40px rgba(139,92,246,0.5)" }}>
-            <Egg className="w-5 h-5" /> Start for free
-          </Link>
+          {session ? (
+            <Link href="/dashboard"
+              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-10 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105"
+              style={{ boxShadow: "0 0 40px rgba(139,92,246,0.5)" }}>
+              <Egg className="w-5 h-5" /> Back to my pets →
+            </Link>
+          ) : (
+            <Link href="/auth/signup"
+              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-10 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105"
+              style={{ boxShadow: "0 0 40px rgba(139,92,246,0.5)" }}>
+              <Egg className="w-5 h-5" /> Start for free
+            </Link>
+          )}
         </motion.div>
       </section>
 
