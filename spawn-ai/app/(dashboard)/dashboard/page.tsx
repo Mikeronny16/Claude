@@ -69,13 +69,21 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">
-          Welcome back{data.user.name ? `, ${data.user.name}` : ""} 👋
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          {data.user.plan === "free" ? `${data.user.messagesUsedToday}/30 messages today` : "Unlimited messages"} · {data.user.plan} plan
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">
+            Welcome back{data.user.name ? `, ${data.user.name}` : ""} 👋
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {data.user.plan === "free" ? `${data.user.messagesUsedToday}/30 messages today` : "Unlimited messages"} · {data.user.plan} plan
+          </p>
+        </div>
+        {data.user.plan === "free" && (
+          <Link href="/pricing" className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-semibold transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #7C3AED, #F59E0B)", color: "#fff" }}>
+            ⚡ Upgrade
+          </Link>
+        )}
       </div>
 
       {/* Ready to hatch */}
