@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String?
+  hashedPassword   String?
+  plan             String    @default("free")
+  planExpiresAt    DateTime?
+  messagesUsedToday Int      @default(0)
+  lastMessageReset DateTime  @default(now())
+  isAdmin          Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+
+  eggs            Egg[]
+  pets            Pet[]
+  paymentRequests PaymentRequest[]
+}
+
+model Egg {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  species             String
+  tier                String   @default("common")
+  incubationStartedAt DateTime @default(now())
+  hatchesAt           DateTime
+  isHatched           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  personalitySeeds PersonalitySeed[]
+}
+
+model PersonalitySeed {
+  id        String   @id @default(cuid())
+  eggId     String
+  egg       Egg      @relation(fields: [eggId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Pet {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  species          String
+  tier             String   @default("common")
+  stage            String   @default("baby")
+  level            Int      @default(1)
+  xp               Int      @default(0)
+  personality      String   @default("{}")
+  backstory        String   @default("")
+  hunger           Int      @default(80)
+  energy           Int      @default(100)
+  happiness        Int      @default(70)
+  bond             Int      @default(0)
+  hatchedAt        DateTime @default(now())
+  lastInteractedAt DateTime @default(now())
+  lastFedAt        DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  messages PetMessage[]
+}
+
+model PetMessage {
+  id        String   @id @default(cuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  xpGained  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model PaymentRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        String
+  amount      Float
+  status      String    @default("pending")
+  adminNote   String?
+  createdAt   DateTime  @default(now())
+  approvedAt  DateTime?
+}
