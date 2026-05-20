@@ -15,14 +15,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
+    // Upload image to Replicate (more reliable than base64)
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const blob = new Blob([bytes], { type: file.type });
+    const uploaded = await replicate.files.create(blob);
+    const imageUrl = uploaded.urls.get;
 
     const prediction = await replicate.predictions.create({
       model: "fofr/face-to-many",
       input: {
-        image: dataUrl,
+        image: imageUrl,
         style: "Toy",
         prompt: "TOK",
         lora_scale: 1,
@@ -33,9 +35,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ id: prediction.id });
-  } catch (err) {
-    console.error("Transform error:", err);
-    return NextResponse.json({ error: "Failed to start transform" }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Transform error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
@@ -54,8 +57,9 @@ export async function GET(req: NextRequest) {
       output: prediction.output,
       error: prediction.error ?? null,
     });
-  } catch (err) {
-    console.error("Status error:", err);
-    return NextResponse.json({ error: "Failed to get status" }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Status error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
