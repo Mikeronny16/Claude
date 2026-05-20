@@ -20,31 +20,53 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around px-2"
       style={{
-        background: "rgba(8,6,20,0.95)",
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-around",
+        paddingLeft: 8,
+        paddingRight: 8,
+        paddingTop: 10,
+        paddingBottom: "calc(env(safe-area-inset-bottom, 12px) + 10px)",
+        background: "rgba(8,6,20,0.97)",
+        borderTop: "1px solid rgba(139,92,246,0.25)",
         backdropFilter: "blur(16px)",
-        borderTop: "1px solid rgba(139,92,246,0.2)",
-        paddingBottom: "env(safe-area-inset-bottom, 12px)",
-        paddingTop: "10px",
+        WebkitBackdropFilter: "blur(16px)",
       }}
     >
       {links.map(({ href, icon: Icon, label }) => {
         const active = isActive(href)
         return (
-          <Link key={href} href={href}
-            className="flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all"
-            style={{ minWidth: 64 }}>
-            <div className="relative">
-              {active && (
-                <div className="absolute -inset-2 rounded-xl"
-                  style={{ background: "rgba(139,92,246,0.15)" }} />
-              )}
-              <Icon className="w-5 h-5 relative z-10 transition-colors"
-                style={{ color: active ? "#A78BFA" : "#6B7280" }} />
-            </div>
-            <span className="text-xs transition-colors"
-              style={{ color: active ? "#A78BFA" : "#6B7280", fontWeight: active ? 600 : 400 }}>
+          <Link
+            key={href}
+            href={href}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 16px",
+              borderRadius: 12,
+              minWidth: 60,
+              textDecoration: "none",
+              background: active ? "rgba(139,92,246,0.15)" : "transparent",
+            }}
+          >
+            <Icon
+              style={{ width: 20, height: 20, color: active ? "#A78BFA" : "#6B7280" }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                color: active ? "#A78BFA" : "#6B7280",
+                fontWeight: active ? 600 : 400,
+              }}
+            >
               {label}
             </span>
           </Link>

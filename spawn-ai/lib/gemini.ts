@@ -4,8 +4,8 @@ const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "")
 
 export function getModel(plan: string) {
   return plan === "free"
-    ? genai.getGenerativeModel({ model: "gemini-1.5-flash" })
-    : genai.getGenerativeModel({ model: "gemini-1.5-pro" })
+    ? genai.getGenerativeModel({ model: "gemini-2.0-flash" })
+    : genai.getGenerativeModel({ model: "gemini-2.0-flash" })
 }
 
 export function buildPetSystemPrompt(pet: {
