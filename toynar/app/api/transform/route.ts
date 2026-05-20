@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const imageUrl = uploaded.urls.get;
 
     const prediction = await replicate.predictions.create({
-      model: "fofr/face-to-many",
+      version: "a07f252abbbd832009640b27f063ea52d87d7a23a185ca165bec23b5adc8deaf",
       input: {
         image: imageUrl,
         style: "Toy",
