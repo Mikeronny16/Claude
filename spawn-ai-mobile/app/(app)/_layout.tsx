@@ -8,7 +8,7 @@ function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
 }
 
 export default function AppLayout() {
-  const { token, loaded } = useAuthStore()
+  const { token, loaded, user } = useAuthStore()
   if (loaded && !token) return <Redirect href="/(auth)" />
 
   return (
@@ -39,6 +39,14 @@ export default function AppLayout() {
       <Tabs.Screen
         name="settings"
         options={{ title: "Settings", tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} /> }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Admin",
+          href: user?.isAdmin ? undefined : null,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="⚡" focused={focused} />,
+        }}
       />
       <Tabs.Screen name="pet/[id]" options={{ href: null }} />
     </Tabs>
