@@ -11,8 +11,7 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
-    env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,16 +19,27 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Expo + EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
       - name: Install dependencies
         working-directory: spawn-ai-mobile
         run: npm install --legacy-peer-deps
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Verify token
-        run: eas whoami
+      - name: Initialize EAS project
+        working-directory: spawn-ai-mobile
+        run: |
+          eas init --non-interactive --force
+          echo "=== app.json after init ==="
+          cat app.json
+          if ! grep -q "projectId" app.json; then
+            echo "ERROR: projectId missing from app.json after eas init"
+            exit 1
+          fi
 
       - name: Build Android APK
         working-directory: spawn-ai-mobile
-        run: eas build -p android --profile preview --non-interactive
+        run: eas build -p android --profile preview --non-interactive --no-wait
