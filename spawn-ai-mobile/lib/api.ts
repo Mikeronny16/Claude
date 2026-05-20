@@ -85,4 +85,30 @@ export const api = {
       { method: "POST", body: JSON.stringify(data) }
     )
   },
+
+  async getAdminStats() {
+    return req<{
+      totalUsers: number; newUsersToday: number
+      totalPets: number; totalEggs: number
+      totalMessages: number; messagesToday: number
+      pendingRequests: number
+      planCounts: { plan: string; count: number }[]
+    }>("/api/mobile/admin/stats")
+  },
+
+  async getAdminRequests() {
+    return req<{
+      requests: {
+        id: string; plan: string; amount: number; status: string; createdAt: string
+        user: { email: string; name: string | null; plan: string }
+      }[]
+    }>("/api/mobile/admin/requests")
+  },
+
+  async approveRequest(id: string, action: "approve" | "reject") {
+    return req<{ success: boolean }>(
+      `/api/mobile/admin/requests/${id}`,
+      { method: "POST", body: JSON.stringify({ action }) }
+    )
+  },
 }

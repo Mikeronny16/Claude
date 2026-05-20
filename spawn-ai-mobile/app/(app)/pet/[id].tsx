@@ -7,6 +7,7 @@ import { useLocalSearchParams, router } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { api } from "@/lib/api"
 import { C, F } from "@/lib/colors"
+import { sharePet } from "@/components/ShareSheet"
 
 type Pet = { id: string; name: string; species: string; tier: string; stage: string; level: number; hunger: number; energy: number; happiness: number; bond: number; xp: number }
 type Msg = { id: string; role: string; content: string }
@@ -99,6 +100,10 @@ export default function PetScreen() {
           </Text>
         </View>
         <Text style={{ fontSize: 28 }}>{stageEmoji[pet.stage] ?? "🐣"}</Text>
+        <TouchableOpacity onPress={() => sharePet({ petName: pet.name, species: pet.species, stage: pet.stage, level: pet.level, bond: pet.bond })}
+          style={{ padding: 6, marginLeft: 8 }}>
+          <Text style={{ fontSize: 20 }}>📤</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Stats row */}

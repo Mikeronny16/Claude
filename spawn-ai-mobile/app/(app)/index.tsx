@@ -9,6 +9,7 @@ import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/store"
 import { C, F } from "@/lib/colors"
 import { EggSVG } from "@/components/EggSVG"
+import { sharePet } from "@/components/ShareSheet"
 
 type Egg = { id: string; species: string; tier: string; hatchesAt: string; isHatched: boolean; personalitySeeds: { id: string }[] }
 type Pet = { id: string; name: string; species: string; tier: string; stage: string; level: number; hunger: number; energy: number; happiness: number; bond: number }
@@ -179,8 +180,15 @@ export default function DashboardScreen() {
                       </Text>
                     </View>
                   </View>
-                  <View style={s.talkBadge}>
-                    <Text style={{ fontSize: F.xs, color: C.purpleLight, fontWeight: "600" }}>💬 Talk</Text>
+                  <View style={{ flexDirection: "row", gap: 6 }}>
+                    <View style={s.talkBadge}>
+                      <Text style={{ fontSize: F.xs, color: C.purpleLight, fontWeight: "600" }}>💬 Talk</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[s.talkBadge, { backgroundColor: "rgba(255,255,255,0.06)" }]}
+                      onPress={(e) => { e.stopPropagation?.(); sharePet({ petName: pet.name, species: pet.species, stage: pet.stage, level: pet.level, bond: pet.bond }) }}>
+                      <Text style={{ fontSize: F.xs }}>📤</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
                 <View style={{ flexDirection: "row", gap: 8 }}>
