@@ -112,7 +112,7 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
   if (!pet) return null
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 64px - 72px)" }}>
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 flex-shrink-0">
         <Link href="/dashboard" className="text-gray-400 hover:text-white">
