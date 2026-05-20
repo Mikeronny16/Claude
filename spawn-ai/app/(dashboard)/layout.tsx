@@ -35,12 +35,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </form>
           </div>
         </nav>
-        <main className="max-w-2xl mx-auto px-4 py-6 pb-24">{children}</main>
+        <main className="max-w-2xl mx-auto px-4 py-6" style={{ paddingBottom: "calc(96px + env(safe-area-inset-bottom))" }}>{children}</main>
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
           background: "#0D0920", borderTop: "3px solid #7C3AED",
           display: "flex", justifyContent: "space-around", alignItems: "center",
-          height: "64px",
+          height: "calc(64px + env(safe-area-inset-bottom))",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}>
           {[
             { href: "/dashboard", label: "Home",     e: "🏠" },

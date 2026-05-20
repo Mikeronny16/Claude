@@ -39,17 +39,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     user.name ?? user.email
   )
 
-  const model = getModel(user.plan)
-  const chat = model.startChat({
-    systemInstruction: systemPrompt,
-    history: history.map(m => ({
-      role: m.role === "user" ? "user" : "model",
-      parts: [{ text: m.content }]
-    }))
-  })
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: "AI service not configured" }, { status: 503 })
+  }
 
-  const result = await chat.sendMessage(message)
-  const reply = result.response.text()
+  let reply: string
+  try {
+    const model = getModel(user.plan)
+    const chat = model.startChat({
+      systemInstruction: systemPrompt,
+      history: history.map(m => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }]
+      }))
+    })
+    const result = await chat.sendMessage(message)
+    reply = result.response.text()
+  } catch (err) {
+    console.error("Gemini error:", err)
+    return NextResponse.json({ error: "AI unavailable, try again in a moment" }, { status: 503 })
+  }
 
   // Save messages
   await prisma.petMessage.createMany({
