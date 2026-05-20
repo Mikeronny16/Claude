@@ -2,7 +2,6 @@ import { auth, signOut } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import SessionWrapper from "./SessionWrapper"
-import BottomNav from "./BottomNav"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -36,7 +35,27 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </nav>
         <main className="max-w-2xl mx-auto px-4 py-6 pb-24">{children}</main>
-        <BottomNav />
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
+          background: "#0D0920", borderTop: "3px solid #7C3AED",
+          display: "flex", justifyContent: "space-around", alignItems: "center",
+          height: "64px",
+        }}>
+          {[
+            { href: "/dashboard", label: "Home",     e: "🏠" },
+            { href: "/shop",      label: "Shop",     e: "🛍️" },
+            { href: "/settings",  label: "Settings", e: "⚙️" },
+          ].map(({ href, label, e }) => (
+            <a key={href} href={href} style={{
+              color: "#A78BFA", textDecoration: "none",
+              display: "flex", flexDirection: "column", alignItems: "center",
+              gap: "2px", fontSize: "11px", fontWeight: 600, minWidth: "64px",
+            }}>
+              <span style={{ fontSize: "22px" }}>{e}</span>
+              {label}
+            </a>
+          ))}
+        </div>
       </div>
     </SessionWrapper>
   )
