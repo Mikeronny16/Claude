@@ -22,17 +22,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (user.email === process.env.ADMIN_EMAIL && !user.isAdmin) {
           await prisma.user.update({ where: { id: user.id }, data: { isAdmin: true } })
         }
-        return { id: user.id, email: user.email, name: user.name }
+        const isAdmin = user.email === process.env.ADMIN_EMAIL ? true : user.isAdmin
+        return { id: user.id, email: user.email, name: user.name, isAdmin, plan: user.plan }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id
+      if (user) {
+        token.id = user.id
+        token.isAdmin = (user as { isAdmin?: boolean }).isAdmin ?? false
+        token.plan = (user as { plan?: string }).plan ?? "free"
+      }
       return token
     },
     async session({ session, token }) {
-      if (token.id && session.user) session.user.id = token.id as string
+      if (token.id && session.user) {
+        session.user.id = token.id as string
+        session.user.isAdmin = (token.isAdmin as boolean) ?? false
+        session.user.plan = (token.plan as string) ?? "free"
+      }
       return session
     },
   },
