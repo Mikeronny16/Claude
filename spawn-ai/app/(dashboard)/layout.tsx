@@ -20,6 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <ellipse cx="50" cy="65" rx="38" ry="50" fill="url(#nl)"/>
             </svg>
             <span className="text-gradient">Spawn AI</span>
+            <span style={{ fontSize: "10px", color: "#10B981", background: "rgba(16,185,129,0.15)", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>v2</span>
           </Link>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-400 hidden sm:block">{session.user?.name ?? session.user?.email}</span>
