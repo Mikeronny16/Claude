@@ -11,33 +11,25 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: spawn-ai-mobile/package-lock.json
+          node-version: 22
 
       - name: Install dependencies
         working-directory: spawn-ai-mobile
         run: npm install --legacy-peer-deps
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
 
-      - name: Init EAS project (first time only)
-        working-directory: spawn-ai-mobile
-        run: eas init --id --non-interactive 2>/dev/null || true
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      - name: Verify token
+        run: eas whoami
 
       - name: Build Android APK
         working-directory: spawn-ai-mobile
         run: eas build -p android --profile preview --non-interactive
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
