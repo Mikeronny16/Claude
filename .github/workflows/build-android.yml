@@ -24,6 +24,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Install Android SDK components
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;27.1.12297006" \
+            "cmake;3.22.1" \
+            "build-tools;35.0.0" \
+            "platforms;android-35"
+
       - name: Install dependencies
         working-directory: spawn-ai-mobile
         run: npm install --legacy-peer-deps
@@ -34,6 +43,8 @@ jobs:
 
       - name: Build APK
         working-directory: spawn-ai-mobile/android
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.1.12297006
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
