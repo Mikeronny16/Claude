@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getRequestUser } from "@/lib/mobile-auth"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth()
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = await getRequestUser(req)
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
   const { action } = await req.json()
-  const pet = await prisma.pet.findFirst({ where: { id, userId: session.user.id } })
+  const pet = await prisma.pet.findFirst({ where: { id, userId: user.id } })
   if (!pet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const actionMap: Record<string, Record<string, number>> = {
@@ -17,7 +17,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     pet:   { happiness: Math.min(100, pet.happiness + 10), bond: Math.min(100, pet.bond + 2) },
   }
   const updates = actionMap[action] ?? {}
-
   const updated = await prisma.pet.update({ where: { id: pet.id }, data: { ...updates, lastInteractedAt: new Date() } })
-  return NextResponse.json({ pet: updated })
+  return NextResponse.json({ hunger: updated.hunger, energy: updated.energy, happiness: updated.happiness, bond: updated.bond })
 }

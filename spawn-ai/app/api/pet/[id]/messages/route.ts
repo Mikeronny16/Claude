@@ -9,5 +9,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   const pet = await prisma.pet.findFirst({ where: { id, userId: user.id } })
   if (!pet) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  return NextResponse.json({ pet })
+
+  const messages = await prisma.petMessage.findMany({
+    where: { petId: id },
+    orderBy: { createdAt: "asc" },
+    take: 60,
+    select: { id: true, role: true, content: true, createdAt: true },
+  })
+
+  return NextResponse.json({ messages })
 }
