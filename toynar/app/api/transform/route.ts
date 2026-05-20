@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import Replicate from "replicate";
+import { fal } from "@fal-ai/client";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
-});
+fal.config({ credentials: process.env.FAL_KEY! });
 
-// POST — start transformation
+const MODEL = "fal-ai/face-to-sticker";
+
+// POST — submit transformation job
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -15,26 +15,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    // Upload image to Replicate (more reliable than base64)
     const bytes = await file.arrayBuffer();
     const blob = new Blob([bytes], { type: file.type });
-    const uploaded = await replicate.files.create(blob);
-    const imageUrl = uploaded.urls.get;
 
-    const prediction = await replicate.predictions.create({
-      version: "a07f252abbbd832009640b27f063ea52d87d7a23a185ca165bec23b5adc8deaf",
+    // Upload image to fal storage to get a URL
+    const imageUrl = await fal.storage.upload(blob as File);
+
+    const { request_id } = await fal.queue.submit(MODEL, {
       input: {
-        image: imageUrl,
-        style: "Toy",
-        prompt: "TOK",
-        lora_scale: 1,
-        denoising_strength: 1,
+        image_url: imageUrl,
+        prompt: "a person as a collectible toy figurine, smooth plastic, vibrant colors",
         instant_id_strength: 0.8,
-        control_depth_strength: 0.8,
+        upscale: true,
       },
     });
 
-    return NextResponse.json({ id: prediction.id });
+    return NextResponse.json({ id: request_id });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Transform error:", msg);
@@ -47,16 +43,27 @@ export async function GET(req: NextRequest) {
   const id = new URL(req.url).searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json({ error: "Missing prediction id" }, { status: 400 });
+    return NextResponse.json({ error: "Missing request id" }, { status: 400 });
   }
 
   try {
-    const prediction = await replicate.predictions.get(id);
-    return NextResponse.json({
-      status: prediction.status,
-      output: prediction.output,
-      error: prediction.error ?? null,
+    const status = await fal.queue.status(MODEL, {
+      requestId: id,
+      logs: false,
     });
+
+    if (status.status === "COMPLETED") {
+      const result = await fal.queue.result(MODEL, { requestId: id });
+      const data = result.data as { images?: Array<{ url: string }> };
+      const output = data.images?.[0]?.url ?? null;
+      return NextResponse.json({ status: "succeeded", output });
+    }
+
+    if (status.status === "IN_QUEUE" || status.status === "IN_PROGRESS") {
+      return NextResponse.json({ status: "processing" });
+    }
+
+    return NextResponse.json({ status: "failed", error: "Unknown failure" });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Status error:", msg);
