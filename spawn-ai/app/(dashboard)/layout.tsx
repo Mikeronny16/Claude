@@ -2,6 +2,7 @@ import { auth, signOut } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import SessionWrapper from "./SessionWrapper"
+import BottomNav from "./BottomNav"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -34,7 +35,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </form>
           </div>
         </nav>
-        <main className="max-w-2xl mx-auto px-4 py-6">{children}</main>
+        <main className="max-w-2xl mx-auto px-4 py-6 pb-24">{children}</main>
+        <BottomNav />
       </div>
     </SessionWrapper>
   )
