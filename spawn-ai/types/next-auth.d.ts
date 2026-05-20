@@ -8,4 +8,16 @@ declare module "next-auth" {
       plan: string
     } & DefaultSession["user"]
   }
+  interface User {
+    isAdmin?: boolean
+    plan?: string
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string
+    isAdmin?: boolean
+    plan?: string
+  }
 }
