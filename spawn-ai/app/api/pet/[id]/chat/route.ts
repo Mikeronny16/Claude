@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getModel, buildPetSystemPrompt } from "@/lib/gemini"
+import { getRequestUser } from "@/lib/mobile-auth"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth()
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const authUser = await getRequestUser(req)
+  if (!authUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
   const { message } = await req.json()
 
-  const pet = await prisma.pet.findFirst({ where: { id, userId: session.user.id } })
+  const pet = await prisma.pet.findFirst({ where: { id, userId: authUser.id } })
   if (!pet) return NextResponse.json({ error: "Pet not found" }, { status: 404 })
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  const user = await prisma.user.findUnique({ where: { id: authUser.id } })
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 })
 
   // Check daily message limit
