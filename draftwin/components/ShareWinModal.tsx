@@ -49,7 +49,7 @@ Free, no signup. Works on Upwork, Fiverr & email.
     <div className="fixed inset-0 flex items-end md:items-center justify-center z-[60] p-4"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="glass w-full max-w-md rounded-3xl overflow-hidden">
+      <div className="glass modal-content w-full max-w-md rounded-3xl overflow-hidden">
 
         <div className="p-6 text-center space-y-2 border-b" style={{ borderColor: "var(--glass-border)" }}>
           <div className="text-5xl">🏆</div>

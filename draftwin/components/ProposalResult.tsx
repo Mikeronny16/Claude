@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Translations } from "@/lib/i18n";
 
 interface Props {
@@ -18,14 +18,28 @@ interface Props {
   onSaveSnippet?: (text: string) => void;
 }
 
-function ScoreBadge({ score }: { score: number }) {
+function ScoreRing({ score }: { score: number }) {
+  const [animated, setAnimated] = useState(false);
+  const radius = 17;
+  const circ = 2 * Math.PI * radius;
   const color = score >= 8 ? "#10B981" : score >= 6 ? "#F59E0B" : "#EF4444";
   const label = score >= 8 ? "Strong" : score >= 6 ? "Good" : "Weak";
+  const offset = animated ? circ * (1 - score / 10) : circ;
+  useEffect(() => { const t = setTimeout(() => setAnimated(true), 80); return () => clearTimeout(t); }, []);
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-      style={{ background: `${color}18`, border: `1px solid ${color}40`, color }}>
-      <span>{score}/10</span>
-      <span style={{ opacity: 0.7 }}>· {label}</span>
+    <div className="flex items-center gap-2">
+      <div className="relative" style={{ width: 42, height: 42 }}>
+        <svg width="42" height="42" viewBox="0 0 42 42" style={{ transform: "rotate(-90deg)" }}>
+          <circle cx="21" cy="21" r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="3.5" />
+          <circle cx="21" cy="21" r={radius} fill="none" stroke={color} strokeWidth="3.5"
+            strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 1.1s ease-out" }} />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-extrabold" style={{ color }}>{score}</span>
+        </div>
+      </div>
+      <div className="text-xs font-semibold" style={{ color, opacity: 0.85 }}>· {label}</div>
     </div>
   );
 }
@@ -147,7 +161,7 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
             <span className="font-semibold text-sm" style={{ color: "var(--green)" }}>Ready to send</span>
           </div>
           <div className="flex items-center gap-2">
-            {score !== null && <ScoreBadge score={score} />}
+            {score !== null && <ScoreRing score={score} />}
             {edited && (
               <button onClick={reset} className="text-xs px-2 py-1 rounded-lg cursor-pointer transition-all"
                 style={{ color: "var(--text-faint)", border: "1px solid var(--glass-border)" }}>

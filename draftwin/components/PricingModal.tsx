@@ -56,7 +56,7 @@ export default function PricingModal({ userId, onClose }: Props) {
   return (
     <div className="fixed inset-0 flex items-end md:items-center justify-center z-50 p-4"
       style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}>
-      <div className="glass w-full max-w-md p-6 space-y-5 relative rounded-3xl" style={{ maxHeight: "90vh", overflowY: "auto" }}>
+      <div className="glass modal-content w-full max-w-md p-6 space-y-5 relative rounded-3xl" style={{ maxHeight: "90vh", overflowY: "auto" }}>
         <button onClick={onClose} className="absolute top-5 right-5 text-xl cursor-pointer" style={{ color: "var(--text-faint)" }}>✕</button>
 
         {step === "pick" && (
