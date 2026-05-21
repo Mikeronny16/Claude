@@ -5,7 +5,9 @@ import ProposalForm from "@/components/ProposalForm";
 import ProposalResult from "@/components/ProposalResult";
 import PricingModal from "@/components/PricingModal";
 import HistoryModal from "@/components/HistoryModal";
+import LangSelector from "@/components/LangSelector";
 import { saveToHistory, getHistory } from "@/lib/history";
+import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib/i18n";
 
 type Tone = "professional" | "friendly" | "creative";
 type Platform = "upwork" | "fiverr" | "email" | "linkedin";
@@ -28,84 +30,37 @@ function getUserId(): string {
   return id;
 }
 
-const FEATURES = [
-  { icon: "⚡", title: "30-Second Proposals", desc: "Stop spending hours writing. Get a polished, client-ready proposal in under 30 seconds." },
-  { icon: "🎯", title: "Perfectly Tailored", desc: "Every proposal is written to match your skills and the client's project — no generic templates." },
-  { icon: "💾", title: "History Saved", desc: "All your proposals saved locally. Review, copy, and reuse any time without re-generating." },
-];
-
-const STEPS = [
-  { num: "1", title: "Fill in your details", desc: "Your name, client name, skills, and project description" },
-  { num: "2", title: "AI writes for you", desc: "Our AI crafts a proposal tailored to the specific job" },
-  { num: "3", title: "Copy & send", desc: "Paste it directly into Upwork, Fiverr, or email" },
-];
-
-const TESTIMONIALS = [
-  {
-    name: "James K.", role: "Full-stack Developer",
-    text: "I used to spend 2 hours on every proposal. Now it takes 30 seconds and my win rate has genuinely gone up. Can't believe this is free.",
-    platform: "Upwork",
-  },
-  {
-    name: "Maria L.", role: "Freelance Copywriter",
-    text: "The platform-specific tone is a game changer. My Upwork proposals finally sound natural, not copy-pasted. Landed 3 clients in one week.",
-    platform: "Upwork + Email",
-  },
-  {
-    name: "David T.", role: "UI/UX Designer",
-    text: "Generated 15 proposals in one afternoon. Landed 3 clients. The LinkedIn tone option is especially good — concise and professional.",
-    platform: "LinkedIn",
-  },
-];
-
 const TEMPLATES = [
   {
-    emoji: "🌐", label: "Web Developer",
+    emoji: "🌐", labelKey: "Web Developer",
     skills: "React, Next.js, Node.js, 5 years experience, 50+ projects delivered",
     projectDesc: "Looking for a skilled developer to build a modern, responsive e-commerce website with product listings, cart, and checkout functionality.",
     tone: "professional" as Tone, platform: "upwork" as Platform, length: "medium" as Length,
   },
   {
-    emoji: "✍️", label: "Copywriter",
+    emoji: "✍️", labelKey: "Copywriter",
     skills: "SEO copywriting, blog content, email marketing, 3 years experience",
     projectDesc: "Need a talented writer to create engaging weekly blog posts for our SaaS company. Topics include productivity, remote work, and business growth.",
     tone: "friendly" as Tone, platform: "upwork" as Platform, length: "medium" as Length,
   },
   {
-    emoji: "🎨", label: "Logo Designer",
+    emoji: "🎨", labelKey: "Logo Designer",
     skills: "Logo design, brand identity, Illustrator, Figma, 200+ logos created",
     projectDesc: "We need a modern, minimalist logo and full brand identity package for our new tech startup in the fintech space.",
     tone: "creative" as Tone, platform: "fiverr" as Platform, length: "short" as Length,
   },
   {
-    emoji: "📱", label: "App Developer",
+    emoji: "📱", labelKey: "App Developer",
     skills: "React Native, iOS, Android, Firebase, 4 years mobile dev experience",
     projectDesc: "Looking for a mobile developer to build a fitness tracking app with workout logs, progress charts, and push notifications.",
     tone: "professional" as Tone, platform: "email" as Platform, length: "medium" as Length,
   },
 ];
 
-const FAQS = [
-  {
-    q: "Is it really free?",
-    a: "Yes — you get 5 free proposals when you first visit. No credit card, no signup needed. When you run out, buy more credits with USDT crypto.",
-  },
-  {
-    q: "How is each proposal different?",
-    a: "The AI reads your skills AND the client's project description together. Every proposal is written fresh — not a template filled in with your name.",
-  },
-  {
-    q: "Which platforms does it work for?",
-    a: "Upwork, Fiverr, Email, and LinkedIn. Each platform gets a different writing style so it sounds natural wherever you send it.",
-  },
-  {
-    q: "Do I need an account?",
-    a: "No. We use a random ID stored in your browser to track your credits. Nothing else is stored on our servers.",
-  },
-  {
-    q: "Why USDT for payment?",
-    a: "USDT (crypto) works globally with no bank or PayPal needed — especially for freelancers in countries where payment processors are limited.",
-  },
+const TESTIMONIALS = [
+  { name: "James K.", role: "Full-stack Developer", text: "I used to spend 2 hours on every proposal. Now it takes 30 seconds and my win rate has genuinely gone up. Can't believe this is free.", platform: "Upwork" },
+  { name: "Maria L.", role: "Freelance Copywriter", text: "The platform-specific tone is a game changer. My Upwork proposals finally sound natural, not copy-pasted. Landed 3 clients in one week.", platform: "Upwork + Email" },
+  { name: "David T.", role: "UI/UX Designer", text: "Generated 15 proposals in one afternoon. Landed 3 clients. The LinkedIn tone option is especially good — concise and professional.", platform: "LinkedIn" },
 ];
 
 const EXAMPLE_PROPOSAL = `Hi Sarah,
@@ -133,6 +88,10 @@ export default function Home() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [prefill, setPrefill] = useState<Partial<FormData> | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [lang, setLang] = useState<LangCode>("en");
+
+  const T = useTranslations(lang);
+  const isRtl = lang === "ar";
 
   const refreshCredits = useCallback(async (uid: string) => {
     const res = await fetch(`/api/credits?userId=${uid}`);
@@ -145,14 +104,21 @@ export default function Home() {
     setUserId(uid);
     refreshCredits(uid);
     setHistoryCount(getHistory().length);
-    const saved = localStorage.getItem("draftwin_theme") as "dark" | "light" | null;
-    if (saved) setTheme(saved);
+    const savedTheme = localStorage.getItem("draftwin_theme") as "dark" | "light" | null;
+    if (savedTheme) setTheme(savedTheme);
+    const savedLang = localStorage.getItem("draftwin_lang") as LangCode | null;
+    if (savedLang && LANGUAGES.find(l => l.code === savedLang)) setLang(savedLang);
   }, [refreshCredits]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("draftwin_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("dir", isRtl ? "rtl" : "ltr");
+    localStorage.setItem("draftwin_lang", lang);
+  }, [lang, isRtl]);
 
   function toggleTheme() { setTheme(t => t === "dark" ? "light" : "dark"); }
 
@@ -169,7 +135,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, ...formData }),
+        body: JSON.stringify({ userId, ...formData, language: PROPOSAL_LANG_NAMES[lang] }),
       });
       const data = await res.json();
       if (data.needsPurchase) { setShowPricing(true); return; }
@@ -187,18 +153,26 @@ export default function Home() {
 
   const g = theme === "dark" ? "#10B981" : "#059669";
 
+  const FAQS = [
+    { q: T.faq1q, a: T.faq1a },
+    { q: T.faq2q, a: T.faq2a },
+    { q: T.faq3q, a: T.faq3a },
+    { q: T.faq4q, a: T.faq4a },
+    { q: T.faq5q, a: T.faq5a },
+  ];
+
   return (
     <main className="min-h-screen">
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
         <span className="font-extrabold text-lg tracking-tight" style={{ color: g }}>DraftWin</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {historyCount > 0 && (
             <button onClick={() => setShowHistory(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm cursor-pointer transition-all"
               style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
-              📋 History
+              📋
               <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{ background: "var(--glass-hover)", color: g }}>
                 {historyCount}
@@ -209,9 +183,10 @@ export default function Home() {
             <button onClick={() => setShowPricing(true)}
               className="px-3 py-1.5 rounded-xl text-sm font-semibold cursor-pointer glow-btn"
               style={{ background: `linear-gradient(135deg, ${g}, var(--green-dim))`, color: "white" }}>
-              Buy Credits
+              {T.buyCredits}
             </button>
           )}
+          <LangSelector lang={lang} onChange={setLang} />
           <button onClick={toggleTheme}
             className="w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all text-base"
             style={{ background: "var(--glass)", border: "1px solid var(--glass-border)" }}>
@@ -229,19 +204,19 @@ export default function Home() {
           {credits !== null && (
             <div className="inline-flex items-center gap-2 glass px-4 py-2 text-sm rounded-full">
               <span className="w-2 h-2 rounded-full animate-pulse inline-block" style={{ background: g }} />
-              <span style={{ color: g }}>{credits} free credit{credits !== 1 ? "s" : ""} left</span>
+              <span style={{ color: g }}>{credits} {credits !== 1 ? T.heroCreditsPlural : T.heroCredits}</span>
             </div>
           )}
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight" style={{ color: "var(--text)" }}>
-            Write proposals
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight whitespace-pre-line" style={{ color: "var(--text)" }}>
+            {T.heroTitle.split("\n")[0]}
             <br />
-            <span className="glow-text">that actually win.</span>
+            <span className="glow-text">{T.heroTitle.split("\n")[1]}</span>
           </h1>
           <p className="text-lg max-w-lg mx-auto leading-relaxed" style={{ color: "var(--text-dim)" }}>
-            AI-powered freelance proposals tailored to every job. Free to try. No account needed.
+            {T.heroSubtitle}
           </p>
           <div className="flex items-center justify-center gap-8 pt-2 flex-wrap">
-            {[["1,200+", "Proposals Generated"], ["4.8★", "Freelancer Rating"], ["< 30s", "Generation Time"]].map(([num, label]) => (
+            {[["1,200+", T.statsProposals], ["4.8★", T.statsRating], ["< 30s", T.statsTime]].map(([num, label]) => (
               <div key={label} className="text-center">
                 <div className="font-extrabold text-2xl" style={{ color: g }}>{num}</div>
                 <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{label}</div>
@@ -255,9 +230,13 @@ export default function Home() {
 
       {/* How It Works */}
       <section className="px-4 py-14 max-w-4xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>How it works</h2>
+        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>{T.howItWorksTitle}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {STEPS.map((step) => (
+          {[
+            { num: "1", title: T.step1Title, desc: T.step1Desc },
+            { num: "2", title: T.step2Title, desc: T.step2Desc },
+            { num: "3", title: T.step3Title, desc: T.step3Desc },
+          ].map((step) => (
             <div key={step.num} className="glass p-6 text-center space-y-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold mx-auto"
                 style={{ background: "var(--glass-hover)", color: g, border: `1px solid var(--glass-border)` }}>
@@ -274,9 +253,13 @@ export default function Home() {
 
       {/* Features */}
       <section className="px-4 py-14 max-w-4xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>Why freelancers use DraftWin</h2>
+        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>{T.featuresTitle}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {FEATURES.map((f) => (
+          {[
+            { icon: "⚡", title: T.feat1Title, desc: T.feat1Desc },
+            { icon: "🎯", title: T.feat2Title, desc: T.feat2Desc },
+            { icon: "💾", title: T.feat3Title, desc: T.feat3Desc },
+          ].map((f) => (
             <div key={f.title} className="glass p-6 space-y-3">
               <div className="text-3xl">{f.icon}</div>
               <h3 className="font-bold" style={{ color: "var(--text)" }}>{f.title}</h3>
@@ -290,16 +273,12 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="px-4 py-14 max-w-4xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>Freelancers love it</h2>
-        <p className="text-center text-sm mb-10" style={{ color: "var(--text-dim)" }}>Real results from real freelancers</p>
+        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>{T.testimonialsTitle}</h2>
+        <p className="text-center text-sm mb-10" style={{ color: "var(--text-dim)" }}>{T.testimonialsSubtitle}</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
             <div key={t.name} className="glass p-6 space-y-4">
-              <div className="flex gap-0.5">
-                {Array(5).fill(0).map((_, i) => (
-                  <span key={i} style={{ color: g }}>★</span>
-                ))}
-              </div>
+              <div className="flex gap-0.5">{Array(5).fill(0).map((_, i) => <span key={i} style={{ color: g }}>★</span>)}</div>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
                 <div>
@@ -317,15 +296,13 @@ export default function Home() {
 
       {/* Example Proposal */}
       <section className="px-4 py-14 max-w-3xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>See what you&apos;ll get</h2>
-        <p className="text-center text-sm mb-8" style={{ color: "var(--text-dim)" }}>
-          A real example — generated for a web developer pitching a photography portfolio
-        </p>
+        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>{T.exampleTitle}</h2>
+        <p className="text-center text-sm mb-8" style={{ color: "var(--text-dim)" }}>{T.exampleSubtitle}</p>
         <div className="glass p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
             style={{ background: "var(--glass-hover)", color: g }}>
             <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ background: g }} />
-            Example Output
+            {T.exampleBadge}
           </div>
           <div className="text-sm leading-relaxed whitespace-pre-wrap mt-4 p-4 rounded-xl"
             style={{ background: theme === "dark" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.5)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
@@ -338,17 +315,14 @@ export default function Home() {
 
       {/* Quick Templates */}
       <section className="px-4 py-14 max-w-4xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>Start with a template</h2>
-        <p className="text-center text-sm mb-8" style={{ color: "var(--text-dim)" }}>
-          Pick your role — we&apos;ll pre-fill the form. Just add your name and client&apos;s name.
-        </p>
+        <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>{T.templatesTitle}</h2>
+        <p className="text-center text-sm mb-8" style={{ color: "var(--text-dim)" }}>{T.templatesSubtitle}</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {TEMPLATES.map((tpl) => (
-            <button key={tpl.label} onClick={() => applyTemplate(tpl)}
-              className="glass p-5 text-center space-y-2 cursor-pointer transition-all glass-hover rounded-2xl"
-              style={{ border: "1px solid var(--glass-border)" }}>
+            <button key={tpl.labelKey} onClick={() => applyTemplate(tpl)}
+              className="glass p-5 text-center space-y-2 cursor-pointer transition-all glass-hover rounded-2xl">
               <div className="text-3xl">{tpl.emoji}</div>
-              <div className="font-semibold text-sm" style={{ color: "var(--text)" }}>{tpl.label}</div>
+              <div className="font-semibold text-sm" style={{ color: "var(--text)" }}>{tpl.labelKey}</div>
               <div className="text-xs" style={{ color: "var(--text-faint)" }}>
                 {tpl.platform.charAt(0).toUpperCase() + tpl.platform.slice(1)} · {tpl.tone}
               </div>
@@ -365,11 +339,11 @@ export default function Home() {
           <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
             style={{ background: "var(--glass-hover)", color: g, border: "1px solid var(--glass-border)" }}>1</span>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>Your Details</h2>
-            <p className="text-xs" style={{ color: "var(--text-faint)" }}>Tell us about you and the project</p>
+            <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>{T.formTitle}</h2>
+            <p className="text-xs" style={{ color: "var(--text-faint)" }}>{T.formSubtitle}</p>
           </div>
         </div>
-        <ProposalForm onGenerate={generate} loading={loading} prefill={prefill} />
+        <ProposalForm onGenerate={generate} loading={loading} prefill={prefill} translations={T} />
       </section>
 
       {/* Result Section */}
@@ -380,12 +354,12 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-6">
               <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                 style={{ background: "var(--glass-hover)", color: g, border: "1px solid var(--glass-border)" }}>2</span>
-              <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>Your Proposal</h2>
+              <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>{T.resultTitle}</h2>
             </div>
             {loading ? (
               <div className="glass p-10 text-center space-y-4">
                 <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: `${g} transparent transparent transparent` }} />
-                <p className="font-semibold animate-pulse" style={{ color: g }}>Writing your winning proposal...</p>
+                <p className="font-semibold animate-pulse" style={{ color: g }}>{T.loadingText}</p>
               </div>
             ) : proposal ? (
               <ProposalResult
@@ -394,6 +368,7 @@ export default function Home() {
                 onRegenerate={() => lastForm && generate(lastForm)}
                 onBuy={() => setShowPricing(true)}
                 loading={loading}
+                translations={T}
               />
             ) : null}
           </section>
@@ -404,23 +379,18 @@ export default function Home() {
 
       {/* FAQ */}
       <section className="px-4 py-14 max-w-2xl mx-auto">
-        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>
-          Frequently asked questions
-        </h2>
+        <h2 className="text-center text-2xl font-extrabold mb-10" style={{ color: "var(--text)" }}>{T.faqTitle}</h2>
         <div className="space-y-3">
           {FAQS.map((faq, i) => (
             <div key={i} className="glass overflow-hidden">
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer"
                 style={{ color: "var(--text)" }}>
                 <span className="font-semibold text-sm pr-4">{faq.q}</span>
                 <span className="text-lg shrink-0 transition-transform" style={{ color: g, transform: openFaq === i ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
               </button>
               {openFaq === i && (
-                <div className="px-5 pb-4 text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>
-                  {faq.a}
-                </div>
+                <div className="px-5 pb-4 text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>{faq.a}</div>
               )}
             </div>
           ))}
@@ -430,22 +400,22 @@ export default function Home() {
       {/* CTA Banner */}
       <section className="px-4 pb-14 max-w-2xl mx-auto">
         <div className="glass p-8 text-center space-y-4" style={{ border: `1px solid ${g}30` }}>
-          <h3 className="text-xl font-extrabold" style={{ color: "var(--text)" }}>Ready to win more clients?</h3>
-          <p className="text-sm" style={{ color: "var(--text-dim)" }}>5 free proposals. No signup. No credit card.</p>
+          <h3 className="text-xl font-extrabold" style={{ color: "var(--text)" }}>{T.ctaTitle}</h3>
+          <p className="text-sm" style={{ color: "var(--text-dim)" }}>{T.ctaSubtitle}</p>
           <button
             onClick={() => document.getElementById("form-section")?.scrollIntoView({ behavior: "smooth" })}
             className="px-8 py-3.5 rounded-2xl font-bold cursor-pointer glow-btn"
             style={{ background: `linear-gradient(135deg, ${g}, var(--green-dim))`, color: "white" }}>
-            ✍️ Generate My First Proposal — Free
+            {T.ctaBtn}
           </button>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="text-center py-10 border-t space-y-2" style={{ borderColor: "var(--glass-border)" }}>
-        <p className="text-xs" style={{ color: "var(--text-faint)" }}>Free to try · Pay with USDT · No signup needed</p>
+        <p className="text-xs" style={{ color: "var(--text-faint)" }}>{T.footerText}</p>
         <p className="text-xs" style={{ color: "var(--text-faint)" }}>
-          Built with ❤️ by{" "}
+          {T.footerBy}{" "}
           <span className="font-semibold" style={{ color: "var(--green)" }}>Mike Ronny</span>
         </p>
       </footer>
@@ -454,7 +424,7 @@ export default function Home() {
         <PricingModal userId={userId} onClose={() => { setShowPricing(false); refreshCredits(userId); }} />
       )}
       {showHistory && (
-        <HistoryModal onClose={() => setShowHistory(false)} />
+        <HistoryModal onClose={() => setShowHistory(false)} translations={T} />
       )}
     </main>
   );

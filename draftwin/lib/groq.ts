@@ -17,6 +17,7 @@ export async function generateProposal(input: {
   tone: "professional" | "friendly" | "creative";
   platform: "upwork" | "fiverr" | "email" | "linkedin";
   length: "short" | "medium" | "long";
+  language?: string;
 }): Promise<string> {
   const toneGuide = {
     professional: "formal, confident, and business-focused",
@@ -32,6 +33,9 @@ export async function generateProposal(input: {
   }[input.platform];
 
   const wordLimit = { short: 150, medium: 300, long: 500 }[input.length];
+  const langInstruction = input.language && input.language !== "English"
+    ? `IMPORTANT: Write the entire proposal in ${input.language}. Do not use English.`
+    : "";
 
   const chat = await getGroq().chat.completions.create({
     model: "llama-3.3-70b-versatile",
@@ -43,7 +47,8 @@ Tone: ${toneGuide}.
 Platform context: ${platformGuide}
 Length: Keep it under ${wordLimit} words.
 Format: Strong opening, understanding of the project, relevant experience, proposed approach, confident closing.
-Use the client's name naturally. Do NOT use placeholders like [X] — fill everything in with the provided details.`,
+Use the client's name naturally. Do NOT use placeholders like [X] — fill everything in with the provided details.
+${langInstruction}`,
       },
       {
         role: "user",

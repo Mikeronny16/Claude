@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { getHistory, deleteFromHistory, formatDate, HistoryEntry } from "@/lib/history";
+import { Translations } from "@/lib/i18n";
 
-interface Props { onClose: () => void; }
+interface Props { onClose: () => void; translations: Translations; }
 
-export default function HistoryModal({ onClose }: Props) {
+export default function HistoryModal({ onClose, translations: T }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [selected, setSelected] = useState<HistoryEntry | null>(null);
   const [copied, setCopied] = useState(false);
@@ -29,10 +30,9 @@ export default function HistoryModal({ onClose }: Props) {
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}>
       <div className="glass w-full max-w-lg rounded-3xl overflow-hidden" style={{ maxHeight: "85vh" }}>
 
-        {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--glass-border)" }}>
           <div>
-            <h2 className="font-bold text-lg" style={{ color: "var(--text)" }}>Proposal History</h2>
+            <h2 className="font-bold text-lg" style={{ color: "var(--text)" }}>{T.historyTitle}</h2>
             <p className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{entries.length} saved proposals</p>
           </div>
           <button onClick={onClose} className="text-xl cursor-pointer" style={{ color: "var(--text-faint)" }}>✕</button>
@@ -41,11 +41,9 @@ export default function HistoryModal({ onClose }: Props) {
         {entries.length === 0 ? (
           <div className="text-center py-16 space-y-2" style={{ color: "var(--text-faint)" }}>
             <div className="text-4xl">📋</div>
-            <p>No proposals yet</p>
-            <p className="text-xs">Generate your first proposal to see it here</p>
+            <p>{T.historyEmpty}</p>
           </div>
         ) : selected ? (
-          /* Detail view */
           <div className="flex flex-col" style={{ maxHeight: "calc(85vh - 70px)" }}>
             <div className="p-4 border-b flex items-center gap-3" style={{ borderColor: "var(--glass-border)" }}>
               <button onClick={() => setSelected(null)} className="text-sm cursor-pointer" style={{ color: "var(--green)" }}>← Back</button>
@@ -64,7 +62,7 @@ export default function HistoryModal({ onClose }: Props) {
               <button onClick={() => copy(selected.proposal)}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm cursor-pointer glow-btn"
                 style={{ background: "linear-gradient(135deg, var(--green), var(--green-dim))", color: "white" }}>
-                {copied ? "✅ Copied!" : "📋 Copy"}
+                {copied ? T.btnCopied : T.btnCopy}
               </button>
               <button onClick={() => remove(selected.id)}
                 className="px-4 py-3 rounded-xl text-sm cursor-pointer transition-all"
@@ -74,16 +72,13 @@ export default function HistoryModal({ onClose }: Props) {
             </div>
           </div>
         ) : (
-          /* List view */
           <div className="overflow-y-auto divide-y" style={{ maxHeight: "calc(85vh - 70px)", borderColor: "var(--glass-border)" }}>
             {entries.map(entry => (
               <button key={entry.id} onClick={() => setSelected(entry)}
                 className="w-full text-left px-5 py-4 transition-colors cursor-pointer hover:bg-emerald-500/5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm" style={{ color: "var(--text)" }}>
-                      {entry.yourName} <span style={{ color: "var(--text-faint)" }}>→</span> {entry.clientName}
-                    </p>
+                    <p className="font-semibold text-sm" style={{ color: "var(--text)" }}>{entry.yourName} <span style={{ color: "var(--text-faint)" }}>→</span> {entry.clientName}</p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-dim)" }}>{entry.skills}</p>
                     <p className="text-xs mt-1" style={{ color: "var(--text-faint)" }}>{formatDate(entry.timestamp)}</p>
                   </div>
