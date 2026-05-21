@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/components/LanguageContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -57,7 +58,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#05080f" />
       </head>
       <body className="bg-cinema-bg text-cinema-text antialiased" style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );
