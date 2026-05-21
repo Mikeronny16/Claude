@@ -8,12 +8,12 @@ type State = "idle" | "processing" | "done" | "error";
 
 export default function Home() {
   const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<Blob | null>(null);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<string | null>(null);
   const [errMsg, setErrMsg] = useState("");
 
-  function onImage(f: File, p: string) {
+  function onImage(f: Blob, p: string) {
     setFile(f);
     setPreview(p);
     setResult(null);

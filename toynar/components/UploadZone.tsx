@@ -3,18 +3,44 @@
 import { useRef, useState, DragEvent } from "react";
 
 interface Props {
-  onImage: (file: File, preview: string) => void;
+  onImage: (blob: Blob, preview: string) => void;
+}
+
+function resizeImage(file: File, maxPx = 1024): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxPx || height > maxPx) {
+        if (width > height) { height = (height * maxPx) / width; width = maxPx; }
+        else { width = (width * maxPx) / height; height = maxPx; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Resize failed")), "image/jpeg", 0.85);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
 }
 
 export default function UploadZone({ onImage }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  function processFile(file: File) {
+  async function processFile(file: File) {
     if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = (e) => onImage(file, e.target?.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const resized = await resizeImage(file);
+      const preview = URL.createObjectURL(resized);
+      onImage(resized, preview);
+    } catch {
+      alert("Could not process image. Please try another photo.");
+    }
   }
 
   function onDrop(e: DragEvent) {
