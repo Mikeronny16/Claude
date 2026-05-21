@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const PACKAGES = {
   starter: { usd: 5, credits: 20, label: "Starter" },
   pro: { usd: 15, credits: 70, label: "Pro" },

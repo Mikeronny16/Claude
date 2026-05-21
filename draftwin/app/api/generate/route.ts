@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateProposal } from "@/lib/groq";
 import { getCredits, deductCredit, ensureUser } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

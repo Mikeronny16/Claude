@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { addCredits } from "@/lib/supabase";
 import * as crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 const CREDIT_MAP: Record<string, number> = {
   starter: 20,
   pro: 70,
