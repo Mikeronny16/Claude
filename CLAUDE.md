@@ -1,6 +1,8 @@
-# Claude Code Instructions — Spawn AI Project
+# Claude Code Instructions — Mike Ronny Projects
 
-> **IMPORTANT:** Before doing anything, read `SPAWN_AI_PROJECT.md` in this folder. That document is the source of truth for this project. This file (CLAUDE.md) is for ongoing session reminders.
+> **IMPORTANT:** Read `MIKE_CONTEXT.md` FIRST in every new session. That file has everything — all projects, tech stack, design system, Mike's preferences, skills, commands.
+
+> Spawn AI specific details: read `SPAWN_AI_PROJECT.md`
 
 ---
 
