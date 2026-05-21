@@ -8,6 +8,8 @@ import HistoryModal from "@/components/HistoryModal";
 import { saveToHistory, getHistory } from "@/lib/history";
 
 type Tone = "professional" | "friendly" | "creative";
+type Platform = "upwork" | "fiverr" | "email" | "linkedin";
+type Length = "short" | "medium" | "long";
 
 interface FormData {
   skills: string;
@@ -15,6 +17,8 @@ interface FormData {
   yourName: string;
   clientName: string;
   tone: Tone;
+  platform: Platform;
+  length: Length;
 }
 
 function getUserId(): string {
