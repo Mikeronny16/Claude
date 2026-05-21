@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, skills, projectDesc, yourName, clientName, tone, platform, length, language } = body;
+    const { userId, skills, projectDesc, yourName, clientName, tone, platform, length, language, mode } = body;
 
     if (!userId || !skills || !projectDesc || !yourName || !clientName) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       platform: platform ?? "upwork",
       length: length ?? "medium",
       language: language ?? "English",
+      mode: mode ?? "proposal",
     });
     const remaining = credits - 1;
 

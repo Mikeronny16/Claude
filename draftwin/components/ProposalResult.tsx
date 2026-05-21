@@ -36,6 +36,16 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function download() {
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `proposal-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setText(e.target.value);
     setEdited(true);
@@ -95,6 +105,11 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
           {loading ? "..." : T.btnRegenerate}
         </button>
       </div>
+      <button onClick={download}
+        className="w-full py-3 rounded-xl font-semibold text-sm cursor-pointer transition-all"
+        style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
+        ⬇️ Download as .txt
+      </button>
 
       {creditsLeft <= 0 && (
         <div className="glass p-5 text-center space-y-3" style={{ borderColor: "rgba(245,158,11,0.3)" }}>

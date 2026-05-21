@@ -12,6 +12,7 @@ import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib
 type Tone = "professional" | "friendly" | "creative";
 type Platform = "upwork" | "fiverr" | "email" | "linkedin";
 type Length = "short" | "medium" | "long";
+type Mode = "proposal" | "cover-letter";
 
 interface FormData {
   skills: string;
@@ -21,6 +22,7 @@ interface FormData {
   tone: Tone;
   platform: Platform;
   length: Length;
+  mode: Mode;
 }
 
 function getUserId(): string {
