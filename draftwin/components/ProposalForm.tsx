@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Tone = "professional" | "friendly" | "creative";
 type Platform = "upwork" | "fiverr" | "email" | "linkedin";
@@ -17,9 +17,10 @@ interface Props {
     length: Length;
   }) => void;
   loading: boolean;
+  prefill?: Partial<{ skills: string; projectDesc: string; yourName: string; clientName: string; tone: Tone; platform: Platform; length: Length }> | null;
 }
 
-export default function ProposalForm({ onGenerate, loading }: Props) {
+export default function ProposalForm({ onGenerate, loading, prefill }: Props) {
   const [yourName, setYourName] = useState("");
   const [clientName, setClientName] = useState("");
   const [skills, setSkills] = useState("");
@@ -27,6 +28,17 @@ export default function ProposalForm({ onGenerate, loading }: Props) {
   const [tone, setTone] = useState<Tone>("professional");
   const [platform, setPlatform] = useState<Platform>("upwork");
   const [length, setLength] = useState<Length>("medium");
+
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.skills !== undefined) setSkills(prefill.skills);
+    if (prefill.projectDesc !== undefined) setProjectDesc(prefill.projectDesc);
+    if (prefill.yourName !== undefined) setYourName(prefill.yourName);
+    if (prefill.clientName !== undefined) setClientName(prefill.clientName);
+    if (prefill.tone !== undefined) setTone(prefill.tone);
+    if (prefill.platform !== undefined) setPlatform(prefill.platform);
+    if (prefill.length !== undefined) setLength(prefill.length);
+  }, [prefill]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
