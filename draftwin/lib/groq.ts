@@ -14,7 +14,7 @@ export async function generateProposal(input: {
   projectDesc: string;
   yourName: string;
   clientName: string;
-  tone: "professional" | "friendly" | "creative";
+  tone: "professional" | "friendly" | "creative" | "confident" | "urgent";
   platform: "upwork" | "fiverr" | "email" | "linkedin";
   length: "short" | "medium" | "long";
   language?: string;
@@ -24,6 +24,8 @@ export async function generateProposal(input: {
     professional: "formal, confident, and business-focused",
     friendly: "warm, conversational, and personable",
     creative: "enthusiastic, innovative, and expressive",
+    confident: "bold, direct, and results-focused — lead with your strongest value proposition immediately",
+    urgent: "creates a sense of urgency and opportunity — emphasize fast delivery, limited availability, and quick wins for the client",
   }[input.tone];
 
   const isCoverLetter = input.mode === "cover-letter";
@@ -81,4 +83,69 @@ Rate the strength based on: personalization, clarity, relevance to the job.`,
   const proposal = raw.replace(/\n?SCORE:\d+\s*$/i, "").trim();
 
   return { proposal, score };
+}
+
+export async function generateFollowUp(input: {
+  originalProposal: string;
+  clientName: string;
+  yourName: string;
+  daysSince: number;
+}): Promise<string> {
+  const chat = await getGroq().chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `You are a follow-up message writer for freelancers. Write a short, polite follow-up message (3-5 sentences max) that does NOT sound desperate or pushy. Sound natural, warm, and confident. Reference the original proposal briefly. End with a soft, easy call-to-action.`,
+      },
+      {
+        role: "user",
+        content: `Write a follow-up message:
+- From: ${input.yourName}
+- To: ${input.clientName}
+- Days since proposal sent: ${input.daysSince}
+- Original proposal summary: ${input.originalProposal.slice(0, 400)}`,
+      },
+    ],
+    temperature: 0.75,
+    max_tokens: 350,
+  });
+  return chat.choices[0]?.message?.content?.trim() ?? "";
+}
+
+export async function rewriteProposal(input: {
+  oldProposal: string;
+  feedback?: string;
+}): Promise<{ improved: string; tip: string }> {
+  const chat = await getGroq().chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `You are an expert proposal coach. Rewrite the given proposal to be significantly stronger:
+- More personalized and specific
+- Confident and direct — no fluff
+- Clear value proposition up front
+- Strong, specific call to action at the end
+- Remove any generic filler phrases
+
+After the improved proposal, on a new line write EXACTLY: TIP:[one specific key improvement you made, in one sentence]`,
+      },
+      {
+        role: "user",
+        content: `Rewrite this proposal to be much stronger:
+
+${input.oldProposal}${input.feedback ? `\n\nSpecifically focus on: ${input.feedback}` : ""}`,
+      },
+    ],
+    temperature: 0.75,
+    max_tokens: 1200,
+  });
+
+  const raw = chat.choices[0]?.message?.content?.trim() ?? "";
+  const tipIdx = raw.lastIndexOf("\nTIP:");
+  const tip = tipIdx >= 0 ? raw.slice(tipIdx + 5).trim() : "Made it more direct and client-focused.";
+  const improved = tipIdx >= 0 ? raw.slice(0, tipIdx).trim() : raw.trim();
+
+  return { improved, tip };
 }
