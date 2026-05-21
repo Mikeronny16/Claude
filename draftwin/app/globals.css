@@ -1,34 +1,116 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a12;
-  --card: #12121e;
-  --border: #1e1e35;
-  --purple: #8b5cf6;
-  --purple-dim: #6d28d9;
+  --bg: #050c08;
+  --bg2: #071209;
+  --green: #10B981;
+  --green-dim: #059669;
+  --green-glow: rgba(16, 185, 129, 0.25);
+  --glass: rgba(16, 185, 129, 0.04);
+  --glass-border: rgba(16, 185, 129, 0.15);
+  --glass-hover: rgba(16, 185, 129, 0.08);
+  --text: #f0fdf4;
+  --text-dim: rgba(240,253,244,0.4);
+  --text-faint: rgba(240,253,244,0.2);
+  --card-bg: rgba(16,185,129,0.03);
+  --divider: rgba(16, 185, 129, 0.25);
 }
+
+[data-theme="light"] {
+  --bg: #f0fdf4;
+  --bg2: #ecfdf5;
+  --green: #059669;
+  --green-dim: #047857;
+  --green-glow: rgba(5, 150, 105, 0.2);
+  --glass: rgba(5, 150, 105, 0.05);
+  --glass-border: rgba(5, 150, 105, 0.2);
+  --glass-hover: rgba(5, 150, 105, 0.1);
+  --text: #064e3b;
+  --text-dim: rgba(6,78,59,0.55);
+  --text-faint: rgba(6,78,59,0.35);
+  --card-bg: rgba(5, 150, 105, 0.04);
+  --divider: rgba(5, 150, 105, 0.2);
+}
+
+* { box-sizing: border-box; }
 
 body {
   background: var(--bg);
-  color: #e5e7eb;
-  font-family: "Inter", system-ui, sans-serif;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.10), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(16, 185, 129, 0.05), transparent);
+  color: var(--text);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(5, 150, 105, 0.10), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(5, 150, 105, 0.05), transparent);
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.glass-hover:hover {
+  background: var(--glass-hover);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .glow-text {
-  text-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  text-shadow: 0 0 40px var(--green-glow);
+  color: var(--green);
 }
 
 .glow-btn {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: all 0.2s;
 }
 
 .glow-btn:hover {
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+  transform: translateY(-1px);
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
+.glow-btn:active {
+  transform: translateY(0);
 }
+
+.step-line {
+  background: linear-gradient(180deg, var(--green) 0%, transparent 100%);
+  opacity: 0.3;
+}
+
+input, textarea, select {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 0.875rem !important;
+  color: var(--text) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-faint) !important;
+}
+
+select option {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.text-dim { color: var(--text-dim); }
+.text-faint { color: var(--text-faint); }
