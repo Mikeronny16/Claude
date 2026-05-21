@@ -20,40 +20,42 @@ export default function ProposalResult({ proposal, creditsLeft, onRegenerate, on
   }
 
   return (
-    <div className="card p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-purple-400">Your Proposal ✨</h2>
-        <span className="text-xs text-gray-500">{creditsLeft} credits left</span>
+    <div className="space-y-4">
+      <div className="glass p-6 md:p-8">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-emerald-400 font-semibold text-sm">Ready to send</span>
+          </div>
+          <span className="text-xs text-white/30">{creditsLeft} credit{creditsLeft !== 1 ? "s" : ""} left</span>
+        </div>
+
+        <div className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap p-4 rounded-xl"
+          style={{background: "rgba(0,0,0,0.2)", border: "1px solid rgba(16,185,129,0.08)"}}>
+          {proposal}
+        </div>
       </div>
 
-      <div className="bg-[#0a0a12] border border-[#1e1e35] rounded-xl p-5 text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
-        {proposal}
-      </div>
-
-      <div className="flex gap-3">
-        <button
-          onClick={copy}
-          className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 font-semibold glow-btn"
-        >
-          {copied ? "✅ Copied!" : "📋 Copy"}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={copy}
+          className="py-3.5 rounded-xl font-semibold text-sm cursor-pointer glow-btn"
+          style={{background: "linear-gradient(135deg, #10B981, #059669)", color: "white"}}>
+          {copied ? "✅ Copied!" : "📋 Copy Proposal"}
         </button>
-        <button
-          onClick={onRegenerate}
-          disabled={loading || creditsLeft <= 0}
-          className="flex-1 py-3 rounded-xl border border-[#1e1e35] font-semibold text-gray-300 hover:border-purple-500/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
+        <button onClick={onRegenerate} disabled={loading || creditsLeft <= 0}
+          className="py-3.5 rounded-xl font-semibold text-sm cursor-pointer transition-all disabled:opacity-40"
+          style={{background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", color: "rgba(255,255,255,0.7)"}}>
           {loading ? "..." : "🔄 Regenerate"}
         </button>
       </div>
 
       {creditsLeft <= 0 && (
-        <div className="text-center space-y-2 pt-2">
-          <p className="text-yellow-400 text-sm font-medium">Credits used up — buy more to keep winning 🏆</p>
-          <button
-            onClick={onBuy}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 font-bold"
-          >
-            💳 Buy Credits (USDT)
+        <div className="glass p-5 text-center space-y-3" style={{borderColor: "rgba(245,158,11,0.3)"}}>
+          <p className="text-amber-400 font-semibold text-sm">Credits used up — keep winning 🏆</p>
+          <button onClick={onBuy}
+            className="w-full py-3 rounded-xl font-bold text-sm cursor-pointer"
+            style={{background: "linear-gradient(135deg, #F59E0B, #D97706)", color: "white"}}>
+            💳 Buy Credits with USDT
           </button>
         </div>
       )}

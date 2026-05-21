@@ -1,34 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a12;
-  --card: #12121e;
-  --border: #1e1e35;
-  --purple: #8b5cf6;
-  --purple-dim: #6d28d9;
+  --bg: #050c08;
+  --bg2: #071209;
+  --green: #10B981;
+  --green-dim: #059669;
+  --green-glow: rgba(16, 185, 129, 0.25);
+  --glass: rgba(16, 185, 129, 0.04);
+  --glass-border: rgba(16, 185, 129, 0.15);
+  --glass-hover: rgba(16, 185, 129, 0.08);
 }
+
+* { box-sizing: border-box; }
 
 body {
   background: var(--bg);
-  color: #e5e7eb;
-  font-family: "Inter", system-ui, sans-serif;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(16, 185, 129, 0.06), transparent);
+  color: #f0fdf4;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+}
+
+.glass-hover:hover {
+  background: var(--glass-hover);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .glow-text {
-  text-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  text-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
 }
 
 .glow-btn {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: all 0.2s;
 }
 
 .glow-btn:hover {
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+  transform: translateY(-1px);
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
+.glow-btn:active {
+  transform: translateY(0);
+}
+
+.step-line {
+  background: linear-gradient(180deg, var(--green) 0%, transparent 100%);
+  opacity: 0.3;
+}
+
+input, textarea {
+  background: rgba(16, 185, 129, 0.03) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 0.875rem !important;
+  color: white !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(255,255,255,0.2) !important;
 }

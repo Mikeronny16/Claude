@@ -8,19 +8,9 @@ const PACKAGES = [
   { id: "unlimited", credits: 200, usd: 39, label: "Power", note: "Best value" },
 ];
 
-interface Props {
-  userId: string;
-  onClose: () => void;
-}
-
+interface Props { userId: string; onClose: () => void; }
 type Step = "pick" | "paying" | "done";
-
-interface PaymentInfo {
-  payAddress: string;
-  payAmount: number;
-  payCurrency: string;
-  credits: number;
-}
+interface PaymentInfo { payAddress: string; payAmount: number; payCurrency: string; credits: number; }
 
 export default function PricingModal({ userId, onClose }: Props) {
   const [step, setStep] = useState<Step>("pick");
@@ -41,7 +31,7 @@ export default function PricingModal({ userId, onClose }: Props) {
       setPayInfo(data);
       setStep("paying");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error creating payment");
+      alert(err instanceof Error ? err.message : "Error");
     } finally {
       setLoading(false);
     }
@@ -55,67 +45,69 @@ export default function PricingModal({ userId, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="card w-full max-w-md p-6 space-y-5 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">✕</button>
+    <div className="fixed inset-0 flex items-end md:items-center justify-center z-50 p-4"
+      style={{background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)"}}>
+      <div className="glass w-full max-w-md p-6 space-y-5 relative rounded-3xl">
+        <button onClick={onClose} className="absolute top-5 right-5 text-white/30 hover:text-white text-xl cursor-pointer">✕</button>
 
         {step === "pick" && (
           <>
-            <h2 className="text-xl font-bold glow-text">Buy Credits</h2>
-            <p className="text-gray-400 text-sm">Pay with USDT (BSC) — instant, no bank needed</p>
+            <div>
+              <h2 className="text-xl font-bold text-white">Buy Credits</h2>
+              <p className="text-white/40 text-sm mt-1">Pay with USDT on BSC — instant, no bank needed</p>
+            </div>
             <div className="space-y-3">
-              {PACKAGES.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  onClick={() => selectPackage(pkg.id)}
-                  disabled={loading}
-                  className={`w-full p-4 rounded-xl border text-left transition-all hover:border-purple-500/70 ${
-                    pkg.highlight ? "border-purple-500 bg-purple-500/10" : "border-[#1e1e35]"
-                  }`}
-                >
+              {PACKAGES.map(pkg => (
+                <button key={pkg.id} onClick={() => selectPackage(pkg.id)} disabled={loading}
+                  className="w-full p-4 rounded-2xl text-left cursor-pointer transition-all glass-hover"
+                  style={{
+                    background: pkg.highlight ? "rgba(16,185,129,0.08)" : "rgba(16,185,129,0.03)",
+                    border: `1px solid ${pkg.highlight ? "rgba(16,185,129,0.4)" : "rgba(16,185,129,0.1)"}`,
+                  }}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="font-bold text-white">{pkg.label}</span>
-                      {pkg.highlight && <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">Popular</span>}
-                      <p className="text-sm text-gray-400 mt-0.5">{pkg.credits} proposals · {pkg.note}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white">{pkg.label}</span>
+                        {pkg.highlight && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{background: "rgba(16,185,129,0.2)", color: "#10B981"}}>Popular</span>}
+                      </div>
+                      <p className="text-sm text-white/40 mt-0.5">{pkg.credits} proposals · {pkg.note}</p>
                     </div>
-                    <span className="text-2xl font-black text-purple-400">${pkg.usd}</span>
+                    <span className="text-2xl font-black" style={{color: "#10B981"}}>${pkg.usd}</span>
                   </div>
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-600 text-center">Credits never expire · One-time purchase</p>
+            <p className="text-xs text-white/20 text-center">Credits never expire · One-time purchase</p>
           </>
         )}
 
         {step === "paying" && payInfo && (
           <>
-            <h2 className="text-xl font-bold">Send Payment</h2>
-            <div className="bg-[#0a0a12] border border-[#1e1e35] rounded-xl p-4 space-y-3">
+            <h2 className="text-xl font-bold text-white">Send Payment</h2>
+            <div className="space-y-3 p-4 rounded-2xl" style={{background: "rgba(0,0,0,0.3)", border: "1px solid rgba(16,185,129,0.1)"}}>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Amount</span>
+                <span className="text-white/40">Amount</span>
                 <span className="font-bold text-white">{payInfo.payAmount} {payInfo.payCurrency.toUpperCase()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Network</span>
+                <span className="text-white/40">Network</span>
                 <span className="text-white">BSC (BNB Smart Chain)</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-gray-400 text-sm">Send to address</span>
+              <div className="space-y-2">
+                <span className="text-white/40 text-sm">Send to address</span>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-purple-300 break-all flex-1">{payInfo.payAddress}</code>
-                  <button onClick={copyAddress} className="text-xs bg-purple-600 px-2 py-1 rounded shrink-0">
+                  <code className="text-xs break-all flex-1" style={{color: "#10B981"}}>{payInfo.payAddress}</code>
+                  <button onClick={copyAddress} className="text-xs px-3 py-1.5 rounded-lg shrink-0 cursor-pointer font-semibold"
+                    style={{background: "rgba(16,185,129,0.2)", color: "#10B981"}}>
                     {copied ? "✓" : "Copy"}
                   </button>
                 </div>
               </div>
             </div>
-            <p className="text-yellow-400 text-xs">⚠️ Send exactly {payInfo.payAmount} USDT on BSC network. Wrong network = lost funds.</p>
-            <p className="text-gray-500 text-xs">Credits auto-add within 1-5 minutes after confirmation. Come back and refresh.</p>
-            <button
-              onClick={() => { setStep("done"); }}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 font-semibold glow-btn"
-            >
+            <p className="text-amber-400 text-xs">⚠️ BSC network only. Wrong network = lost funds.</p>
+            <button onClick={() => setStep("done")}
+              className="w-full py-3.5 rounded-xl font-bold cursor-pointer glow-btn"
+              style={{background: "linear-gradient(135deg, #10B981, #059669)", color: "white"}}>
               I&apos;ve Sent the Payment ✅
             </button>
           </>
@@ -124,9 +116,10 @@ export default function PricingModal({ userId, onClose }: Props) {
         {step === "done" && (
           <div className="text-center space-y-4 py-4">
             <div className="text-5xl">🎉</div>
-            <h2 className="text-xl font-bold">Payment Sent!</h2>
-            <p className="text-gray-400 text-sm">Your credits will appear within 1-5 minutes after blockchain confirmation. Refresh the page to see them.</p>
-            <button onClick={onClose} className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 font-semibold glow-btn">
+            <h2 className="text-xl font-bold text-white">Payment Sent!</h2>
+            <p className="text-white/40 text-sm">Credits will appear within 1–5 minutes. Refresh to see them.</p>
+            <button onClick={onClose} className="w-full py-3.5 rounded-xl font-bold cursor-pointer glow-btn"
+              style={{background: "linear-gradient(135deg, #10B981, #059669)", color: "white"}}>
               Got It
             </button>
           </div>

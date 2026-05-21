@@ -5,13 +5,7 @@ import { useState } from "react";
 type Tone = "professional" | "friendly" | "creative";
 
 interface Props {
-  onGenerate: (data: {
-    skills: string;
-    projectDesc: string;
-    yourName: string;
-    clientName: string;
-    tone: Tone;
-  }) => void;
+  onGenerate: (data: { skills: string; projectDesc: string; yourName: string; clientName: string; tone: Tone }) => void;
   loading: boolean;
 }
 
@@ -34,79 +28,49 @@ export default function ProposalForm({ onGenerate, loading }: Props) {
   ];
 
   return (
-    <form onSubmit={submit} className="card p-6 space-y-4">
+    <form onSubmit={submit} className="glass p-6 md:p-8 space-y-5">
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-xs text-gray-400 uppercase tracking-wider block mb-1">Your Name</label>
-          <input
-            value={yourName}
-            onChange={(e) => setYourName(e.target.value)}
-            placeholder="Alex Johnson"
-            required
-            className="w-full bg-[#0a0a12] border border-[#1e1e35] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-          />
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-emerald-400 uppercase tracking-widest block">Your Name</label>
+          <input value={yourName} onChange={e => setYourName(e.target.value)} placeholder="Alex" required className="w-full px-4 py-3 text-sm" />
         </div>
-        <div>
-          <label className="text-xs text-gray-400 uppercase tracking-wider block mb-1">Client Name</label>
-          <input
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            placeholder="Sarah / TechCorp"
-            required
-            className="w-full bg-[#0a0a12] border border-[#1e1e35] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-          />
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-emerald-400 uppercase tracking-widest block">Client Name</label>
+          <input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Sarah" required className="w-full px-4 py-3 text-sm" />
         </div>
       </div>
 
-      <div>
-        <label className="text-xs text-gray-400 uppercase tracking-wider block mb-1">Your Skills</label>
-        <input
-          value={skills}
-          onChange={(e) => setSkills(e.target.value)}
-          placeholder="React, Node.js, 4 years experience, UI/UX design..."
-          required
-          className="w-full bg-[#0a0a12] border border-[#1e1e35] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-        />
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-emerald-400 uppercase tracking-widest block">Your Skills</label>
+        <input value={skills} onChange={e => setSkills(e.target.value)} placeholder="Photography, Lightroom editing, 5 years experience..." required className="w-full px-4 py-3 text-sm" />
       </div>
 
-      <div>
-        <label className="text-xs text-gray-400 uppercase tracking-wider block mb-1">Client&apos;s Project Description</label>
-        <textarea
-          value={projectDesc}
-          onChange={(e) => setProjectDesc(e.target.value)}
-          placeholder="Paste the job post or describe the project here..."
-          required
-          rows={5}
-          className="w-full bg-[#0a0a12] border border-[#1e1e35] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-        />
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-emerald-400 uppercase tracking-widest block">Project Description</label>
+        <textarea value={projectDesc} onChange={e => setProjectDesc(e.target.value)} placeholder="Paste the job post or describe the project..." required rows={5} className="w-full px-4 py-3 text-sm resize-none" />
       </div>
 
-      <div>
-        <label className="text-xs text-gray-400 uppercase tracking-wider block mb-2">Tone</label>
-        <div className="flex gap-3">
-          {tones.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => setTone(t.value)}
-              className={`flex-1 py-2 rounded-xl border text-sm font-medium transition-all ${
-                tone === t.value
-                  ? "border-purple-500 bg-purple-500/20 text-purple-300"
-                  : "border-[#1e1e35] text-gray-400 hover:border-purple-500/50"
-              }`}
-            >
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-emerald-400 uppercase tracking-widest block">Tone</label>
+        <div className="grid grid-cols-3 gap-2">
+          {tones.map(t => (
+            <button key={t.value} type="button" onClick={() => setTone(t.value)}
+              className="py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer"
+              style={{
+                background: tone === t.value ? "rgba(16,185,129,0.15)" : "transparent",
+                border: `1px solid ${tone === t.value ? "rgba(16,185,129,0.5)" : "rgba(16,185,129,0.1)"}`,
+                color: tone === t.value ? "#10B981" : "rgba(255,255,255,0.4)",
+              }}>
               {t.emoji} {t.label}
             </button>
           ))}
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 font-bold text-lg glow-btn disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? "Writing your proposal..." : "✍️ Generate Proposal"}
+      <button type="submit" disabled={loading}
+        className="w-full py-4 rounded-2xl font-bold text-base cursor-pointer glow-btn disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{background: "linear-gradient(135deg, #10B981, #059669)", color: "white"}}>
+        {loading ? "Writing your proposal..." : "✍️ Generate Proposal — Free"}
       </button>
     </form>
   );
