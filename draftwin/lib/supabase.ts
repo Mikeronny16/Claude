@@ -1,12 +1,19 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+let _supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_KEY;
+    if (!url || !key) throw new Error("Supabase env vars missing");
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
 
 export async function getCredits(userId: string): Promise<number> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from("users")
     .select("credits")
     .eq("id", userId)
@@ -15,16 +22,16 @@ export async function getCredits(userId: string): Promise<number> {
 }
 
 export async function deductCredit(userId: string): Promise<boolean> {
-  const { data } = await supabase.rpc("deduct_credit", { user_id: userId });
+  const { data } = await getSupabase().rpc("deduct_credit", { user_id: userId });
   return data === true;
 }
 
 export async function addCredits(userId: string, amount: number): Promise<void> {
-  await supabase.rpc("add_credits", { user_id: userId, amount });
+  await getSupabase().rpc("add_credits", { user_id: userId, amount });
 }
 
 export async function ensureUser(userId: string): Promise<void> {
-  await supabase
+  await getSupabase()
     .from("users")
     .upsert({ id: userId, credits: 3 }, { onConflict: "id", ignoreDuplicates: true });
 }
