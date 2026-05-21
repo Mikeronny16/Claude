@@ -1,6 +1,13 @@
 import Groq from "groq-sdk";
 
-export const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+let _groq: Groq | null = null;
+
+function getGroq(): Groq {
+  if (!_groq) {
+    _groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+  }
+  return _groq;
+}
 
 export async function generateProposal(input: {
   skills: string;
@@ -15,7 +22,7 @@ export async function generateProposal(input: {
     creative: "enthusiastic, innovative, and expressive",
   }[input.tone];
 
-  const chat = await groq.chat.completions.create({
+  const chat = await getGroq().chat.completions.create({
     model: "llama3-70b-8192",
     messages: [
       {
