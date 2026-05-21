@@ -25,15 +25,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
-    const data = JSON.parse(body);
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(body);
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
 
-    // Only act on confirmed or finished payments
     if (data.payment_status !== "confirmed" && data.payment_status !== "finished") {
       return NextResponse.json({ ok: true });
     }
 
-    // order_id format: userId__packageId__timestamp
-    const [userId, packageId] = (data.order_id as string).split("__");
+    if (!data.order_id || typeof data.order_id !== "string") {
+      return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
+    }
+
+    const [userId, packageId] = data.order_id.split("__");
     const credits = CREDIT_MAP[packageId];
 
     if (!userId || !credits) {

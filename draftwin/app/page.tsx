@@ -104,6 +104,7 @@ export default function Home() {
   const [showPricingCalc, setShowPricingCalc] = useState(false);
   const [showRewriter, setShowRewriter] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -177,7 +178,8 @@ export default function Home() {
       saveToHistory({ yourName: formData.yourName, clientName: formData.clientName, skills: formData.skills, proposal: data.proposal, score: data.score ?? null });
       setHistoryCount(getHistory().length);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Something went wrong");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setTimeout(() => setErrorMsg(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -195,6 +197,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen" onClick={() => setShowToolsMenu(false)}>
+
+      {/* Error Toast */}
+      {errorMsg && (
+        <div className="fixed top-4 left-1/2 z-[100] px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg"
+          style={{ transform: "translateX(-50%)", background: "rgba(239,68,68,0.95)", color: "white", maxWidth: "90vw" }}>
+          ⚠️ {errorMsg}
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
