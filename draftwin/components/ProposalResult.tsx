@@ -29,6 +29,8 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
   const [text, setText] = useState(proposal);
   const [copied, setCopied] = useState(false);
   const [edited, setEdited] = useState(false);
+  const [sendEmail, setSendEmail] = useState("");
+  const [showEmailInput, setShowEmailInput] = useState(false);
 
   function copy() {
     navigator.clipboard.writeText(text);
@@ -44,6 +46,15 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
     a.download = `proposal-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function sendViaEmail() {
+    if (!sendEmail.trim()) return;
+    const subject = encodeURIComponent("My Proposal");
+    const body = encodeURIComponent(text);
+    window.open(`mailto:${sendEmail.trim()}?subject=${subject}&body=${body}`, "_blank");
+    setShowEmailInput(false);
+    setSendEmail("");
   }
 
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -105,11 +116,36 @@ export default function ProposalResult({ proposal, score, creditsLeft, onRegener
           {loading ? "..." : T.btnRegenerate}
         </button>
       </div>
-      <button onClick={download}
-        className="w-full py-3 rounded-xl font-semibold text-sm cursor-pointer transition-all"
-        style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
-        ⬇️ Download as .txt
-      </button>
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={download}
+          className="py-3 rounded-xl font-semibold text-sm cursor-pointer transition-all"
+          style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
+          ⬇️ Download .txt
+        </button>
+        <button onClick={() => setShowEmailInput(v => !v)}
+          className="py-3 rounded-xl font-semibold text-sm cursor-pointer transition-all"
+          style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
+          📤 Send via Email
+        </button>
+      </div>
+
+      {showEmailInput && (
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={sendEmail}
+            onChange={e => setSendEmail(e.target.value)}
+            placeholder="recipient@email.com"
+            className="flex-1 px-4 py-2.5 text-sm"
+            onKeyDown={e => e.key === "Enter" && sendViaEmail()}
+          />
+          <button onClick={sendViaEmail}
+            className="px-4 py-2.5 rounded-xl text-sm font-bold cursor-pointer glow-btn shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--green), var(--green-dim))", color: "white" }}>
+            Send
+          </button>
+        </div>
+      )}
 
       {creditsLeft <= 0 && (
         <div className="glass p-5 text-center space-y-3" style={{ borderColor: "rgba(245,158,11,0.3)" }}>

@@ -6,6 +6,7 @@ import ProposalResult from "@/components/ProposalResult";
 import PricingModal from "@/components/PricingModal";
 import HistoryModal from "@/components/HistoryModal";
 import LangSelector from "@/components/LangSelector";
+import DashboardModal from "@/components/DashboardModal";
 import { saveToHistory, getHistory } from "@/lib/history";
 import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib/i18n";
 
@@ -92,6 +93,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [lang, setLang] = useState<LangCode>("en");
   const [score, setScore] = useState<number | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -111,6 +113,23 @@ export default function Home() {
     if (savedTheme) setTheme(savedTheme);
     const savedLang = localStorage.getItem("draftwin_lang") as LangCode | null;
     if (savedLang && LANGUAGES.find(l => l.code === savedLang)) setLang(savedLang);
+
+    // Handle referral link
+    const params = new URLSearchParams(window.location.search);
+    const refId = params.get("ref");
+    if (refId && refId !== uid && !localStorage.getItem("draftwin_ref_claimed")) {
+      fetch("/api/referral", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newUserId: uid, refUserId: refId }),
+      }).then(r => r.json()).then(data => {
+        if (data.ok) {
+          localStorage.setItem("draftwin_ref_claimed", "1");
+          refreshCredits(uid);
+        }
+      }).catch(() => {});
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, [refreshCredits]);
 
   useEffect(() => {
@@ -172,6 +191,11 @@ export default function Home() {
       <nav className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
         <span className="font-extrabold text-lg tracking-tight" style={{ color: g }}>DraftWin</span>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowDashboard(true)}
+            className="px-3 py-1.5 rounded-xl text-sm cursor-pointer transition-all"
+            style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
+            📊
+          </button>
           {historyCount > 0 && (
             <button onClick={() => setShowHistory(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm cursor-pointer transition-all"
@@ -425,6 +449,9 @@ export default function Home() {
         </p>
       </footer>
 
+      {showDashboard && userId && credits !== null && (
+        <DashboardModal credits={credits} userId={userId} onClose={() => setShowDashboard(false)} />
+      )}
       {showPricing && userId && (
         <PricingModal userId={userId} onClose={() => { setShowPricing(false); refreshCredits(userId); }} />
       )}

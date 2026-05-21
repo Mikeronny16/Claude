@@ -27,7 +27,15 @@ export async function deductCredit(userId: string): Promise<boolean> {
 }
 
 export async function addCredits(userId: string, amount: number): Promise<void> {
-  await getSupabase().rpc("add_credits", { user_id: userId, amount });
+  const { data: user } = await getSupabase().from("users").select("credits").eq("id", userId).single();
+  if (user) {
+    await getSupabase().from("users").update({ credits: user.credits + amount }).eq("id", userId);
+  }
+}
+
+export async function userExists(userId: string): Promise<boolean> {
+  const { data } = await getSupabase().from("users").select("id").eq("id", userId).single();
+  return !!data;
 }
 
 export async function ensureUser(userId: string): Promise<void> {
