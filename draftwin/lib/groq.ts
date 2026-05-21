@@ -17,7 +17,8 @@ export async function generateProposal(input: {
   tone: "professional" | "friendly" | "creative";
   platform: "upwork" | "fiverr" | "email" | "linkedin";
   length: "short" | "medium" | "long";
-}): Promise<string> {
+  language?: string;
+}): Promise<{ proposal: string; score: number | null }> {
   const toneGuide = {
     professional: "formal, confident, and business-focused",
     friendly: "warm, conversational, and personable",
@@ -32,6 +33,9 @@ export async function generateProposal(input: {
   }[input.platform];
 
   const wordLimit = { short: 150, medium: 300, long: 500 }[input.length];
+  const langInstruction = input.language && input.language !== "English"
+    ? `IMPORTANT: Write the entire proposal in ${input.language}. Do not use English.`
+    : "";
 
   const chat = await getGroq().chat.completions.create({
     model: "llama-3.3-70b-versatile",
@@ -43,7 +47,10 @@ Tone: ${toneGuide}.
 Platform context: ${platformGuide}
 Length: Keep it under ${wordLimit} words.
 Format: Strong opening, understanding of the project, relevant experience, proposed approach, confident closing.
-Use the client's name naturally. Do NOT use placeholders like [X] — fill everything in with the provided details.`,
+Use the client's name naturally. Do NOT use placeholders like [X] — fill everything in with the provided details.
+${langInstruction}
+After the proposal, on a new line write EXACTLY this (always in English, always this format): SCORE:[number 1-10]
+Rate the proposal strength based on: personalization, clarity, relevance to the job.`,
       },
       {
         role: "user",
@@ -55,8 +62,14 @@ Use the client's name naturally. Do NOT use placeholders like [X] — fill every
       },
     ],
     temperature: 0.8,
-    max_tokens: 1000,
+    max_tokens: 1100,
   });
 
-  return chat.choices[0]?.message?.content ?? "";
+  const raw = chat.choices[0]?.message?.content ?? "";
+
+  const scoreMatch = raw.match(/SCORE:(\d+)/i);
+  const score = scoreMatch ? Math.min(10, Math.max(1, parseInt(scoreMatch[1]))) : null;
+  const proposal = raw.replace(/\n?SCORE:\d+\s*$/i, "").trim();
+
+  return { proposal, score };
 }

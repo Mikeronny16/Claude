@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, skills, projectDesc, yourName, clientName, tone, platform, length } = body;
+    const { userId, skills, projectDesc, yourName, clientName, tone, platform, length, language } = body;
 
     if (!userId || !skills || !projectDesc || !yourName || !clientName) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -25,15 +25,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No credits left", needsPurchase: true }, { status: 402 });
     }
 
-    const proposal = await generateProposal({
+    const { proposal, score } = await generateProposal({
       skills, projectDesc, yourName, clientName,
       tone: tone ?? "professional",
       platform: platform ?? "upwork",
       length: length ?? "medium",
+      language: language ?? "English",
     });
     const remaining = credits - 1;
 
-    return NextResponse.json({ proposal, creditsLeft: remaining });
+    return NextResponse.json({ proposal, score, creditsLeft: remaining });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Generate error:", msg);
