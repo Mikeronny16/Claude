@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Translations } from "@/lib/i18n";
 
-type Tone = "professional" | "friendly" | "creative";
+type Tone = "professional" | "friendly" | "creative" | "confident" | "urgent";
 type Platform = "upwork" | "fiverr" | "email" | "linkedin";
 type Length = "short" | "medium" | "long";
 type Mode = "proposal" | "cover-letter";
@@ -47,6 +47,8 @@ export default function ProposalForm({ onGenerate, loading, prefill, translation
     { value: "professional", label: T.toneProf, emoji: "💼" },
     { value: "friendly", label: T.toneFriend, emoji: "😊" },
     { value: "creative", label: T.toneCreative, emoji: "✨" },
+    { value: "confident", label: "Confident", emoji: "🔥" },
+    { value: "urgent", label: "Urgent", emoji: "⚡" },
   ];
 
   const platforms: { value: Platform; label: string; emoji: string }[] = [
@@ -133,11 +135,20 @@ export default function ProposalForm({ onGenerate, loading, prefill, translation
         </div>
       )}
 
-      {/* Tone */}
+      {/* Tone — 5 options in a 3+2 layout */}
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-widest block" style={{ color: "var(--green)" }}>{T.labelTone}</label>
         <div className="grid grid-cols-3 gap-2">
-          {tones.map(t => (
+          {tones.slice(0, 3).map(t => (
+            <button key={t.value} type="button" onClick={() => setTone(t.value)}
+              className="py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer"
+              style={activeBtn(tone === t.value)}>
+              {t.emoji} {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {tones.slice(3).map(t => (
             <button key={t.value} type="button" onClick={() => setTone(t.value)}
               className="py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer"
               style={activeBtn(tone === t.value)}>

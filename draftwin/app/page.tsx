@@ -7,10 +7,14 @@ import PricingModal from "@/components/PricingModal";
 import HistoryModal from "@/components/HistoryModal";
 import LangSelector from "@/components/LangSelector";
 import DashboardModal from "@/components/DashboardModal";
+import TemplatesModal from "@/components/TemplatesModal";
+import SnippetVaultModal from "@/components/SnippetVaultModal";
+import PricingCalcModal from "@/components/PricingCalcModal";
+import RewriterModal from "@/components/RewriterModal";
 import { saveToHistory, getHistory } from "@/lib/history";
 import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib/i18n";
 
-type Tone = "professional" | "friendly" | "creative";
+type Tone = "professional" | "friendly" | "creative" | "confident" | "urgent";
 type Platform = "upwork" | "fiverr" | "email" | "linkedin";
 type Length = "short" | "medium" | "long";
 type Mode = "proposal" | "cover-letter";
@@ -33,7 +37,7 @@ function getUserId(): string {
   return id;
 }
 
-const TEMPLATES = [
+const QUICK_TEMPLATES = [
   {
     emoji: "🌐", labelKey: "Web Developer",
     skills: "React, Next.js, Node.js, 5 years experience, 50+ projects delivered",
@@ -94,6 +98,12 @@ export default function Home() {
   const [lang, setLang] = useState<LangCode>("en");
   const [score, setScore] = useState<number | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showSnippetVault, setShowSnippetVault] = useState(false);
+  const [snippetInitialText, setSnippetInitialText] = useState("");
+  const [showPricingCalc, setShowPricingCalc] = useState(false);
+  const [showRewriter, setShowRewriter] = useState(false);
+  const [showToolsMenu, setShowToolsMenu] = useState(false);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -114,7 +124,6 @@ export default function Home() {
     const savedLang = localStorage.getItem("draftwin_lang") as LangCode | null;
     if (savedLang && LANGUAGES.find(l => l.code === savedLang)) setLang(savedLang);
 
-    // Handle referral link
     const params = new URLSearchParams(window.location.search);
     const refId = params.get("ref");
     if (refId && refId !== uid && !localStorage.getItem("draftwin_ref_claimed")) {
@@ -144,7 +153,7 @@ export default function Home() {
 
   function toggleTheme() { setTheme(t => t === "dark" ? "light" : "dark"); }
 
-  function applyTemplate(tpl: typeof TEMPLATES[0]) {
+  function applyTemplate(tpl: { skills: string; projectDesc: string; tone: Tone; platform: Platform; length: Length }) {
     setPrefill({ skills: tpl.skills, projectDesc: tpl.projectDesc, tone: tpl.tone, platform: tpl.platform, length: tpl.length });
     document.getElementById("form-section")?.scrollIntoView({ behavior: "smooth" });
   }
@@ -185,7 +194,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" onClick={() => setShowToolsMenu(false)}>
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
@@ -207,6 +216,40 @@ export default function Home() {
               </span>
             </button>
           )}
+
+          {/* Tools Menu */}
+          <div className="relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowToolsMenu(v => !v)}
+              className="px-3 py-1.5 rounded-xl text-sm cursor-pointer transition-all"
+              style={{
+                background: showToolsMenu ? "rgba(16,185,129,0.1)" : "var(--glass)",
+                border: `1px solid ${showToolsMenu ? "rgba(16,185,129,0.4)" : "var(--glass-border)"}`,
+                color: showToolsMenu ? "var(--green)" : "var(--text-dim)",
+              }}>
+              🛠️
+            </button>
+            {showToolsMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl overflow-hidden z-40"
+                style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+                {[
+                  { icon: "📋", label: "Templates", action: () => { setShowTemplates(true); setShowToolsMenu(false); } },
+                  { icon: "✂️", label: "Snippet Vault", action: () => { setSnippetInitialText(""); setShowSnippetVault(true); setShowToolsMenu(false); } },
+                  { icon: "💰", label: "Rate Calculator", action: () => { setShowPricingCalc(true); setShowToolsMenu(false); } },
+                  { icon: "🔄", label: "Proposal Rewriter", action: () => { setShowRewriter(true); setShowToolsMenu(false); } },
+                ].map(item => (
+                  <button key={item.label} onClick={item.action}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium cursor-pointer transition-all text-left"
+                    style={{ color: "var(--text-dim)", borderBottom: "1px solid var(--glass-border)" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--glass-hover)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {credits !== null && credits <= 2 && (
             <button onClick={() => setShowPricing(true)}
               className="px-3 py-1.5 rounded-xl text-sm font-semibold cursor-pointer glow-btn"
@@ -295,6 +338,16 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {/* Extra features chips */}
+        <div className="flex flex-wrap justify-center gap-2 mt-8">
+          {["📄 PDF Export", "💬 Follow-Up Generator", "🔄 Proposal Rewriter", "✂️ Snippet Vault", "💰 Rate Calculator", "📋 10 Niche Templates", "🏆 Win Rate Tracker", "🌍 8 Languages"].map(f => (
+            <span key={f} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", color: "var(--green)" }}>
+              {f}
+            </span>
+          ))}
+        </div>
       </section>
 
       <div className="w-full h-px" style={{ background: `linear-gradient(90deg, transparent, var(--divider), transparent)` }} />
@@ -346,7 +399,7 @@ export default function Home() {
         <h2 className="text-center text-2xl font-extrabold mb-3" style={{ color: "var(--text)" }}>{T.templatesTitle}</h2>
         <p className="text-center text-sm mb-8" style={{ color: "var(--text-dim)" }}>{T.templatesSubtitle}</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {TEMPLATES.map((tpl) => (
+          {QUICK_TEMPLATES.map((tpl) => (
             <button key={tpl.labelKey} onClick={() => applyTemplate(tpl)}
               className="glass p-5 text-center space-y-2 cursor-pointer transition-all glass-hover rounded-2xl">
               <div className="text-3xl">{tpl.emoji}</div>
@@ -356,6 +409,13 @@ export default function Home() {
               </div>
             </button>
           ))}
+        </div>
+        <div className="text-center mt-5">
+          <button onClick={() => setShowTemplates(true)}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all"
+            style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", color: "var(--green)" }}>
+            📋 View All 10 Templates →
+          </button>
         </div>
       </section>
 
@@ -398,6 +458,11 @@ export default function Home() {
                 onBuy={() => setShowPricing(true)}
                 loading={loading}
                 translations={T}
+                userId={userId}
+                clientName={lastForm?.clientName}
+                yourName={lastForm?.yourName}
+                onCreditsUpdate={(n) => setCredits(n)}
+                onSaveSnippet={(text) => { setSnippetInitialText(text); setShowSnippetVault(true); }}
               />
             ) : null}
           </section>
@@ -449,6 +514,7 @@ export default function Home() {
         </p>
       </footer>
 
+      {/* Modals */}
       {showDashboard && userId && credits !== null && (
         <DashboardModal credits={credits} userId={userId} onClose={() => setShowDashboard(false)} />
       )}
@@ -457,6 +523,24 @@ export default function Home() {
       )}
       {showHistory && (
         <HistoryModal onClose={() => setShowHistory(false)} translations={T} />
+      )}
+      {showTemplates && (
+        <TemplatesModal onClose={() => setShowTemplates(false)} onSelect={(tpl) => applyTemplate(tpl)} />
+      )}
+      {showSnippetVault && (
+        <SnippetVaultModal onClose={() => { setShowSnippetVault(false); setSnippetInitialText(""); }} initialText={snippetInitialText} />
+      )}
+      {showPricingCalc && (
+        <PricingCalcModal onClose={() => setShowPricingCalc(false)} />
+      )}
+      {showRewriter && userId && (
+        <RewriterModal
+          onClose={() => setShowRewriter(false)}
+          userId={userId}
+          onCreditsUpdate={(n) => setCredits(n)}
+          onBuy={() => { setShowRewriter(false); setShowPricing(true); }}
+          creditsLeft={credits ?? 0}
+        />
       )}
     </main>
   );
