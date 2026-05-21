@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getHistory, deleteFromHistory, updateHistoryStatus, formatDate, HistoryEntry, ProposalStatus } from "@/lib/history";
 import { Translations } from "@/lib/i18n";
+import ShareWinModal from "@/components/ShareWinModal";
 
 interface Props { onClose: () => void; translations: Translations; }
 
@@ -16,6 +17,8 @@ export default function HistoryModal({ onClose, translations: T }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [selected, setSelected] = useState<HistoryEntry | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showShareWin, setShowShareWin] = useState(false);
+  const [shareWinClientName, setShareWinClientName] = useState<string | undefined>(undefined);
 
   useEffect(() => { setEntries(getHistory()); }, []);
 
@@ -37,6 +40,11 @@ export default function HistoryModal({ onClose, translations: T }: Props) {
   function setStatus(id: string, status: ProposalStatus) {
     updateHistoryStatus(id, status);
     reload();
+    if (status === "won") {
+      const entry = entries.find(e => e.id === id);
+      setShareWinClientName(entry?.clientName);
+      setShowShareWin(true);
+    }
   }
 
   function copy(text: string) {
@@ -50,6 +58,7 @@ export default function HistoryModal({ onClose, translations: T }: Props) {
   const winRate = sent.length > 0 ? Math.round((won.length / sent.length) * 100) : null;
 
   return (
+    <>
     <div className="fixed inset-0 flex items-end md:items-center justify-center z-50 p-4"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}>
       <div className="glass w-full max-w-lg rounded-3xl overflow-hidden" style={{ maxHeight: "85vh" }}>
@@ -171,5 +180,10 @@ export default function HistoryModal({ onClose, translations: T }: Props) {
         )}
       </div>
     </div>
+
+    {showShareWin && (
+      <ShareWinModal onClose={() => setShowShareWin(false)} clientName={shareWinClientName} />
+    )}
+    </>
   );
 }

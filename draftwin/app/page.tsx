@@ -11,6 +11,7 @@ import TemplatesModal from "@/components/TemplatesModal";
 import SnippetVaultModal from "@/components/SnippetVaultModal";
 import PricingCalcModal from "@/components/PricingCalcModal";
 import RewriterModal from "@/components/RewriterModal";
+import LiveCounter from "@/components/LiveCounter";
 import { saveToHistory, getHistory } from "@/lib/history";
 import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib/i18n";
 
@@ -104,6 +105,7 @@ export default function Home() {
   const [showPricingCalc, setShowPricingCalc] = useState(false);
   const [showRewriter, setShowRewriter] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -177,7 +179,8 @@ export default function Home() {
       saveToHistory({ yourName: formData.yourName, clientName: formData.clientName, skills: formData.skills, proposal: data.proposal, score: data.score ?? null });
       setHistoryCount(getHistory().length);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Something went wrong");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setTimeout(() => setErrorMsg(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -195,6 +198,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen" onClick={() => setShowToolsMenu(false)}>
+
+      {/* Error Toast */}
+      {errorMsg && (
+        <div className="fixed top-4 left-1/2 z-[100] px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg"
+          style={{ transform: "translateX(-50%)", background: "rgba(239,68,68,0.95)", color: "white", maxWidth: "90vw" }}>
+          ⚠️ {errorMsg}
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
@@ -287,12 +298,18 @@ export default function Home() {
             {T.heroSubtitle}
           </p>
           <div className="flex items-center justify-center gap-8 pt-2 flex-wrap">
-            {[["1,200+", T.statsProposals], ["4.8★", T.statsRating], ["< 30s", T.statsTime]].map(([num, label]) => (
-              <div key={label} className="text-center">
-                <div className="font-extrabold text-2xl" style={{ color: g }}>{num}</div>
-                <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{label}</div>
-              </div>
-            ))}
+            <div className="text-center">
+              <LiveCounter target={1200} suffix="+" className="font-extrabold text-2xl" style={{ color: g }} />
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{T.statsProposals}</div>
+            </div>
+            <div className="text-center">
+              <div className="font-extrabold text-2xl" style={{ color: g }}>4.8★</div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{T.statsRating}</div>
+            </div>
+            <div className="text-center">
+              <div className="font-extrabold text-2xl" style={{ color: g }}>&lt; 30s</div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>{T.statsTime}</div>
+            </div>
           </div>
         </div>
       </section>
@@ -506,7 +523,16 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-10 border-t space-y-2" style={{ borderColor: "var(--glass-border)" }}>
+      <footer className="text-center py-10 border-t space-y-3" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <a href="/templates" className="text-xs font-medium transition-opacity hover:opacity-80" style={{ color: "var(--green)" }}>
+            📋 Free Templates
+          </a>
+          <span className="text-xs" style={{ color: "var(--glass-border)" }}>·</span>
+          <a href="/affiliate" className="text-xs font-medium transition-opacity hover:opacity-80" style={{ color: "var(--green)" }}>
+            💰 Earn 30% Affiliate
+          </a>
+        </div>
         <p className="text-xs" style={{ color: "var(--text-faint)" }}>{T.footerText}</p>
         <p className="text-xs" style={{ color: "var(--text-faint)" }}>
           {T.footerBy}{" "}
