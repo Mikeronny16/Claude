@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ShareCard from "@/components/ShareCard";
 
 type Msg = {
   id: string;
@@ -29,7 +30,7 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-function MessageCard({ msg, onReact, onReply }: { msg: Msg; onReact: (id: string, r: string) => void; onReply: (id: string, text: string) => void }) {
+function MessageCard({ msg, onReact, onReply, onShare }: { msg: Msg; onReact: (id: string, r: string) => void; onReply: (id: string, text: string) => void; onShare: (msg: Msg) => void }) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [replying, setReplying] = useState(false);
@@ -84,6 +85,9 @@ function MessageCard({ msg, onReact, onReply }: { msg: Msg; onReact: (id: string
           <button onClick={copyMsg} className="text-xs px-2 py-1 rounded-lg cursor-pointer" style={{ color: "var(--text-faint)", border: "1px solid var(--glass-border)" }}>
             {copied ? "✅" : "Copy"}
           </button>
+          <button onClick={() => onShare(msg)} className="text-xs px-2 py-1 rounded-lg cursor-pointer font-semibold" style={{ color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+            Share
+          </button>
           {!msg.public_reply && (
             <button onClick={() => setShowReply(v => !v)} className="text-xs px-2 py-1 rounded-lg cursor-pointer font-semibold" style={{ color: a, border: `1px solid rgba(6,182,212,0.3)` }}>
               Reply
@@ -114,6 +118,7 @@ export default function InboxPage() {
   const [stats, setStats] = useState<Stats>({ total: 0, unread: 0, today: 0 });
   const [loading, setLoading] = useState(true);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [shareMsg, setShareMsg] = useState<Msg | null>(null);
   const a = "#06b6d4";
 
   const load = useCallback(async (u: User) => {
@@ -158,7 +163,23 @@ export default function InboxPage() {
 
   const myLink = `whispr.app/${user.username}`;
 
+  function openShare(msg: Msg) {
+    setShareMsg(msg);
+  }
+
   return (
+    <>
+    {shareMsg && user && (
+      <ShareCard
+        message={shareMsg.content}
+        senderMood={shareMsg.sender_mood}
+        reaction={shareMsg.reaction}
+        username={user.username}
+        displayName={user.displayName}
+        avatarEmoji={user.avatarEmoji}
+        onClose={() => setShareMsg(null)}
+      />
+    )}
     <main className="min-h-screen px-4 py-6 max-w-xl mx-auto">
 
       {/* Header */}
@@ -224,7 +245,7 @@ export default function InboxPage() {
         <div className="space-y-3">
           <p className="text-xs font-semibold" style={{ color: "var(--text-faint)" }}>{messages.length} message{messages.length !== 1 ? "s" : ""}</p>
           {messages.map(msg => (
-            <MessageCard key={msg.id} msg={msg} onReact={react} onReply={reply} />
+            <MessageCard key={msg.id} msg={msg} onReact={react} onReply={reply} onShare={openShare} />
           ))}
         </div>
       )}
@@ -233,5 +254,6 @@ export default function InboxPage() {
         <Link href="/" style={{ color: a }}>Whispr</Link> · Anonymous messages
       </footer>
     </main>
+    </>
   );
 }

@@ -30,6 +30,7 @@ export default function SendPage() {
     fetch(`/api/user/${username}`)
       .then(r => { if (!r.ok) { setNotFound(true); return null; } return r.json(); })
       .then(d => { if (d) setUserData(d); });
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username }) });
   }, [username]);
 
   async function send(e: React.FormEvent) {
