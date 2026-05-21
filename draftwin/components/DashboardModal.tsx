@@ -44,7 +44,7 @@ export default function DashboardModal({ onClose, credits, userId }: Props) {
   return (
     <div className="fixed inset-0 flex items-end md:items-center justify-center z-50 p-4"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}>
-      <div className="glass w-full max-w-md rounded-3xl overflow-hidden" style={{ maxHeight: "88vh", overflowY: "auto" }}>
+      <div className="glass modal-content w-full max-w-md rounded-3xl overflow-hidden" style={{ maxHeight: "88vh", overflowY: "auto" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--glass-border)" }}>

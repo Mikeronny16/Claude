@@ -64,7 +64,7 @@ export default function SnippetVaultModal({ onClose, initialText = "" }: Props) 
     <div className="fixed inset-0 flex items-end md:items-center justify-center z-50 p-4"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="glass w-full max-w-md rounded-3xl overflow-hidden" style={{ maxHeight: "88vh", overflowY: "auto" }}>
+      <div className="glass modal-content w-full max-w-md rounded-3xl overflow-hidden" style={{ maxHeight: "88vh", overflowY: "auto" }}>
 
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--glass-border)" }}>
           <div>

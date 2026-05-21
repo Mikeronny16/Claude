@@ -87,7 +87,7 @@ export default function ProposalForm({ onGenerate, loading, prefill, translation
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-widest block" style={{ color: "var(--green)" }}>{T.labelYourName}</label>
           <input value={yourName} onChange={e => setYourName(e.target.value)} placeholder="Alex" required className="w-full px-4 py-3 text-sm" />
@@ -174,7 +174,7 @@ export default function ProposalForm({ onGenerate, loading, prefill, translation
       </div>
 
       <button type="submit" disabled={loading}
-        className="w-full py-4 rounded-2xl font-bold text-base cursor-pointer glow-btn disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`w-full py-4 rounded-2xl font-bold text-base cursor-pointer glow-btn disabled:opacity-50 disabled:cursor-not-allowed${!loading ? " glow-pulse" : ""}`}
         style={{ background: "linear-gradient(135deg, var(--green), var(--green-dim))", color: "white" }}>
         {loading ? T.btnGenerating : isCoverLetter ? "📄 Generate Cover Letter — Free" : T.btnGenerate}
       </button>

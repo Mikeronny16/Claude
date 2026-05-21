@@ -12,6 +12,40 @@ import SnippetVaultModal from "@/components/SnippetVaultModal";
 import PricingCalcModal from "@/components/PricingCalcModal";
 import RewriterModal from "@/components/RewriterModal";
 import LiveCounter from "@/components/LiveCounter";
+
+const HERO_LINE1 = "Write Winning";
+const HERO_LINE2 = "Proposals in 30s";
+const HERO_FULL = `${HERO_LINE1}\n${HERO_LINE2}`;
+
+async function fireConfetti() {
+  try {
+    const confetti = (await import("canvas-confetti")).default;
+    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ["#10B981","#059669","#34D399","#6EE7B7","#ffffff"] });
+    setTimeout(() => confetti({ particleCount: 55, angle: 60, spread: 60, origin: { x: 0 }, colors: ["#10B981","#34D399","#ffffff"] }), 250);
+    setTimeout(() => confetti({ particleCount: 55, angle: 120, spread: 60, origin: { x: 1 }, colors: ["#10B981","#34D399","#ffffff"] }), 450);
+  } catch { /* silently skip if unavailable */ }
+}
+
+function ProposalSkeleton() {
+  return (
+    <div className="glass p-6 md:p-8 space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="skeleton h-3 w-28" />
+        <div className="skeleton h-6 w-20 rounded-full" />
+      </div>
+      <div className="skeleton h-px w-full" />
+      <div className="space-y-3 pt-1">
+        {[95, 87, 100, 78, 92, 68, 85, 55, 90, 72].map((w, i) => (
+          <div key={i} className="skeleton h-3" style={{ width: `${w}%` }} />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 pt-2">
+        <div className="skeleton h-12 rounded-xl" />
+        <div className="skeleton h-12 rounded-xl" />
+      </div>
+    </div>
+  );
+}
 import { saveToHistory, getHistory } from "@/lib/history";
 import { LangCode, LANGUAGES, useTranslations, PROPOSAL_LANG_NAMES } from "@/lib/i18n";
 
@@ -106,6 +140,9 @@ export default function Home() {
   const [showRewriter, setShowRewriter] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [typed, setTyped] = useState("");
+  const [typeDone, setTypeDone] = useState(false);
+  const [creditsPulseKey, setCreditsPulseKey] = useState(0);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -153,6 +190,16 @@ export default function Home() {
     localStorage.setItem("draftwin_lang", lang);
   }, [lang, isRtl]);
 
+  useEffect(() => {
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      setTyped(HERO_FULL.slice(0, i));
+      if (i >= HERO_FULL.length) { clearInterval(timer); setTypeDone(true); }
+    }, 38);
+    return () => clearInterval(timer);
+  }, []);
+
   function toggleTheme() { setTheme(t => t === "dark" ? "light" : "dark"); }
 
   function applyTemplate(tpl: { skills: string; projectDesc: string; tone: Tone; platform: Platform; length: Length }) {
@@ -176,6 +223,7 @@ export default function Home() {
       setProposal(data.proposal);
       setScore(data.score ?? null);
       setCredits(data.creditsLeft);
+      fireConfetti();
       saveToHistory({ yourName: formData.yourName, clientName: formData.clientName, skills: formData.skills, proposal: data.proposal, score: data.score ?? null });
       setHistoryCount(getHistory().length);
     } catch (err) {
@@ -279,20 +327,35 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative text-center px-4 pt-16 pb-12 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[700px] h-[500px] rounded-full" style={{ background: `radial-gradient(circle, ${theme === "dark" ? "rgba(16,185,129,0.07)" : "rgba(5,150,105,0.06)"} 0%, transparent 70%)` }} />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full"
+            style={{ background: `radial-gradient(circle, ${theme === "dark" ? "rgba(16,185,129,0.08)" : "rgba(5,150,105,0.06)"} 0%, transparent 70%)`, animation: "float-slow 9s ease-in-out infinite" }} />
+          <div className="absolute top-1/3 left-1/4 w-[340px] h-[340px] rounded-full"
+            style={{ background: `radial-gradient(circle, ${theme === "dark" ? "rgba(16,185,129,0.04)" : "rgba(5,150,105,0.03)"} 0%, transparent 70%)`, animation: "float-slow-alt 11s ease-in-out infinite" }} />
+          <div className="absolute bottom-0 right-1/4 w-[240px] h-[240px] rounded-full"
+            style={{ background: `radial-gradient(circle, ${theme === "dark" ? "rgba(16,185,129,0.03)" : "rgba(5,150,105,0.02)"} 0%, transparent 70%)`, animation: "float-slow-3 13s ease-in-out infinite" }} />
         </div>
         <div className="relative z-10 max-w-3xl mx-auto space-y-5">
           {credits !== null && (
             <div className="inline-flex items-center gap-2 glass px-4 py-2 text-sm rounded-full">
               <span className="w-2 h-2 rounded-full animate-pulse inline-block" style={{ background: g }} />
-              <span style={{ color: g }}>{credits} {credits !== 1 ? T.heroCreditsPlural : T.heroCredits}</span>
+              <span key={creditsPulseKey} className={creditsPulseKey > 0 ? "credits-pop" : ""} style={{ color: g }}>
+                {credits} {credits !== 1 ? T.heroCreditsPlural : T.heroCredits}
+              </span>
             </div>
           )}
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight whitespace-pre-line" style={{ color: "var(--text)" }}>
-            {T.heroTitle.split("\n")[0]}
-            <br />
-            <span className="glow-text">{T.heroTitle.split("\n")[1]}</span>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight" style={{ color: "var(--text)" }} suppressHydrationWarning>
+            {typed.split("\n")[0] || <>&nbsp;</>}
+            {!typeDone && typed.split("\n")[1] === undefined && <span className="tw-cursor" />}
+            {typed.includes("\n") && (
+              <>
+                <br />
+                <span className="glow-text">
+                  {typed.split("\n")[1]}
+                  {!typeDone && <span className="tw-cursor" />}
+                </span>
+              </>
+            )}
           </h1>
           <p className="text-lg max-w-lg mx-auto leading-relaxed" style={{ color: "var(--text-dim)" }}>
             {T.heroSubtitle}
@@ -325,7 +388,7 @@ export default function Home() {
             { num: "2", title: T.step2Title, desc: T.step2Desc },
             { num: "3", title: T.step3Title, desc: T.step3Desc },
           ].map((step) => (
-            <div key={step.num} className="glass p-6 text-center space-y-3">
+            <div key={step.num} className="glass p-6 text-center space-y-3 card-hover">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold mx-auto"
                 style={{ background: "var(--glass-hover)", color: g, border: `1px solid var(--glass-border)` }}>
                 {step.num}
@@ -348,7 +411,7 @@ export default function Home() {
             { icon: "🎯", title: T.feat2Title, desc: T.feat2Desc },
             { icon: "💾", title: T.feat3Title, desc: T.feat3Desc },
           ].map((f) => (
-            <div key={f.title} className="glass p-6 space-y-3">
+            <div key={f.title} className="glass p-6 space-y-3 card-hover">
               <div className="text-3xl">{f.icon}</div>
               <h3 className="font-bold" style={{ color: "var(--text)" }}>{f.title}</h3>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>{f.desc}</p>
@@ -375,7 +438,7 @@ export default function Home() {
         <p className="text-center text-sm mb-10" style={{ color: "var(--text-dim)" }}>{T.testimonialsSubtitle}</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="glass p-6 space-y-4">
+            <div key={t.name} className="glass p-6 space-y-4 card-hover">
               <div className="flex gap-0.5">{Array(5).fill(0).map((_, i) => <span key={i} style={{ color: g }}>★</span>)}</div>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
@@ -462,10 +525,7 @@ export default function Home() {
               <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>{T.resultTitle}</h2>
             </div>
             {loading ? (
-              <div className="glass p-10 text-center space-y-4">
-                <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: `${g} transparent transparent transparent` }} />
-                <p className="font-semibold animate-pulse" style={{ color: g }}>{T.loadingText}</p>
-              </div>
+              <ProposalSkeleton />
             ) : proposal ? (
               <ProposalResult
                 proposal={proposal}
@@ -478,7 +538,7 @@ export default function Home() {
                 userId={userId}
                 clientName={lastForm?.clientName}
                 yourName={lastForm?.yourName}
-                onCreditsUpdate={(n) => setCredits(n)}
+                onCreditsUpdate={(n) => { setCredits(n); setCreditsPulseKey(k => k + 1); }}
                 onSaveSnippet={(text) => { setSnippetInitialText(text); setShowSnippetVault(true); }}
               />
             ) : null}
