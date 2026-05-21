@@ -15,7 +15,7 @@ type Msg = {
   created_at: string;
 };
 
-type Stats = { total: number; unread: number; today: number };
+type Stats = { total: number; unread: number; today: number; week: number; moods: Record<string, number> };
 type User = { id: string; username: string; displayName: string; avatarEmoji: string };
 
 const REACTIONS = ["❤️", "😂", "😮", "💯", "🔥"];
@@ -115,17 +115,23 @@ export default function InboxPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, unread: 0, today: 0 });
+  const [stats, setStats] = useState<Stats>({ total: 0, unread: 0, today: 0, week: 0, moods: {} });
   const [loading, setLoading] = useState(true);
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareMsg, setShareMsg] = useState<Msg | null>(null);
+  const [streak, setStreak] = useState(0);
   const a = "#06b6d4";
 
   const load = useCallback(async (u: User) => {
-    const res = await fetch(`/api/messages/inbox?userId=${u.id}`);
-    const data = await res.json();
+    const [inboxRes, streakRes] = await Promise.all([
+      fetch(`/api/messages/inbox?userId=${u.id}`),
+      fetch("/api/streak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: u.id }) }),
+    ]);
+    const data = await inboxRes.json();
+    const streakData = await streakRes.json();
     setMessages(data.messages ?? []);
-    setStats(data.stats ?? { total: 0, unread: 0, today: 0 });
+    setStats(data.stats ?? { total: 0, unread: 0, today: 0, week: 0, moods: {} });
+    setStreak(streakData.streak ?? 0);
     setLoading(false);
   }, []);
 
@@ -163,9 +169,12 @@ export default function InboxPage() {
 
   const myLink = `whispr.app/${user.username}`;
 
-  function openShare(msg: Msg) {
-    setShareMsg(msg);
-  }
+  function openShare(msg: Msg) { setShareMsg(msg); }
+
+  const WEEKLY_GOAL = 50;
+  const weekPct = Math.min(100, Math.round(((stats.week ?? 0) / WEEKLY_GOAL) * 100));
+  const topMood = Object.entries(stats.moods ?? {}).sort((a, b) => b[1] - a[1])[0];
+  const moodPct = topMood && stats.total > 0 ? Math.round((topMood[1] / stats.total) * 100) : 0;
 
   return (
     <>
@@ -225,6 +234,61 @@ export default function InboxPage() {
           </div>
         ))}
       </div>
+
+      {/* Streak + Mood + Challenge */}
+      {!loading && (
+        <div className="grid grid-cols-3 gap-3 mb-6">
+
+          {/* Streak */}
+          <div className="glass p-3 text-center col-span-1">
+            <div className="text-2xl mb-1">🔥</div>
+            <div className="font-extrabold text-lg" style={{ color: streak >= 3 ? "#f59e0b" : "var(--text)" }}>{streak}</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>day streak</div>
+          </div>
+
+          {/* Top Mood */}
+          <div className="glass p-3 text-center col-span-1">
+            <div className="text-2xl mb-1">{topMood ? topMood[0] : "💬"}</div>
+            <div className="font-extrabold text-lg" style={{ color: a }}>{moodPct}%</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>top vibe</div>
+          </div>
+
+          {/* Weekly */}
+          <div className="glass p-3 text-center col-span-1">
+            <div className="text-2xl mb-1">{weekPct >= 100 ? "🏆" : "🎯"}</div>
+            <div className="font-extrabold text-lg" style={{ color: weekPct >= 100 ? "#f59e0b" : "var(--text)" }}>{stats.week ?? 0}</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>this week</div>
+          </div>
+        </div>
+      )}
+
+      {/* Weekly Challenge Bar */}
+      {!loading && (
+        <div className="glass p-4 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold" style={{ color: a }}>🎯 Weekly Challenge</p>
+            <p className="text-xs font-bold" style={{ color: weekPct >= 100 ? "#f59e0b" : "var(--text-faint)" }}>
+              {stats.week ?? 0} / {WEEKLY_GOAL} {weekPct >= 100 ? "🏆 Done!" : ""}
+            </p>
+          </div>
+          <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(6,182,212,0.1)" }}>
+            <div className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${weekPct}%`, background: weekPct >= 100 ? "linear-gradient(90deg,#f59e0b,#fbbf24)" : `linear-gradient(90deg,${a},#0891b2)` }} />
+          </div>
+          {weekPct < 100 && (
+            <p className="text-xs mt-2" style={{ color: "var(--text-faint)" }}>Get {WEEKLY_GOAL - (stats.week ?? 0)} more messages to unlock 🏆 badge</p>
+          )}
+        </div>
+      )}
+
+      {/* Leaderboard Link */}
+      {!loading && (
+        <div className="text-center mb-4">
+          <Link href="/leaderboard" className="text-xs font-semibold" style={{ color: "rgba(6,182,212,0.6)" }}>
+            🏆 View public leaderboard →
+          </Link>
+        </div>
+      )}
 
       {/* Messages */}
       {loading ? (

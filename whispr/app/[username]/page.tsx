@@ -11,6 +11,17 @@ const MOODS = [
   { value: "🤔", label: "Curious" },
 ];
 
+const PROMPTS = [
+  "Roast me honestly 🔥",
+  "Rate me 1-10 ⭐",
+  "What do you really think of me?",
+  "Give me one piece of advice 💡",
+  "What's your first impression of me?",
+  "Tell me a secret about yourself 🤫",
+  "What would surprise me about you?",
+  "Compliment me anonymously ❤️",
+];
+
 type UserData = { user: { display_name: string; avatar_emoji: string; username: string }; totalMessages: number } | null;
 
 export default function SendPage() {
@@ -126,6 +137,20 @@ export default function SendPage() {
             Send {user.display_name} an anonymous message 👻
           </h2>
 
+          {/* Quick Prompts */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-widest block" style={{ color: a }}>Quick prompts</label>
+            <div className="flex flex-wrap gap-2">
+              {PROMPTS.map(p => (
+                <button key={p} type="button" onClick={() => setMessage(p)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all"
+                  style={{ background: message === p ? "rgba(6,182,212,0.15)" : "var(--glass)", border: `1px solid ${message === p ? "rgba(6,182,212,0.5)" : "var(--glass-border)"}`, color: message === p ? a : "var(--text-dim)" }}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Mood */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-widest block" style={{ color: a }}>Your vibe</label>
@@ -170,10 +195,15 @@ export default function SendPage() {
           </p>
         </form>
 
-        <p className="text-center text-xs mt-6" style={{ color: "var(--text-faint)" }}>
-          Want your own?{" "}
-          <Link href="/join" style={{ color: a }}>Create free Whispr link →</Link>
-        </p>
+        <div className="text-center text-xs mt-6 space-y-1">
+          <p style={{ color: "var(--text-faint)" }}>
+            Want your own?{" "}
+            <Link href="/join" style={{ color: a }}>Create free Whispr link →</Link>
+          </p>
+          <p>
+            <Link href="/leaderboard" style={{ color: "rgba(6,182,212,0.5)" }}>🏆 View leaderboard</Link>
+          </p>
+        </div>
       </div>
     </main>
   );
