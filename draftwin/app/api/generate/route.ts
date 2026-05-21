@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No credits left", needsPurchase: true }, { status: 402 });
     }
 
-    const proposal = await generateProposal({
+    const { proposal, score } = await generateProposal({
       skills, projectDesc, yourName, clientName,
       tone: tone ?? "professional",
       platform: platform ?? "upwork",
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     });
     const remaining = credits - 1;
 
-    return NextResponse.json({ proposal, creditsLeft: remaining });
+    return NextResponse.json({ proposal, score, creditsLeft: remaining });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Generate error:", msg);

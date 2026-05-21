@@ -89,6 +89,7 @@ export default function Home() {
   const [prefill, setPrefill] = useState<Partial<FormData> | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [lang, setLang] = useState<LangCode>("en");
+  const [score, setScore] = useState<number | null>(null);
 
   const T = useTranslations(lang);
   const isRtl = lang === "ar";
@@ -141,8 +142,9 @@ export default function Home() {
       if (data.needsPurchase) { setShowPricing(true); return; }
       if (data.error) throw new Error(data.error);
       setProposal(data.proposal);
+      setScore(data.score ?? null);
       setCredits(data.creditsLeft);
-      saveToHistory({ yourName: formData.yourName, clientName: formData.clientName, skills: formData.skills, proposal: data.proposal });
+      saveToHistory({ yourName: formData.yourName, clientName: formData.clientName, skills: formData.skills, proposal: data.proposal, score: data.score ?? null });
       setHistoryCount(getHistory().length);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Something went wrong");
@@ -364,6 +366,7 @@ export default function Home() {
             ) : proposal ? (
               <ProposalResult
                 proposal={proposal}
+                score={score}
                 creditsLeft={credits ?? 0}
                 onRegenerate={() => lastForm && generate(lastForm)}
                 onBuy={() => setShowPricing(true)}

@@ -5,6 +5,7 @@ import { Translations } from "@/lib/i18n";
 
 interface Props {
   proposal: string;
+  score: number | null;
   creditsLeft: number;
   onRegenerate: () => void;
   onBuy: () => void;
@@ -12,29 +13,74 @@ interface Props {
   translations: Translations;
 }
 
-export default function ProposalResult({ proposal, creditsLeft, onRegenerate, onBuy, loading, translations: T }: Props) {
+function ScoreBadge({ score }: { score: number }) {
+  const color = score >= 8 ? "#10B981" : score >= 6 ? "#F59E0B" : "#EF4444";
+  const label = score >= 8 ? "Strong" : score >= 6 ? "Good" : "Weak";
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+      style={{ background: `${color}18`, border: `1px solid ${color}40`, color }}>
+      <span>{score}/10</span>
+      <span style={{ opacity: 0.7 }}>· {label}</span>
+    </div>
+  );
+}
+
+export default function ProposalResult({ proposal, score, creditsLeft, onRegenerate, onBuy, loading, translations: T }: Props) {
+  const [text, setText] = useState(proposal);
   const [copied, setCopied] = useState(false);
+  const [edited, setEdited] = useState(false);
 
   function copy() {
-    navigator.clipboard.writeText(proposal);
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setText(e.target.value);
+    setEdited(true);
+  }
+
+  function reset() {
+    setText(proposal);
+    setEdited(false);
   }
 
   return (
     <div className="space-y-4">
       <div className="glass p-6 md:p-8">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--green)" }} />
             <span className="font-semibold text-sm" style={{ color: "var(--green)" }}>Ready to send</span>
           </div>
-          <span className="text-xs" style={{ color: "var(--text-faint)" }}>{creditsLeft} credit{creditsLeft !== 1 ? "s" : ""} left</span>
+          <div className="flex items-center gap-2">
+            {score !== null && <ScoreBadge score={score} />}
+            {edited && (
+              <button onClick={reset} className="text-xs px-2 py-1 rounded-lg cursor-pointer transition-all"
+                style={{ color: "var(--text-faint)", border: "1px solid var(--glass-border)" }}>
+                ↩ Reset
+              </button>
+            )}
+            <span className="text-xs" style={{ color: "var(--text-faint)" }}>{creditsLeft} credit{creditsLeft !== 1 ? "s" : ""} left</span>
+          </div>
         </div>
-        <div className="text-sm leading-relaxed whitespace-pre-wrap p-4 rounded-xl"
-          style={{ background: "rgba(0,0,0,0.15)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
-          {proposal}
-        </div>
+
+        <textarea
+          value={text}
+          onChange={handleChange}
+          rows={12}
+          className="w-full text-sm leading-relaxed p-4 rounded-xl resize-none"
+          style={{
+            background: "rgba(0,0,0,0.15)",
+            border: `1px solid ${edited ? "var(--green)" : "var(--glass-border)"}`,
+            color: "var(--text-dim)",
+            fontFamily: "inherit",
+          }}
+        />
+        {edited && (
+          <p className="text-xs mt-2" style={{ color: "var(--text-faint)" }}>✏️ Edited — copy when ready</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

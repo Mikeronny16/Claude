@@ -1,6 +1,8 @@
 const KEY = "draftwin_history";
 const MAX = 20;
 
+export type ProposalStatus = "sent" | "won" | "lost" | null;
+
 export interface HistoryEntry {
   id: string;
   timestamp: number;
@@ -8,6 +10,8 @@ export interface HistoryEntry {
   clientName: string;
   skills: string;
   proposal: string;
+  status?: ProposalStatus;
+  score?: number | null;
 }
 
 export function saveToHistory(entry: Omit<HistoryEntry, "id" | "timestamp">): void {
@@ -30,6 +34,12 @@ export function getHistory(): HistoryEntry[] {
 export function deleteFromHistory(id: string): void {
   if (typeof window === "undefined") return;
   const updated = getHistory().filter(e => e.id !== id);
+  localStorage.setItem(KEY, JSON.stringify(updated));
+}
+
+export function updateHistoryStatus(id: string, status: ProposalStatus): void {
+  if (typeof window === "undefined") return;
+  const updated = getHistory().map(e => e.id === id ? { ...e, status } : e);
   localStorage.setItem(KEY, JSON.stringify(updated));
 }
 
