@@ -3,9 +3,15 @@
 import { useRef, useMemo, useEffect, type MutableRefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { PARTICLE_COUNT, generateSphere, generateFibers, generateTorus } from '@/lib/geometries'
+import {
+  PARTICLE_COUNT,
+  generateSizes,
+  generateSphere,
+  generateFibers,
+  generateTorus,
+} from '@/lib/geometries'
 
-// ─── GLSL ────────────────────────────────────────────────────────────────────
+// ─── GLSL — galaxy/starfield style ───────────────────────────────────────────
 
 const VERT = /* glsl */ `
   uniform float u_p1;
@@ -13,37 +19,58 @@ const VERT = /* glsl */ `
   uniform float u_time;
   uniform float u_size;
 
-  attribute vec3 a_posFibers;
-  attribute vec3 a_posTorus;
+  attribute vec3  a_posFibers;
+  attribute vec3  a_posTorus;
+  attribute float a_size;     // per-star size variation
 
   varying vec3  v_color;
   varying float v_alpha;
+
+  // pseudo-random hash for per-particle twinkle rate
+  float hash(vec3 p) {
+    return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
+  }
 
   void main() {
     vec3 pos = position;
     pos = mix(pos, a_posFibers, u_p1);
     pos = mix(pos, a_posTorus,  u_p2);
 
-    // subtle breathing float — small displacement only
-    float wave = sin(u_time * 0.6 + position.x * 1.8 + position.z * 1.3) * 0.025;
-    float sway = cos(u_time * 0.4 + position.z * 2.2) * 0.018;
-    pos.y += wave;
-    pos.x += sway;
+    // very gentle drift — enough to feel alive, not enough to distort shape
+    float h   = hash(position);
+    float spd = 0.5 + h * 0.8;
+    pos.y += sin(u_time * spd       + h * 6.28) * 0.018;
+    pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.013;
+    pos.z += sin(u_time * spd * 0.6 + h * 4.71) * 0.013;
 
-    vec4 mvPos   = modelViewMatrix * vec4(pos, 1.0);
-    // small, crisp points — NOT big blobs
-    gl_PointSize = u_size * (180.0 / -mvPos.z);
+    vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+
+    // size attenuation — stays small even close to camera
+    gl_PointSize = a_size * u_size * (14.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
 
-    // color transition: cyan → white → violet
-    vec3 cyan   = vec3(0.0,  0.82, 1.0);
-    vec3 white  = vec3(0.88, 0.96, 1.0);
-    vec3 violet = vec3(0.65, 0.50, 1.0);
+    // --- color ----------------------------------------------------------
+    // mostly cool blue-white, bright stars slightly warmer
+    float hc       = hash(position.yzx);
+    vec3 coolWhite = vec3(0.80, 0.93, 1.00);   // cool blue-white
+    vec3 pureWhite = vec3(1.00, 1.00, 1.00);
+    vec3 cyanTint  = vec3(0.55, 0.90, 1.00);   // subtle cyan for cyan phase
 
-    vec3 col = mix(cyan, white, u_p1);
-    col      = mix(col, violet, u_p2);
-    v_color  = col;
-    v_alpha  = 0.85;
+    vec3 starCol = mix(coolWhite, pureWhite, hc);
+
+    // morph color tint: sphere=blue-white → fibers=white → torus=violet-white
+    vec3 phaseCol = mix(starCol,           vec3(0.90,0.98,1.00), u_p1);
+    phaseCol      = mix(phaseCol,          vec3(0.82,0.75,1.00), u_p2);
+    // add subtle cyan sparkle for large stars
+    phaseCol      = mix(phaseCol, cyanTint, step(1.6, a_size) * 0.35);
+
+    v_color = phaseCol;
+
+    // twinkle: per-particle sinusoidal brightness
+    float twinkleSpd = 1.2 + h * 3.5;
+    float twinkle    = 0.72 + 0.28 * sin(u_time * twinkleSpd + h * 6.28);
+    // bright stars twinkle more visibly
+    v_alpha = twinkle * (0.55 + step(1.0, a_size) * 0.35);
   }
 `
 
@@ -56,12 +83,14 @@ const FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    // tight hot core + very subtle halo — looks like a small star, NOT a blob
-    float core = exp(-r * 7.0);
-    float halo = exp(-r * 2.5) * 0.25;
+    // hot bright core + tiny diffraction halo = real star look
+    float core = exp(-r * 9.5);
+    float halo = exp(-r * 2.2) * 0.14;
     float alpha = (core + halo) * v_alpha;
 
-    gl_FragColor = vec4(v_color * (0.6 + core * 0.7), alpha);
+    // core is brightest, outer halo matches color
+    vec3 col = v_color + core * vec3(0.15, 0.18, 0.22);
+    gl_FragColor = vec4(col, alpha);
   }
 `
 
@@ -76,10 +105,11 @@ export function ParticleMorph({ progressRef }: Props) {
   const matRef    = useRef<THREE.ShaderMaterial>(null)
   const geoRef    = useRef<THREE.BufferGeometry>(null)
 
-  const { sphere, fibers, torus } = useMemo(() => ({
+  const { sphere, fibers, torus, sizes } = useMemo(() => ({
     sphere: generateSphere(PARTICLE_COUNT),
     fibers: generateFibers(PARTICLE_COUNT),
     torus:  generateTorus(PARTICLE_COUNT),
+    sizes:  generateSizes(PARTICLE_COUNT),
   }), [])
 
   useEffect(() => {
@@ -87,14 +117,15 @@ export function ParticleMorph({ progressRef }: Props) {
     if (!geo) return
     geo.setAttribute('a_posFibers', new THREE.BufferAttribute(fibers, 3))
     geo.setAttribute('a_posTorus',  new THREE.BufferAttribute(torus, 3))
+    geo.setAttribute('a_size',      new THREE.BufferAttribute(sizes, 1))
     return () => { geo.dispose() }
-  }, [fibers, torus])
+  }, [fibers, torus, sizes])
 
   const uniforms = useMemo(() => ({
     u_p1:   { value: 0 },
     u_p2:   { value: 0 },
     u_time: { value: 0 },
-    u_size: { value: 1.8 },   // smaller base size
+    u_size: { value: 1.4 },   // base size — small stars
   }), [])
 
   useFrame(({ clock }) => {
@@ -109,7 +140,9 @@ export function ParticleMorph({ progressRef }: Props) {
     matRef.current.uniforms.u_p2.value   = ease(p2)
     matRef.current.uniforms.u_time.value = clock.elapsedTime
 
-    pointsRef.current.rotation.y = clock.elapsedTime * 0.04
+    // slow majestic rotation — feels like deep space
+    pointsRef.current.rotation.y = clock.elapsedTime * 0.03
+    pointsRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.015) * 0.08
   })
 
   return (
