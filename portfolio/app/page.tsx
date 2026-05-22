@@ -111,7 +111,7 @@ export default function HomePage() {
       {/* ── Navigation ─────────────────────────────────────── */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
-        style={{ padding: '20px 28px' }}
+        style={{ padding: '20px 28px', backdropFilter: 'blur(0px)' }}
       >
         {/* Logo */}
         <span
@@ -275,7 +275,7 @@ export default function HomePage() {
         style={{
           position: 'relative',
           zIndex: 10,
-          background: 'linear-gradient(to bottom, transparent, #04060e 8%)',
+          background: 'transparent',
           padding: 'clamp(60px, 8vw, 120px) clamp(28px, 6vw, 96px)',
         }}
       >
@@ -306,21 +306,25 @@ export default function HomePage() {
                 className="group block rounded-2xl transition-all duration-300"
                 style={{
                   padding: '28px 26px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(4,6,14,0.72)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
                   textDecoration: 'none',
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement
-                  el.style.border = `1px solid ${p.color}40`
-                  el.style.background = `${p.color}08`
+                  el.style.border = `1px solid ${p.color}55`
+                  el.style.background = `rgba(4,6,14,0.6)`
                   el.style.transform = 'translateY(-4px)'
+                  el.style.boxShadow = `0 0 40px ${p.color}20`
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement
-                  el.style.border = '1px solid rgba(255,255,255,0.06)'
-                  el.style.background = 'rgba(255,255,255,0.03)'
+                  el.style.border = '1px solid rgba(255,255,255,0.08)'
+                  el.style.background = 'rgba(4,6,14,0.72)'
                   el.style.transform = 'translateY(0)'
+                  el.style.boxShadow = 'none'
                 }}
               >
                 <div style={{ fontSize: 36, marginBottom: 18 }}>{p.emoji}</div>
@@ -359,24 +363,11 @@ export default function HomePage() {
         style={{
           position: 'relative',
           zIndex: 10,
-          background: '#04060e',
+          background: 'transparent',
           padding: 'clamp(60px, 8vw, 120px) clamp(28px, 6vw, 96px)',
           textAlign: 'center',
         }}
       >
-        {/* Background glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '30%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 500,
-            height: 300,
-            background: 'radial-gradient(ellipse, rgba(0,194,255,0.08) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
 
         <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative' }}>
           <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4" style={{ color: '#00c2ff' }}>
@@ -430,8 +421,10 @@ export default function HomePage() {
         style={{
           position: 'relative',
           zIndex: 10,
-          background: '#04060e',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(4,6,14,0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           padding: '28px clamp(28px, 6vw, 96px)',
           display: 'flex',
           alignItems: 'center',
