@@ -21,6 +21,19 @@ type Stats = {
   error?: string;
 };
 
+type CountryRow = { key: string; total: number };
+type ReferrerRow = { key: string; total: number };
+
+type Analytics = {
+  visitors: number;
+  pageviews: number;
+  bounce_rate: number;
+  countries: CountryRow[];
+  referrers: ReferrerRow[];
+  error?: string;
+  detail?: unknown;
+};
+
 const STATUS_COLOR: Record<string, string> = {
   finished: "#22c55e",
   confirmed: "#22c55e",
@@ -40,7 +53,9 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"payments" | "prompts">("payments");
+  const [activeTab, setActiveTab] = useState<"payments" | "traffic" | "prompts">("payments");
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(CATEGORIES[0]);
   const [error, setError] = useState("");
 
@@ -64,6 +79,19 @@ export default function AdminPage() {
     }
   }, []);
 
+  const fetchAnalytics = useCallback(async (password: string) => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/analytics?pass=${encodeURIComponent(password)}`);
+      const data = await res.json();
+      setAnalytics(data);
+    } catch {
+      setAnalytics({ visitors: 0, pageviews: 0, bounce_rate: 0, countries: [], referrers: [], error: "fetch_error" });
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }, []);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     fetchStats(pass);
@@ -71,9 +99,16 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!authed) return;
+    fetchAnalytics(pass);
     const interval = setInterval(() => fetchStats(pass), 60000);
     return () => clearInterval(interval);
-  }, [authed, pass, fetchStats]);
+  }, [authed, pass, fetchStats, fetchAnalytics]);
+
+  useEffect(() => {
+    if (activeTab === "traffic" && authed && !analytics) {
+      fetchAnalytics(pass);
+    }
+  }, [activeTab, authed, analytics, pass, fetchAnalytics]);
 
   if (!authed) {
     return (
@@ -145,16 +180,20 @@ export default function AdminPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-5">
-          {(["payments", "prompts"] as const).map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all"
+        <div className="flex gap-2 mb-5 flex-wrap">
+          {([
+            { key: "payments", label: `💳 Orders` },
+            { key: "traffic",  label: `📊 Traffic` },
+            { key: "prompts",  label: `📋 Prompts (${PROMPTS.length})` },
+          ] as const).map(({ key, label }) => (
+            <button key={key} onClick={() => setActiveTab(key)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
               style={{
-                background: activeTab === tab ? "rgba(249,115,22,0.15)" : "rgba(15,20,30,0.8)",
-                color: activeTab === tab ? "#f97316" : "#64748b",
-                border: `1px solid ${activeTab === tab ? "rgba(249,115,22,0.3)" : "rgba(30,41,59,0.6)"}`,
+                background: activeTab === key ? "rgba(249,115,22,0.15)" : "rgba(15,20,30,0.8)",
+                color: activeTab === key ? "#f97316" : "#64748b",
+                border: `1px solid ${activeTab === key ? "rgba(249,115,22,0.3)" : "rgba(30,41,59,0.6)"}`,
               }}>
-              {tab === "payments" ? `💳 Payments` : `📋 Prompts (${PROMPTS.length})`}
+              {label}
             </button>
           ))}
         </div>
@@ -197,6 +236,147 @@ export default function AdminPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Traffic Tab */}
+        {activeTab === "traffic" && (
+          <div>
+            {analyticsLoading ? (
+              <div className="rounded-2xl p-8 text-center"
+                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm" style={{ color: "#64748b" }}>Loading analytics...</p>
+              </div>
+            ) : analytics?.error === "no_token" ? (
+              <div className="rounded-2xl p-6"
+                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(249,115,22,0.2)" }}>
+                <p className="text-2xl mb-3">🔑</p>
+                <h3 className="font-black text-white mb-2 text-base">Setup Required</h3>
+                <p className="text-sm mb-4" style={{ color: "#94a3b8" }}>
+                  Add <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "rgba(249,115,22,0.15)", color: "#fb923c" }}>VERCEL_TOKEN</code> to your Vercel environment variables to see live traffic data.
+                </p>
+                <ol className="text-sm space-y-2 mb-5" style={{ color: "#64748b" }}>
+                  <li>1. Go to <strong style={{ color: "#94a3b8" }}>vercel.com → Account Settings → Tokens</strong></li>
+                  <li>2. Create a token → copy it</li>
+                  <li>3. Go to your <strong style={{ color: "#94a3b8" }}>Vercel project → Settings → Environment Variables</strong></li>
+                  <li>4. Add: <code className="px-1 py-0.5 rounded text-xs" style={{ background: "rgba(30,41,59,0.8)", color: "#94a3b8" }}>VERCEL_TOKEN</code> = your token</li>
+                  <li>5. Redeploy</li>
+                </ol>
+                <a href="https://vercel.com/account/tokens" target="_blank" rel="noopener noreferrer"
+                  className="inline-block text-xs px-4 py-2 rounded-lg font-bold"
+                  style={{ background: "rgba(249,115,22,0.15)", color: "#f97316", border: "1px solid rgba(249,115,22,0.25)" }}>
+                  Open Vercel Tokens →
+                </a>
+              </div>
+            ) : analytics?.error ? (
+              <div className="rounded-2xl p-6"
+                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <p className="text-2xl mb-2">⚠️</p>
+                <p className="font-bold text-white mb-1 text-sm">Analytics Error</p>
+                <p className="text-xs mb-3" style={{ color: "#94a3b8" }}>
+                  {analytics.error === "no_project"
+                    ? "VERCEL_PROJECT_ID not found — make sure the app is deployed on Vercel."
+                    : "Could not load analytics. Check that your VERCEL_TOKEN has the correct permissions."}
+                </p>
+                <button onClick={() => fetchAnalytics(pass)}
+                  className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                  style={{ background: "rgba(249,115,22,0.15)", color: "#f97316" }}>
+                  Retry
+                </button>
+              </div>
+            ) : analytics ? (
+              <div className="space-y-4">
+                {/* Key metrics */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "Visitors", value: analytics.visitors.toLocaleString(), sub: "7 days", color: "#f97316" },
+                    { label: "Page Views", value: analytics.pageviews.toLocaleString(), sub: "7 days", color: "#3b82f6" },
+                    { label: "Bounce Rate", value: `${Math.round((analytics.bounce_rate || 0) * 100)}%`, sub: "7 days", color: "#a78bfa" },
+                  ].map(({ label, value, sub, color }) => (
+                    <div key={label} className="rounded-xl p-4 text-center"
+                      style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+                      <div className="text-2xl font-black mb-0.5" style={{ color }}>{value}</div>
+                      <div className="text-xs font-semibold text-white">{label}</div>
+                      <div className="text-xs mt-0.5" style={{ color: "#334155" }}>{sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Top Countries */}
+                {analytics.countries.length > 0 && (
+                  <div className="rounded-xl p-4"
+                    style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+                    <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#64748b" }}>
+                      🌍 Top Countries
+                    </p>
+                    <div className="space-y-2">
+                      {analytics.countries.map((c, i) => {
+                        const max = analytics.countries[0].total;
+                        const pct = Math.round((c.total / max) * 100);
+                        return (
+                          <div key={c.key}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium" style={{ color: "#cbd5e1" }}>
+                                {c.key || "Unknown"}
+                              </span>
+                              <span className="text-xs font-bold" style={{ color: "#f97316" }}>
+                                {c.total.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(30,41,59,0.8)" }}>
+                              <div className="h-full rounded-full transition-all"
+                                style={{
+                                  width: `${pct}%`,
+                                  background: i === 0
+                                    ? "linear-gradient(90deg, #f97316, #fb923c)"
+                                    : "rgba(249,115,22,0.3)",
+                                }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Top Referrers */}
+                {analytics.referrers.length > 0 && (
+                  <div className="rounded-xl p-4"
+                    style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+                    <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#64748b" }}>
+                      🔗 Top Referrers
+                    </p>
+                    <div className="space-y-2">
+                      {analytics.referrers.map((r) => (
+                        <div key={r.key} className="flex items-center justify-between">
+                          <span className="text-sm truncate mr-3 max-w-[70%]" style={{ color: "#94a3b8" }}>
+                            {r.key || "Direct"}
+                          </span>
+                          <span className="text-xs font-bold flex-shrink-0" style={{ color: "#3b82f6" }}>
+                            {r.total.toLocaleString()} visits
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Refresh + Vercel link */}
+                <div className="flex items-center justify-between">
+                  <button onClick={() => fetchAnalytics(pass)}
+                    className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                    style={{ background: "rgba(30,41,59,0.6)", color: "#64748b" }}>
+                    🔄 Refresh
+                  </button>
+                  <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                    style={{ background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}>
+                    Full Analytics on Vercel →
+                  </a>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
