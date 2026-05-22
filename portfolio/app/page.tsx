@@ -267,12 +267,62 @@ export default function HomePage() {
 
         {/* Sticky overlay — stays in view during entire scroll */}
         <div
-          className="sticky top-0 flex items-center"
+          className="sticky top-0 flex flex-col items-center justify-center"
           style={{ height: '100vh', zIndex: 10, pointerEvents: 'none' }}
         >
-          <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680 }}>
+          {/* ── Center name block — always visible ── */}
+          <div
+            style={{
+              textAlign: 'center',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              transition: 'opacity 0.4s ease',
+              opacity: prog > 0.15 ? Math.max(0, 1 - (prog - 0.15) / 0.15) : 1,
+            }}
+          >
+            <p
+              className="font-bold tracking-[0.35em] uppercase mb-3"
+              style={{ fontSize: 'clamp(0.6rem, 2vw, 0.75rem)', color: 'rgba(0,194,255,0.7)' }}
+            >
+              ✦ &nbsp; MIKE RONNY &nbsp; ✦
+            </p>
+            <h1
+              className="font-black text-white"
+              style={{
+                fontSize: 'clamp(3rem, 10vw, 6.5rem)',
+                lineHeight: 1.0,
+                letterSpacing: '-0.03em',
+                textShadow: '0 0 60px rgba(0,194,255,0.25)',
+              }}
+            >
+              Builder.
+            </h1>
+            <p
+              style={{
+                marginTop: '1rem',
+                color: 'rgba(255,255,255,0.38)',
+                fontSize: 'clamp(0.8rem, 2.5vw, 1rem)',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Developer &amp; founder, based in Myanmar.
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-6" style={{ opacity: 0.4 }}>
+              <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.4)' }} />
+              <span className="text-xs tracking-[0.2em] font-semibold uppercase">Scroll to explore</span>
+              <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.4)' }} />
+            </div>
+          </div>
+
+          {/* ── Left section text (fades in after center fades out) ── */}
+          <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680, width: '100%' }}>
             {SECTIONS.map((s, i) => {
-              const opacity   = getSectionOpacity(i, prog)
+              const rawOpacity = getSectionOpacity(i, prog)
+              // shift section 0 start later (center block shows first)
+              const opacity    = i === 0 ? Math.min(rawOpacity, Math.max(0, (prog - 0.15) / 0.15)) : rawOpacity
               const translateY = opacity === 0 ? (prog > (i / 3) ? -20 : 20) : 0
               return (
                 <div
@@ -326,14 +376,6 @@ export default function HomePage() {
                     >
                       {s.cta} →
                     </a>
-                  )}
-
-                  {/* Scroll hint — section 0 only */}
-                  {i === 0 && (
-                    <div className="flex items-center gap-3 mt-8" style={{ opacity: 0.35 }}>
-                      <div style={{ width: 28, height: 1, background: 'rgba(255,255,255,0.4)' }} />
-                      <span className="text-xs tracking-[0.2em] font-semibold uppercase">Scroll to explore</span>
-                    </div>
                   )}
                 </div>
               )
