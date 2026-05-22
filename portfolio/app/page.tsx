@@ -60,6 +60,87 @@ const PROJECTS = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Sparkle dots arranged around the email link
+const SPARKLE_DOTS = [
+  { angle: 0,   r: 90,  size: 5, dur: 2.0, delay: 0.0,  color: '#00e5ff' },
+  { angle: 40,  r: 110, size: 3, dur: 2.5, delay: 0.35, color: '#ffffff' },
+  { angle: 75,  r: 80,  size: 4, dur: 1.8, delay: 0.7,  color: '#00c2ff' },
+  { angle: 120, r: 100, size: 3, dur: 2.3, delay: 0.15, color: '#a78bfa' },
+  { angle: 160, r: 95,  size: 5, dur: 2.1, delay: 0.55, color: '#00e5ff' },
+  { angle: 200, r: 85,  size: 3, dur: 2.4, delay: 0.9,  color: '#ffffff' },
+  { angle: 240, r: 105, size: 4, dur: 1.9, delay: 0.3,  color: '#00c2ff' },
+  { angle: 280, r: 75,  size: 3, dur: 2.2, delay: 0.65, color: '#a78bfa' },
+  { angle: 320, r: 98,  size: 5, dur: 2.0, delay: 0.45, color: '#00e5ff' },
+  // outer scattered
+  { angle: 20,  r: 140, size: 2, dur: 3.0, delay: 0.2,  color: '#ffffff' },
+  { angle: 100, r: 130, size: 2, dur: 2.8, delay: 0.8,  color: '#00c2ff' },
+  { angle: 190, r: 145, size: 2, dur: 3.2, delay: 0.4,  color: '#a78bfa' },
+  { angle: 300, r: 135, size: 2, dur: 2.9, delay: 0.1,  color: '#ffffff' },
+]
+
+function SparkleEmail() {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block', padding: '20px 0' }}>
+      {/* Sparkle dots */}
+      {SPARKLE_DOTS.map((d, i) => {
+        const rad = (d.angle * Math.PI) / 180
+        const x   = Math.cos(rad) * d.r
+        const y   = Math.sin(rad) * d.r * 0.55  // flatten vertically
+        return (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              top:  `calc(50% + ${y}px)`,
+              left: `calc(50% + ${x}px)`,
+              width:  d.size,
+              height: d.size,
+              borderRadius: '50%',
+              background: d.color,
+              boxShadow: `0 0 ${d.size * 3}px ${d.color}`,
+              animation: `sparklePop ${d.dur}s ease-in-out ${d.delay}s infinite`,
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+            }}
+          />
+        )
+      })}
+
+      {/* Email link */}
+      <a
+        href="mailto:mikeronny18@gmail.com"
+        style={{
+          display: 'inline-block',
+          fontSize: 'clamp(1rem, 3vw, 1.4rem)',
+          fontWeight: 900,
+          letterSpacing: '-0.01em',
+          textDecoration: 'none',
+          background: 'linear-gradient(135deg, #00e5ff 0%, #00c2ff 50%, #a78bfa 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          animation: 'electricText 4s ease-in-out infinite',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        mikeronny18@gmail.com →
+      </a>
+
+      {/* Underline glow */}
+      <div style={{
+        height: 1,
+        background: 'linear-gradient(90deg, transparent, #00c2ff, #a78bfa, transparent)',
+        marginTop: 6,
+        opacity: 0.5,
+        animation: 'sparklePop 2s ease-in-out infinite',
+      }} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
@@ -389,30 +470,12 @@ export default function HomePage() {
               something great.
             </span>
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '2.5rem', fontSize: '1rem' }}>
+          <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '3rem', fontSize: '1rem' }}>
             Open for new projects, collabs, and ideas.
           </p>
-          <a
-            href="mailto:mikeronny18@gmail.com"
-            className="inline-block font-black text-white rounded-full transition-all"
-            style={{
-              padding: '16px 36px',
-              background: 'linear-gradient(135deg, #00c2ff, #0075ff)',
-              boxShadow: '0 0 50px rgba(0,194,255,0.35)',
-              fontSize: '0.95rem',
-              textDecoration: 'none',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = 'scale(1.04)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 70px rgba(0,194,255,0.5)'
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = 'scale(1)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 50px rgba(0,194,255,0.35)'
-            }}
-          >
-            mikeronny18@gmail.com →
-          </a>
+
+          {/* ── Sparkle CTA ─────────────────────────── */}
+          <SparkleEmail />
         </div>
       </section>
 

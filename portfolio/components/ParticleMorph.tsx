@@ -25,25 +25,36 @@ const VERT = /* glsl */ `
     pos = mix(pos, a_posFibers, u_p1);
     pos = mix(pos, a_posTorus,  u_p2);
 
-    // gentle float / breathe
-    float wave  = sin(u_time * 0.65 + position.x * 2.2 + position.z * 1.5) * 0.04;
-    float drift = cos(u_time * 0.45 + position.z * 2.8) * 0.025;
-    pos.y += wave;
-    pos.x += drift;
+    // lively float — spread outward feel
+    float dist  = length(position);
+    float wave  = sin(u_time * 0.7  + position.x * 1.8 + position.z * 1.3) * 0.07;
+    float wave2 = cos(u_time * 0.5  + position.y * 2.1 + position.x * 0.9) * 0.05;
+    float drift = cos(u_time * 0.38 + position.z * 2.4) * 0.04;
+    pos.y += wave  + wave2 * 0.5;
+    pos.x += drift + sin(u_time * 0.3 + position.y * 1.6) * 0.03;
+    pos.z += cos(u_time * 0.4 + position.x * 1.4) * 0.03;
+    // corona particles drift further
+    pos += normalize(position) * sin(u_time * 0.25 + dist * 2.0) * 0.04 * smoothstep(2.0, 4.0, dist);
 
     vec4 mvPos   = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = u_size * (280.0 / -mvPos.z);
+    // corona particles appear slightly larger
+    float sizeMult = 1.0 + smoothstep(2.5, 4.0, dist) * 0.6;
+    gl_PointSize = u_size * sizeMult * (300.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
 
     // color: electric-cyan → white → soft-violet
-    vec3 cyan   = vec3(0.0,  0.76, 1.0);
-    vec3 white  = vec3(0.85, 0.97, 1.0);
-    vec3 violet = vec3(0.62, 0.52, 1.0);
+    // corona particles are brighter/whiter (sparkle effect)
+    float coreFac = smoothstep(2.8, 4.5, dist);
+    vec3 cyan     = vec3(0.0,  0.85, 1.0);
+    vec3 white    = vec3(1.0,  1.0,  1.0);
+    vec3 violet   = vec3(0.7,  0.55, 1.0);
+    vec3 spark    = vec3(0.9,  0.97, 1.0);  // bright sparkle white
 
     vec3 col = mix(cyan, white, u_p1);
     col      = mix(col, violet, u_p2);
+    col      = mix(col, spark,  coreFac);   // corona → sparkle white
     v_color  = col;
-    v_alpha  = 0.92 - length(pos) * 0.035;
+    v_alpha  = mix(0.9, 0.7, coreFac);      // corona slightly more transparent
   }
 `
 
@@ -56,9 +67,10 @@ const FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    float glow  = exp(-r * 2.2);
-    float alpha = glow * clamp(v_alpha, 0.0, 1.0);
-    gl_FragColor = vec4(v_color * (0.75 + glow * 0.5), alpha);
+    float glow  = exp(-r * 1.8);          // wider, softer glow
+    float core  = exp(-r * 6.0);          // bright hot center
+    float alpha = (glow * 0.7 + core * 0.5) * clamp(v_alpha, 0.0, 1.0);
+    gl_FragColor = vec4(v_color * (0.7 + core * 0.8), alpha);
   }
 `
 

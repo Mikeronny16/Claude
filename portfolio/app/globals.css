@@ -30,3 +30,23 @@ html, body {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+
+/* Sparkle dots — pulse in/out at their fixed positions */
+@keyframes sparklePop {
+  0%, 100% { opacity: 0;   transform: translate(-50%, -50%) scale(0);   }
+  40%, 60% { opacity: 1;   transform: translate(-50%, -50%) scale(1);   }
+}
+
+/* Sparkle ✦ characters drifting */
+@keyframes sparkleDrift {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg);   }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1)   rotate(20deg);  }
+  70%  { opacity: 1; transform: translate(-50%, -50%) scale(1)   rotate(-10deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg);   }
+}
+
+/* Email text flicker */
+@keyframes electricText {
+  0%, 96%, 100% { filter: brightness(1); }
+  97%            { filter: brightness(1.6) drop-shadow(0 0 8px #00c2ff); }
+}
