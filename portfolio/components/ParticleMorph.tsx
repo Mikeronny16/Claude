@@ -6,20 +6,19 @@ import * as THREE from 'three'
 import {
   PARTICLE_COUNT,
   SPIKE_COUNT,
+  POINTS_PER_SPIKE,
   generateSizes,
   generateSphere,
-  generateSpikes,
+  generateSpikePoints,
 } from '@/lib/geometries'
 
-// ─── Particle shader — sphere that scatters outward ──────────────────────────
+// ─── Particle shader (sphere → scatter) ──────────────────────────────────────
 
 const PARTICLE_VERT = /* glsl */ `
   uniform float u_scatter;
   uniform float u_time;
   uniform float u_size;
-
   attribute float a_size;
-
   varying vec3  v_color;
   varying float v_alpha;
 
@@ -30,37 +29,29 @@ const PARTICLE_VERT = /* glsl */ `
   void main() {
     float h = hash3(position);
 
-    // staggered departure: each particle waits its own threshold
-    float threshold   = h * 0.5;
-    float denom       = max(0.001, 1.0 - threshold);
-    float localScatter = clamp((u_scatter - threshold) / denom, 0.0, 1.0);
-    localScatter = localScatter * localScatter;   // ease-in
+    float threshold    = h * 0.45;
+    float localScatter = clamp((u_scatter - threshold) / max(0.001, 1.0 - threshold), 0.0, 1.0);
+    localScatter = localScatter * localScatter;
 
-    // scatter outward along position normal + subtle drift
-    vec3 dir = normalize(position);
-    float travelDist = 1.2 + h * 3.5;
-    vec3 pos = position + dir * localScatter * travelDist;
+    vec3 dir  = normalize(position);
+    float dist = 1.5 + h * 4.0;
+    vec3 pos  = position + dir * localScatter * dist;
 
-    // gentle alive drift
     float spd = 0.4 + h * 0.7;
-    pos.y += sin(u_time * spd       + h * 6.28) * 0.018 * (1.0 - localScatter * 0.6);
-    pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.013 * (1.0 - localScatter * 0.6);
+    pos.y += sin(u_time * spd       + h * 6.28) * 0.016;
+    pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.011;
 
-    vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = a_size * u_size * (10.0 / -mvPos.z);
-    gl_Position  = projectionMatrix * mvPos;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = a_size * u_size * (12.0 / -mv.z);
+    gl_Position  = projectionMatrix * mv;
 
-    // color: cool blue-white at rest → warm orange tint as scatter
     float hc = hash3(position.yzx);
-    vec3 restCol    = mix(vec3(0.80, 0.93, 1.00), vec3(1.00, 1.00, 1.00), hc);
-    vec3 scatterCol = vec3(1.00, 0.65, 0.22);
-    v_color = mix(restCol, scatterCol, localScatter * 0.65);
+    vec3 restCol    = mix(vec3(0.85,0.95,1.00), vec3(1.00,1.00,1.00), hc);
+    vec3 scatterCol = vec3(1.00, 0.70, 0.25);
+    v_color = mix(restCol, scatterCol, localScatter * 0.7);
 
-    // twinkle
-    float twinkleSpd = 1.2 + h * 3.5;
-    float twinkle    = 0.72 + 0.28 * sin(u_time * twinkleSpd + h * 6.28);
-    v_alpha = twinkle * (0.75 + step(1.0, a_size) * 0.20)
-            * (1.0 - localScatter * 0.4);
+    float twinkle = 0.70 + 0.30 * sin(u_time * (1.2 + h * 3.5) + h * 6.28);
+    v_alpha = twinkle * (0.80 + step(1.0, a_size) * 0.18) * (1.0 - localScatter * 0.35);
   }
 `
 
@@ -73,66 +64,72 @@ const PARTICLE_FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    float core = exp(-r * 14.0);
-    if (core < 0.015) discard;
+    float core = exp(-r * 12.0);
+    if (core < 0.012) discard;
 
-    vec3 col = v_color + core * vec3(0.08, 0.10, 0.15);
-    gl_FragColor = vec4(col, core * v_alpha);
+    gl_FragColor = vec4(v_color, core * v_alpha);
   }
 `
 
-// ─── Spike shader — orange-gold fibers radiating outward ─────────────────────
+// ─── Spike point shader (points along spike path) ────────────────────────────
+// Uses points instead of LineSegments → visible on mobile (no linewidth limit)
 
 const SPIKE_VERT = /* glsl */ `
   uniform float u_scatter;
   uniform float u_time;
-
   attribute vec3  a_dir;
   attribute float a_maxLen;
   attribute float a_speed;
-  attribute float a_tip;     // 0=base, 1=tip
+  attribute float a_t;       // 0=base  1=tip
 
-  varying float v_tip;
-  varying float v_visible;
+  varying float v_t;
+  varying float v_alpha;
 
   void main() {
-    // growth driven by scatter, sped per-spike
-    float rawGrowth = clamp(u_scatter * a_speed * 1.8, 0.0, 1.0);
-    float growth    = rawGrowth * rawGrowth;   // ease-in
+    float raw    = clamp(u_scatter * a_speed * 1.6, 0.0, 1.0);
+    float growth = raw * raw;
 
-    // base stays on sphere; tip extends along direction
-    vec3 pos = position + a_dir * a_tip * a_maxLen * growth;
+    // this point only shows once the growth front has passed it
+    float visible = smoothstep(a_t - 0.06, a_t + 0.06, growth);
 
-    // very subtle pulse on tip
-    float pulse = 1.0 + 0.04 * sin(u_time * 3.0 + a_maxLen * 5.0);
-    pos += a_dir * a_tip * pulse * 0.02;
+    vec3 pos = position + a_dir * a_t * a_maxLen;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    // subtle tip pulse
+    pos += a_dir * a_t * 0.03 * sin(u_time * 3.5 + a_maxLen * 4.0);
 
-    v_tip     = a_tip;
-    v_visible = growth;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    // base=big, tip=small; invisible until growth reaches
+    float sz = mix(5.0, 2.0, a_t) * visible;
+    gl_PointSize = sz * (50.0 / -mv.z);
+    gl_Position  = projectionMatrix * mv;
+
+    v_t     = a_t;
+    v_alpha = visible;
   }
 `
 
 const SPIKE_FRAG = /* glsl */ `
-  varying float v_tip;
-  varying float v_visible;
+  varying float v_t;
+  varying float v_alpha;
 
   void main() {
-    if (v_visible < 0.01) discard;
+    if (v_alpha < 0.01) discard;
 
-    // orange core → bright gold-white tip
-    vec3 baseCol = vec3(1.00, 0.30, 0.04);   // deep orange
-    vec3 midCol  = vec3(1.00, 0.68, 0.12);   // amber
-    vec3 tipCol  = vec3(1.00, 0.95, 0.60);   // bright gold-white
+    vec2  uv = gl_PointCoord * 2.0 - 1.0;
+    float r  = dot(uv, uv);
+    if (r > 1.0) discard;
 
-    vec3 col = v_tip < 0.5
-      ? mix(baseCol, midCol, v_tip * 2.0)
-      : mix(midCol,  tipCol, (v_tip - 0.5) * 2.0);
+    float core = exp(-r * 8.0);
+    if (core < 0.02) discard;
 
-    // base is bright/opaque, tip fades
-    float alpha = (0.92 - v_tip * 0.55) * min(1.0, v_visible * 4.0);
+    // deep orange base → bright gold tip
+    vec3 col = mix(
+      vec3(1.00, 0.32, 0.04),   // orange
+      vec3(1.00, 0.92, 0.50),   // gold-white
+      v_t * v_t
+    );
 
+    float alpha = core * (0.95 - v_t * 0.4) * v_alpha;
     gl_FragColor = vec4(col, alpha);
   }
 `
@@ -144,21 +141,18 @@ interface Props {
 }
 
 export function ParticleMorph({ progressRef }: Props) {
-  const groupRef      = useRef<THREE.Group>(null)
-  const particleRef   = useRef<THREE.Points>(null)
-  const particleMatRef= useRef<THREE.ShaderMaterial>(null)
-  const particleGeoRef= useRef<THREE.BufferGeometry>(null)
-  const spikeRef     = useRef<THREE.LineSegments>(null)
-  const spikeMatRef  = useRef<THREE.ShaderMaterial>(null)
-  const spikeGeoRef  = useRef<THREE.BufferGeometry>(null)
+  const groupRef       = useRef<THREE.Group>(null)
+  const particleMatRef = useRef<THREE.ShaderMaterial>(null)
+  const particleGeoRef = useRef<THREE.BufferGeometry>(null)
+  const spikeMatRef    = useRef<THREE.ShaderMaterial>(null)
+  const spikeGeoRef    = useRef<THREE.BufferGeometry>(null)
 
   const { sphere, sizes, spikes } = useMemo(() => ({
     sphere: generateSphere(PARTICLE_COUNT),
     sizes:  generateSizes(PARTICLE_COUNT),
-    spikes: generateSpikes(SPIKE_COUNT),
+    spikes: generateSpikePoints(SPIKE_COUNT, POINTS_PER_SPIKE),
   }), [])
 
-  // Particle attributes
   useEffect(() => {
     const geo = particleGeoRef.current
     if (!geo) return
@@ -166,21 +160,20 @@ export function ParticleMorph({ progressRef }: Props) {
     return () => { geo.dispose() }
   }, [sizes])
 
-  // Spike attributes
   useEffect(() => {
     const geo = spikeGeoRef.current
     if (!geo) return
     geo.setAttribute('a_dir',    new THREE.BufferAttribute(spikes.directions, 3))
     geo.setAttribute('a_maxLen', new THREE.BufferAttribute(spikes.lengths,    1))
     geo.setAttribute('a_speed',  new THREE.BufferAttribute(spikes.speeds,     1))
-    geo.setAttribute('a_tip',    new THREE.BufferAttribute(spikes.tipFlags,   1))
+    geo.setAttribute('a_t',      new THREE.BufferAttribute(spikes.tValues,    1))
     return () => { geo.dispose() }
   }, [spikes])
 
   const particleUniforms = useMemo(() => ({
     u_scatter: { value: 0 },
     u_time:    { value: 0 },
-    u_size:    { value: 1.0 },
+    u_size:    { value: 1.2 },
   }), [])
 
   const spikeUniforms = useMemo(() => ({
@@ -190,7 +183,6 @@ export function ParticleMorph({ progressRef }: Props) {
 
   useFrame(({ clock }) => {
     if (!particleMatRef.current || !spikeMatRef.current || !groupRef.current) return
-
     const scatter = Math.max(0, Math.min(1, progressRef.current))
     const t       = clock.elapsedTime
 
@@ -199,15 +191,15 @@ export function ParticleMorph({ progressRef }: Props) {
     spikeMatRef.current.uniforms.u_scatter.value    = scatter
     spikeMatRef.current.uniforms.u_time.value       = t
 
-    // slow majestic rotation
     groupRef.current.rotation.y = t * 0.025
     groupRef.current.rotation.x = Math.sin(t * 0.012) * 0.07
   })
 
   return (
     <group ref={groupRef}>
-      {/* Particle sphere */}
-      <points ref={particleRef}>
+
+      {/* White star particles — NormalBlending = no cyan blob */}
+      <points>
         <bufferGeometry ref={particleGeoRef}>
           <bufferAttribute attach="attributes-position" args={[sphere, 3]} />
         </bufferGeometry>
@@ -222,8 +214,8 @@ export function ParticleMorph({ progressRef }: Props) {
         />
       </points>
 
-      {/* Orange spike fibers — positions are consecutive base/tip pairs, no index needed */}
-      <lineSegments ref={spikeRef}>
+      {/* Orange spike points — AdditiveBlending for glow, works on mobile */}
+      <points>
         <bufferGeometry ref={spikeGeoRef}>
           <bufferAttribute attach="attributes-position" args={[spikes.positions, 3]} />
         </bufferGeometry>
@@ -235,9 +227,9 @@ export function ParticleMorph({ progressRef }: Props) {
           transparent
           depthWrite={false}
           blending={THREE.AdditiveBlending}
-          linewidth={1}
         />
-      </lineSegments>
+      </points>
+
     </group>
   )
 }
