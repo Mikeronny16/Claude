@@ -270,17 +270,20 @@ export default function HomePage() {
           className="sticky top-0 flex flex-col items-center justify-center"
           style={{ height: '100vh', zIndex: 10, pointerEvents: 'none' }}
         >
-          {/* ── Center name block — always visible ── */}
+          {/* ── Center name block — fixed so it's always truly centered ── */}
           <div
             style={{
               textAlign: 'center',
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
+              zIndex: 11,
               pointerEvents: 'none',
               transition: 'opacity 0.4s ease',
               opacity: prog > 0.15 ? Math.max(0, 1 - (prog - 0.15) / 0.15) : 1,
+              width: '90vw',
+              maxWidth: 500,
             }}
           >
             <p
