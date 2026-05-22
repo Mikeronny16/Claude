@@ -53,6 +53,8 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
 }
 
 // ─── Data ─────────────────────────────────────────────────────
+const BASE_URL = "https://readyprompts.vercel.app";
+
 const CATEGORIES_META = [
   { icon: "🎬", key: "TikTok & Short Video",  count: 20, color: "orange" as const, examples: ["Viral hook generator", "POV story scripts", "Trending caption maker"] },
   { icon: "📸", key: "Instagram Content",      count: 18, color: "blue"   as const, examples: ["Carousel slide writer", "Reel script builder", "Bio optimizer"] },
@@ -61,8 +63,6 @@ const CATEGORIES_META = [
   { icon: "📧", key: "Email Marketing",        count: 12, color: "orange" as const, examples: ["Welcome sequence writer", "Re-engagement campaign", "Subject line generator"] },
   { icon: "🌟", key: "Personal Brand",         count: 17, color: "blue"   as const, examples: ["Origin story creator", "LinkedIn authority posts", "Viral thread writer"] },
 ];
-
-const FREE_SAMPLES = PROMPTS.slice(0, 3);
 
 const TESTIMONIALS = [
   { name: "Aisha R.",    country: "🇮🇩 Indonesia", stars: 5, text: "Used the TikTok hooks — my next video got 3x more views. Worth every cent." },
@@ -87,6 +87,11 @@ export default function HomePage() {
   const [openFaq, setOpenFaq]         = useState<number | null>(null);
   const [showSticky, setShowSticky]   = useState(false);
   const [openSample, setOpenSample]   = useState<number | null>(null);
+  const [freeCount, setFreeCount]     = useState(3);
+  const [myRef, setMyRef]             = useState("");
+  const [incomingRef, setIncomingRef] = useState("");
+  const [copied, setCopied]           = useState(false);
+  const [refDismissed, setRefDismissed] = useState(false);
 
   // sticky bar on scroll
   useEffect(() => {
@@ -94,6 +99,40 @@ export default function HomePage() {
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  // referral detection + personal ref code generation
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    let code = localStorage.getItem("rp_myref");
+    if (!code) {
+      code = "RP" + Math.random().toString(36).slice(2, 7).toUpperCase();
+      localStorage.setItem("rp_myref", code);
+    }
+    setMyRef(code);
+
+    if (ref) {
+      setIncomingRef(ref);
+      localStorage.setItem("rp_came_via", ref);
+      setFreeCount(5);
+    } else if (localStorage.getItem("rp_came_via")) {
+      setFreeCount(5);
+    }
+  }, []);
+
+  const shareUrl = myRef ? `${BASE_URL}/?ref=${myRef}` : BASE_URL;
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard?.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [shareUrl]);
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(`🔥 Get 5 free AI prompts here (I'm giving you bonus access): ${shareUrl}`)}`;
+  const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`These AI prompts actually work 🔥 Get 5 free ones: ${shareUrl}`)}`;
+
+  const freeSamples = PROMPTS.slice(0, freeCount);
 
   const handleBuy = useCallback(() => {
     const subject = encodeURIComponent("ReadyPrompts Purchase — $2");
@@ -111,6 +150,28 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-cinema-bg overflow-x-hidden">
+
+      {/* ── REFERRAL BANNER ───────────────────────────────── */}
+      {incomingRef && !refDismissed && (
+        <div className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-between gap-3 px-5 py-2.5"
+          style={{
+            background: "rgba(5,30,20,0.97)",
+            borderBottom: "1px solid rgba(34,197,94,0.35)",
+            backdropFilter: "blur(12px)",
+          }}>
+          <p className="text-sm font-semibold flex items-center gap-2" style={{ color: "#86efac" }}>
+            <span className="text-base">🎁</span>
+            <span>
+              Bonus unlocked!{" "}
+              <strong style={{ color: "#4ade80" }}>5 free prompts</strong>
+              {" "}instead of 3 — scroll down ↓
+            </span>
+          </p>
+          <button onClick={() => setRefDismissed(true)}
+            className="text-lg flex-shrink-0 leading-none"
+            style={{ color: "#34d399" }}>✕</button>
+        </div>
+      )}
 
       {/* ── STICKY BOTTOM BAR ─────────────────────────────── */}
       <div style={{
@@ -150,7 +211,8 @@ export default function HomePage() {
       </nav>
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-20 px-5 text-center bg-grid overflow-hidden">
+      <section className="relative pb-20 px-5 text-center bg-grid overflow-hidden"
+        style={{ paddingTop: incomingRef && !refDismissed ? "8rem" : "7rem" }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{ background: "radial-gradient(ellipse, #f97316 0%, transparent 70%)" }} />
         <div className="absolute top-20 right-0 w-[300px] h-[300px] rounded-full opacity-8 blur-3xl pointer-events-none"
@@ -248,15 +310,17 @@ export default function HomePage() {
           <FadeUp>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
               style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#86efac" }}>
-              🎁 3 Free Sample Prompts — No purchase needed
+              🎁 {freeCount} Free Sample Prompts — No purchase needed
             </div>
             <h2 className="text-2xl sm:text-3xl font-black mb-2">Try Before You Buy</h2>
             <p className="text-sm mb-8" style={{ color: "#64748b" }}>
-              Here are 3 real prompts from the kit. Copy, paste, use now — for free.
+              {freeCount === 5
+                ? "You unlocked 5 real prompts — copy, paste, use now for free."
+                : "Here are 3 real prompts from the kit. Copy, paste, use now — for free."}
             </p>
           </FadeUp>
           <div className="space-y-3">
-            {FREE_SAMPLES.map((p, i) => (
+            {freeSamples.map((p, i) => (
               <FadeUp key={p.id} delay={i * 100}>
                 <div className="rounded-xl overflow-hidden"
                   style={{ background: "rgba(15,20,30,0.9)", border: "1px solid rgba(249,115,22,0.15)" }}>
@@ -284,11 +348,54 @@ export default function HomePage() {
               </FadeUp>
             ))}
           </div>
-          <FadeUp delay={300}>
-            <div className="mt-8 p-4 rounded-xl text-center"
+          {/* Share panel */}
+          <FadeUp delay={280}>
+            <div className="mt-6 rounded-xl p-4"
+              style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.18)" }}>
+              <p className="text-sm font-black text-white mb-1">🔗 Give Friends 5 Free Prompts</p>
+              <p className="text-xs mb-3" style={{ color: "#64748b" }}>
+                Share your link — friends get 5 prompts instead of 3.
+              </p>
+              {myRef && (
+                <>
+                  <div className="flex gap-2 mb-2">
+                    <div className="flex-1 min-w-0 px-3 py-2 rounded-lg text-xs overflow-hidden"
+                      style={{ background: "rgba(15,20,30,0.9)", border: "1px solid rgba(30,41,59,0.8)", color: "#64748b" }}>
+                      <span className="truncate block">{BASE_URL}/?ref={myRef}</span>
+                    </div>
+                    <button onClick={handleCopy}
+                      className="px-3 py-2 rounded-lg text-xs font-black flex-shrink-0 transition-all"
+                      style={{
+                        background: copied ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)",
+                        color: copied ? "#4ade80" : "#60a5fa",
+                        border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(59,130,246,0.25)"}`,
+                      }}>
+                      {copied ? "✓ Copied!" : "📋 Copy"}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
+                      style={{ background: "rgba(37,211,102,0.1)", color: "#22c55e", border: "1px solid rgba(37,211,102,0.2)" }}>
+                      📱 WhatsApp
+                    </a>
+                    <a href={twUrl} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
+                      style={{ background: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(30,41,59,0.8)" }}>
+                      𝕏 Twitter
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
+          </FadeUp>
+
+          {/* Buy CTA */}
+          <FadeUp delay={340}>
+            <div className="mt-4 p-4 rounded-xl text-center"
               style={{ background: "rgba(249,115,22,0.06)", border: "1px dashed rgba(249,115,22,0.25)" }}>
               <p className="text-sm font-semibold mb-3" style={{ color: "#cbd5e1" }}>
-                Want all 105? The other 102 are waiting. 👇
+                Want all 105? The other {105 - freeCount} are waiting. 👇
               </p>
               <button onClick={handleBuy}
                 className="btn-orange px-6 py-3 text-sm font-black rounded-xl">
