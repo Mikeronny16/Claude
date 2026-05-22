@@ -213,6 +213,57 @@ export default function HomePage() {
       {/* ── Fixed 3D canvas (z: 0) ─────────────────────────── */}
       <ParticleCanvas progressRef={progressRef} />
 
+      {/* ── Center name hero (z: 5, fades on scroll) ──────── */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          opacity: prog > 0.2 ? Math.max(0, 1 - (prog - 0.2) / 0.12) : 1,
+          transition: 'opacity 0.35s ease',
+        }}
+      >
+        <div style={{ textAlign: 'center', padding: '0 24px' }}>
+          <p style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,194,255,0.65)',
+            marginBottom: '0.8rem',
+          }}>
+            ✦ &nbsp; MIKE RONNY &nbsp; ✦
+          </p>
+          <h1 style={{
+            fontSize: 'clamp(3.5rem, 14vw, 7rem)',
+            fontWeight: 900,
+            color: '#fff',
+            lineHeight: 1.0,
+            letterSpacing: '-0.03em',
+            margin: 0,
+          }}>
+            Builder.
+          </h1>
+          <p style={{
+            marginTop: '1rem',
+            color: 'rgba(255,255,255,0.35)',
+            fontSize: 'clamp(0.75rem, 3vw, 0.95rem)',
+            letterSpacing: '0.06em',
+          }}>
+            Developer &amp; founder — Myanmar
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 28, opacity: 0.35 }}>
+            <div style={{ width: 20, height: 1, background: 'rgba(255,255,255,0.5)' }} />
+            <span style={{ fontSize: '0.65rem', letterSpacing: '0.2em', fontWeight: 600, textTransform: 'uppercase', color: '#fff' }}>Scroll to explore</span>
+            <div style={{ width: 20, height: 1, background: 'rgba(255,255,255,0.5)' }} />
+          </div>
+        </div>
+      </div>
+
       {/* ── Navigation ─────────────────────────────────────── */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
@@ -270,56 +321,6 @@ export default function HomePage() {
           className="sticky top-0 flex flex-col items-center justify-center"
           style={{ height: '100vh', zIndex: 10, pointerEvents: 'none' }}
         >
-          {/* ── Center name block — fixed so it's always truly centered ── */}
-          <div
-            style={{
-              textAlign: 'center',
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 11,
-              pointerEvents: 'none',
-              transition: 'opacity 0.4s ease',
-              opacity: prog > 0.15 ? Math.max(0, 1 - (prog - 0.15) / 0.15) : 1,
-              width: '90vw',
-              maxWidth: 500,
-            }}
-          >
-            <p
-              className="font-bold tracking-[0.35em] uppercase mb-3"
-              style={{ fontSize: 'clamp(0.6rem, 2vw, 0.75rem)', color: 'rgba(0,194,255,0.7)' }}
-            >
-              ✦ &nbsp; MIKE RONNY &nbsp; ✦
-            </p>
-            <h1
-              className="font-black text-white"
-              style={{
-                fontSize: 'clamp(3rem, 10vw, 6.5rem)',
-                lineHeight: 1.0,
-                letterSpacing: '-0.03em',
-                textShadow: '0 0 60px rgba(0,194,255,0.25)',
-              }}
-            >
-              Builder.
-            </h1>
-            <p
-              style={{
-                marginTop: '1rem',
-                color: 'rgba(255,255,255,0.38)',
-                fontSize: 'clamp(0.8rem, 2.5vw, 1rem)',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Developer &amp; founder, based in Myanmar.
-            </p>
-            <div className="flex items-center justify-center gap-3 mt-6" style={{ opacity: 0.4 }}>
-              <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.4)' }} />
-              <span className="text-xs tracking-[0.2em] font-semibold uppercase">Scroll to explore</span>
-              <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.4)' }} />
-            </div>
-          </div>
-
           {/* ── Left section text (fades in after center fades out) ── */}
           <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680, width: '100%' }}>
             {SECTIONS.map((s, i) => {
