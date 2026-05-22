@@ -47,7 +47,7 @@ const PARTICLE_VERT = /* glsl */ `
     pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.013 * (1.0 - localScatter * 0.6);
 
     vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = a_size * u_size * (14.0 / -mvPos.z);
+    gl_PointSize = a_size * u_size * (10.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
 
     // color: cool blue-white at rest → warm orange tint as scatter
@@ -59,8 +59,8 @@ const PARTICLE_VERT = /* glsl */ `
     // twinkle
     float twinkleSpd = 1.2 + h * 3.5;
     float twinkle    = 0.72 + 0.28 * sin(u_time * twinkleSpd + h * 6.28);
-    v_alpha = twinkle * (0.55 + step(1.0, a_size) * 0.35)
-            * (1.0 - localScatter * 0.45);   // fade slightly as particles fly off
+    v_alpha = twinkle * (0.38 + step(1.0, a_size) * 0.28)
+            * (1.0 - localScatter * 0.45);
   }
 `
 
@@ -73,11 +73,10 @@ const PARTICLE_FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    float core  = exp(-r * 9.5);
-    float halo  = exp(-r * 2.2) * 0.14;
-    float alpha = (core + halo) * v_alpha;
+    float core  = exp(-r * 14.0);
+    float alpha = core * v_alpha;
 
-    vec3 col = v_color + core * vec3(0.15, 0.18, 0.22);
+    vec3 col = v_color + core * vec3(0.10, 0.12, 0.18);
     gl_FragColor = vec4(col, alpha);
   }
 `
@@ -181,7 +180,7 @@ export function ParticleMorph({ progressRef }: Props) {
   const particleUniforms = useMemo(() => ({
     u_scatter: { value: 0 },
     u_time:    { value: 0 },
-    u_size:    { value: 1.4 },
+    u_size:    { value: 1.0 },
   }), [])
 
   const spikeUniforms = useMemo(() => ({

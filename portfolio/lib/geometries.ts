@@ -1,4 +1,4 @@
-export const PARTICLE_COUNT = 7000
+export const PARTICLE_COUNT = 4500
 export const SPIKE_COUNT   = 55
 const SPHERE_R = 2.2
 
@@ -18,7 +18,7 @@ export function generateSphere(count: number): Float32Array {
   for (let i = 0; i < count; i++) {
     const theta = Math.random() * Math.PI * 2
     const phi   = Math.acos(2 * Math.random() - 1)
-    const r     = SPHERE_R + (Math.random() - 0.5) * 0.1
+    const r     = SPHERE_R + (Math.random() - 0.5) * 0.06
     pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
     pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
     pos[i * 3 + 2] = r * Math.cos(phi)
