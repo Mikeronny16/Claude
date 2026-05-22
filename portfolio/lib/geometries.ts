@@ -1,4 +1,4 @@
-export const PARTICLE_COUNT = 4500
+export const PARTICLE_COUNT = 3000
 export const SPIKE_COUNT   = 55
 const SPHERE_R = 2.2
 

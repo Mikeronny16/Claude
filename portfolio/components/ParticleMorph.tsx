@@ -59,8 +59,8 @@ const PARTICLE_VERT = /* glsl */ `
     // twinkle
     float twinkleSpd = 1.2 + h * 3.5;
     float twinkle    = 0.72 + 0.28 * sin(u_time * twinkleSpd + h * 6.28);
-    v_alpha = twinkle * (0.38 + step(1.0, a_size) * 0.28)
-            * (1.0 - localScatter * 0.45);
+    v_alpha = twinkle * (0.75 + step(1.0, a_size) * 0.20)
+            * (1.0 - localScatter * 0.4);
   }
 `
 
@@ -73,11 +73,11 @@ const PARTICLE_FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    float core  = exp(-r * 14.0);
-    float alpha = core * v_alpha;
+    float core = exp(-r * 14.0);
+    if (core < 0.015) discard;
 
-    vec3 col = v_color + core * vec3(0.10, 0.12, 0.18);
-    gl_FragColor = vec4(col, alpha);
+    vec3 col = v_color + core * vec3(0.08, 0.10, 0.15);
+    gl_FragColor = vec4(col, core * v_alpha);
   }
 `
 
@@ -218,7 +218,7 @@ export function ParticleMorph({ progressRef }: Props) {
           uniforms={particleUniforms}
           transparent
           depthWrite={false}
-          blending={THREE.AdditiveBlending}
+          blending={THREE.NormalBlending}
         />
       </points>
 
