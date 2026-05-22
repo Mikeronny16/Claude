@@ -84,8 +84,6 @@ const AI_TOOLS = [
 // ─── Main Page ────────────────────────────────────────────────
 export default function HomePage() {
   const { t } = useLang();
-  const [loading, setLoading]         = useState(false);
-  const [payError, setPayError]       = useState("");
   const [openFaq, setOpenFaq]         = useState<number | null>(null);
   const [showSticky, setShowSticky]   = useState(false);
   const [openSample, setOpenSample]   = useState<number | null>(null);
@@ -97,22 +95,12 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const handleBuy = useCallback(async () => {
-    setLoading(true);
-    setPayError("");
-    try {
-      const res  = await fetch("/api/payment/create", { method: "POST" });
-      const data = await res.json();
-      if (data.invoice_url) {
-        window.location.href = data.invoice_url;
-      } else {
-        setPayError(data.detail || "Payment setup failed. Please try again.");
-        setLoading(false);
-      }
-    } catch {
-      setPayError("Network error. Please try again.");
-      setLoading(false);
-    }
+  const handleBuy = useCallback(() => {
+    const subject = encodeURIComponent("ReadyPrompts Purchase — $2");
+    const body = encodeURIComponent(
+      "Hi Mike,\n\nI want to buy ReadyPrompts (105 AI Prompt Kit) for $2.\n\nPlease send me your payment details and the access code after payment.\n\nThank you!"
+    );
+    window.open(`mailto:mikeronny18@gmail.com?subject=${subject}&body=${body}`);
   }, []);
 
   // stats section
@@ -120,13 +108,6 @@ export default function HomePage() {
   const count105 = useCountUp(105, statsRef.visible);
   const count6   = useCountUp(6,   statsRef.visible);
   const count47  = useCountUp(47,  statsRef.visible);
-
-  const Spinner = () => (
-    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
 
   return (
     <main className="min-h-screen bg-cinema-bg overflow-x-hidden">
@@ -146,8 +127,8 @@ export default function HomePage() {
           <p className="text-sm font-black text-white">ReadyPrompts</p>
           <p className="text-xs" style={{ color: "#f97316" }}>105 AI Prompts · $2 only</p>
         </div>
-        <button onClick={handleBuy} disabled={loading} className="btn-orange px-5 py-3 text-sm font-black rounded-xl">
-          {loading ? <span className="flex gap-2 items-center"><Spinner /> ...</span> : "⚡ Get for $2"}
+        <button onClick={handleBuy} className="btn-orange px-5 py-3 text-sm font-black rounded-xl">
+          ✉️ Get for $2
         </button>
       </div>
 
@@ -161,9 +142,9 @@ export default function HomePage() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSelector />
-          <button onClick={handleBuy} disabled={loading}
+          <button onClick={handleBuy}
             className="btn-orange text-xs font-bold px-4 py-2 rounded-lg">
-            {loading ? "..." : t.nav.buy}
+            {t.nav.buy}
           </button>
         </div>
       </nav>
@@ -207,16 +188,11 @@ export default function HomePage() {
 
           <FadeUp delay={200}>
             <div className="flex flex-col items-center gap-3">
-              <button onClick={handleBuy} disabled={loading}
+              <button onClick={handleBuy}
                 className="w-full max-w-sm py-4 px-8 text-lg font-black rounded-xl btn-orange"
                 style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
-                {loading
-                  ? <span className="flex items-center justify-center gap-2"><Spinner /> Redirecting...</span>
-                  : t.hero.cta}
+                {t.hero.cta}
               </button>
-              {payError && (
-                <p className="text-xs max-w-xs text-center" style={{ color: "#f87171" }}>⚠️ {payError}</p>
-              )}
               <p className="text-xs" style={{ color: "#475569" }}>{t.hero.note}</p>
             </div>
           </FadeUp>
@@ -314,9 +290,9 @@ export default function HomePage() {
               <p className="text-sm font-semibold mb-3" style={{ color: "#cbd5e1" }}>
                 Want all 105? The other 102 are waiting. 👇
               </p>
-              <button onClick={handleBuy} disabled={loading}
+              <button onClick={handleBuy}
                 className="btn-orange px-6 py-3 text-sm font-black rounded-xl">
-                {loading ? "..." : "⚡ Get All 105 — $2 Only"}
+                ✉️ Get All 105 — $2 Only
               </button>
             </div>
           </FadeUp>
@@ -511,14 +487,11 @@ export default function HomePage() {
                   ))}
                 </ul>
 
-                <button onClick={handleBuy} disabled={loading}
+                <button onClick={handleBuy}
                   className="w-full py-4 text-base font-black rounded-xl btn-orange"
                   style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
-                  {loading
-                    ? <span className="flex items-center justify-center gap-2"><Spinner /> ...</span>
-                    : t.pricing.cta}
+                  {t.pricing.cta}
                 </button>
-                {payError && <p className="text-xs mt-2" style={{ color: "#f87171" }}>⚠️ {payError}</p>}
                 <p className="text-xs mt-3" style={{ color: "#334155" }}>{t.pricing.secure}</p>
               </div>
             </div>
@@ -566,9 +539,9 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-base mb-8" style={{ color: "#64748b" }}>{t.cta2.sub}</p>
-            <button onClick={handleBuy} disabled={loading}
+            <button onClick={handleBuy}
               className="w-full max-w-xs py-4 text-lg font-black rounded-xl btn-orange mx-auto block">
-              {loading ? "..." : t.cta2.btn}
+              {t.cta2.btn}
             </button>
             <p className="text-xs mt-4" style={{ color: "#334155" }}>{t.cta2.note}</p>
           </FadeUp>
