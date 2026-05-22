@@ -6,7 +6,7 @@ import { SCRIPTS } from "@/lib/scripts";
 
 const BASE_URL = "https://colddm.vercel.app";
 
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -22,64 +22,54 @@ function useInView(threshold = 0.15) {
   return { ref, visible };
 }
 
-function useCountUp(to: number, visible: boolean, duration = 1400) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!visible) return;
-    const start = Date.now();
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      setCount(Math.floor(ease * to));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [visible, to, duration]);
-  return count;
-}
-
-function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useInView();
   return (
     <div ref={ref} className={className} style={{
       opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(28px)",
-      transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+      transform: visible ? "translateY(0)" : "translateY(24px)",
+      transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
     }}>
       {children}
     </div>
   );
 }
 
-const CATEGORIES_META = [
-  { icon: "📱", key: "Instagram DMs — Client Outreach",   count: 6,  color: "blue"  as const, examples: ["Noticed Your Work opener", "Social Proof DM", "Free Value First"] },
-  { icon: "📧", key: "Cold Emails — Freelance Pitch",      count: 6,  color: "slate" as const, examples: ["Quick Idea for Business", "I Found 3 Things", "2-Minute Read"] },
-  { icon: "🔄", key: "Follow-Up Messages",                 count: 5,  color: "blue"  as const, examples: ["No-Reply Follow-Up", "Value Add Follow-Up", "Last Message Breakup"] },
-  { icon: "🤝", key: "Collab & Partnership DMs",           count: 5,  color: "slate" as const, examples: ["Brand Collab Outreach", "Podcast Guest Request", "Cross-Promo Pitch"] },
-  { icon: "💬", key: "Objection Replies",                  count: 4,  color: "blue"  as const, examples: ["Can't Afford It reply", "I'll Think About It reply", "Already Have Someone reply"] },
-  { icon: "📋", key: "Proposal Openers",                   count: 4,  color: "slate" as const, examples: ["Discovery Call Closer", "Here's What I'd Do", "Why Me Pitch"] },
+const STEPS = [
+  { n: "01", icon: "📂", title: "Open your scripts", body: "30 scripts organized by situation. Pick the one that fits." },
+  { n: "02", icon: "✏️", title: "Fill the brackets", body: "Replace [NAME], [YOUR SERVICE], [RESULT] with your info. Takes 60 seconds." },
+  { n: "03", icon: "📤", title: "Send. Get replies.", body: "Hit send. These scripts are written to get responses — not get ignored." },
+];
+
+const CATS = [
+  { icon: "📱", label: "Instagram DMs",   count: 6,  desc: "Openers that get read" },
+  { icon: "📧", label: "Cold Emails",      count: 6,  desc: "Subject lines that get opened" },
+  { icon: "🔄", label: "Follow-Ups",       count: 5,  desc: "Revive dead leads" },
+  { icon: "🤝", label: "Collabs & Deals",  count: 5,  desc: "Brand & partner outreach" },
+  { icon: "💬", label: "Objection Replies",count: 4,  desc: "Handle \"I'll think about it\"" },
+  { icon: "📋", label: "Proposals",        count: 4,  desc: "Close after the call" },
 ];
 
 const TESTIMONIALS = [
-  { name: "Carlo M.",   country: "🇵🇭 Philippines", stars: 5, text: "Sent 3 of these scripts and landed a $400 web design client in the same week." },
-  { name: "Siti R.",    country: "🇮🇩 Indonesia",  stars: 5, text: "The follow-up scripts are insane. I recovered 2 dead leads with script #15." },
-  { name: "Thanh N.",   country: "🇻🇳 Vietnam",    stars: 5, text: "I used to spend 40 minutes writing one cold email. Now it's 60 seconds." },
-  { name: "James K.",   country: "🇺🇬 Uganda",     stars: 5, text: "The objection reply scripts alone are worth way more than $5." },
+  { name: "Carlo M.",  flag: "🇵🇭", role: "Web designer",       text: "Sent 3 of these and landed a $400 client the same week." },
+  { name: "Siti R.",   flag: "🇮🇩", role: "Content creator",    text: "Script #15 recovered 2 dead leads I had given up on." },
+  { name: "Thanh N.",  flag: "🇻🇳", role: "Copywriter",         text: "Used to spend 40 min on one cold email. Now it's 60 seconds." },
+  { name: "James K.",  flag: "🇺🇬", role: "Video editor",       text: "The objection replies alone are worth way more than $5." },
 ];
 
 export default function HomePage() {
   const { t } = useLang();
-  const [openFaq, setOpenFaq]         = useState<number | null>(null);
-  const [showSticky, setShowSticky]   = useState(false);
-  const [openSample, setOpenSample]   = useState<number | null>(null);
-  const [freeCount, setFreeCount]     = useState(3);
-  const [myRef, setMyRef]             = useState("");
-  const [incomingRef, setIncomingRef] = useState("");
-  const [copied, setCopied]           = useState(false);
+  const [openFaq, setOpenFaq]           = useState<number | null>(null);
+  const [openSample, setOpenSample]     = useState<number | null>(null);
+  const [showSticky, setShowSticky]     = useState(false);
+  const [freeCount, setFreeCount]       = useState(3);
+  const [myRef, setMyRef]               = useState("");
+  const [incomingRef, setIncomingRef]   = useState("");
+  const [copied, setCopied]             = useState(false);
   const [refDismissed, setRefDismissed] = useState(false);
 
   useEffect(() => {
-    const fn = () => setShowSticky(window.scrollY > 600);
+    const fn = () => setShowSticky(window.scrollY > 500);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
@@ -103,42 +93,34 @@ export default function HomePage() {
   }, []);
 
   const shareUrl = myRef ? `${BASE_URL}/?ref=${myRef}` : BASE_URL;
-
   const handleCopy = useCallback(() => {
     navigator.clipboard?.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [shareUrl]);
 
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(`💬 Get 5 free cold DM scripts here (I unlocked bonus access for you): ${shareUrl}`)}`;
-  const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`These cold DM scripts actually get replies 💬 Get 5 free ones: ${shareUrl}`)}`;
-
-  const freeSamples = SCRIPTS.slice(0, freeCount);
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(`💬 Get 5 free cold DM scripts: ${shareUrl}`)}`;
+  const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`These DM scripts actually get replies 💬 ${shareUrl}`)}`;
 
   const handleBuy = useCallback(() => {
     const subject = encodeURIComponent("ColdDM Scripts Purchase — $5");
-    const body = encodeURIComponent(
-      "Hi Mike,\n\nI want to buy ColdDM Scripts (30 Freelancer Scripts) for $5.\n\nPlease send me your payment details and the access code after payment.\n\nThank you!"
-    );
+    const body = encodeURIComponent("Hi Mike,\n\nI want to buy ColdDM Scripts (30 Freelancer Scripts) for $5.\n\nPlease send me payment details and the access code.\n\nThank you!");
     window.open(`mailto:mikeronny18@gmail.com?subject=${subject}&body=${body}`);
   }, []);
 
-  const statsRef = useInView();
-  const count30  = useCountUp(30,  statsRef.visible);
-  const count6   = useCountUp(6,   statsRef.visible);
+  const freeSamples = SCRIPTS.slice(0, freeCount);
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ background: "#0d1117" }}>
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "#0d1117", color: "#cbd5e1" }}>
 
       {/* ── REFERRAL BANNER ───────────────────────────────── */}
       {incomingRef && !refDismissed && (
         <div className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-between gap-3 px-5 py-2.5"
-          style={{ background: "rgba(5,15,30,0.97)", borderBottom: "1px solid rgba(59,130,246,0.35)", backdropFilter: "blur(12px)" }}>
-          <p className="text-sm font-semibold flex items-center gap-2" style={{ color: "#93c5fd" }}>
-            <span>🎁</span>
-            <span>Bonus unlocked! <strong style={{ color: "#60a5fa" }}>5 free scripts</strong> instead of 3 — scroll down ↓</span>
+          style={{ background: "rgba(5,10,25,0.98)", borderBottom: "1px solid rgba(0,194,255,0.5)", backdropFilter: "blur(12px)" }}>
+          <p className="text-sm font-semibold" style={{ color: "#93c5fd" }}>
+            🎁 Bonus: <strong style={{ color: "#38d9ff" }}>5 free scripts</strong> unlocked — scroll down ↓
           </p>
-          <button onClick={() => setRefDismissed(true)} style={{ color: "#3b82f6" }}>✕</button>
+          <button onClick={() => setRefDismissed(true)} style={{ color: "#00c2ff", fontSize: 18 }}>✕</button>
         </div>
       )}
 
@@ -146,470 +128,494 @@ export default function HomePage() {
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
         transform: showSticky ? "translateY(0)" : "translateY(100%)",
-        transition: "transform 0.35s ease",
-        background: "rgba(10,14,22,0.96)",
-        backdropFilter: "blur(12px)",
-        borderTop: "1px solid rgba(59,130,246,0.2)",
-        padding: "12px 20px",
+        transition: "transform 0.3s ease",
+        background: "rgba(9,13,23,0.97)",
+        backdropFilter: "blur(16px)",
+        borderTop: "1px solid rgba(0,194,255,0.15)",
+        padding: "10px 20px",
         display: "flex", alignItems: "center", gap: "12px",
       }}>
         <div style={{ flex: 1 }}>
           <p className="text-sm font-black text-white">ColdDM Scripts</p>
-          <p className="text-xs" style={{ color: "#3b82f6" }}>30 Scripts · $5 only</p>
+          <p className="text-xs" style={{ color: "#00c2ff" }}>30 scripts · $5 one-time</p>
         </div>
-        <button onClick={handleBuy} className="btn-blue px-5 py-3 text-sm font-black rounded-xl">
-          ✉️ Get for $5
-        </button>
+        <button onClick={handleBuy} className="btn-blue px-5 py-2.5 text-sm font-black rounded-xl">✉️ $5</button>
       </div>
 
       {/* ── NAV ──────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-5 py-3 flex items-center justify-between"
-        style={{ background: "rgba(10,14,22,0.9)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(30,42,61,0.6)" }}>
+        style={{ background: "rgba(9,13,23,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(30,42,61,0.5)" }}>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}>C</div>
-          <span className="font-bold text-white text-sm tracking-tight">ColdDM Scripts</span>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm text-white"
+            style={{ background: "linear-gradient(135deg, #00c2ff, #0060e0)" }}>C</div>
+          <span className="font-bold text-white text-sm">ColdDM</span>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSelector />
-          <button onClick={handleBuy} className="btn-blue text-xs font-bold px-4 py-2 rounded-lg">
-            {t.nav.buy}
-          </button>
+          <button onClick={handleBuy} className="btn-blue text-xs font-bold px-4 py-2 rounded-lg">{t.nav.buy}</button>
         </div>
       </nav>
 
-      {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative pb-20 px-5 text-center bg-grid overflow-hidden"
-        style={{ paddingTop: incomingRef && !refDismissed ? "8rem" : "7rem" }}>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full opacity-10 blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(ellipse, #3b82f6 0%, transparent 70%)" }} />
-        <div className="absolute top-20 right-0 w-[250px] h-[250px] rounded-full opacity-6 blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(ellipse, #60a5fa 0%, transparent 70%)" }} />
+      {/* ══════════════════════════════════════════════════════
+          HERO — Split layout
+      ══════════════════════════════════════════════════════ */}
+      <section style={{ paddingTop: incomingRef && !refDismissed ? "8rem" : "6rem", paddingBottom: "4rem" }}
+        className="px-5 relative overflow-hidden">
 
-        <div className="relative max-w-3xl mx-auto">
-          <FadeUp>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4"
-              style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)", color: "#93c5fd" }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              {t.hero.badge}
+        {/* BG glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 80% 60% at 15% 40%, rgba(0,194,255,0.15) 0%, rgba(0,117,255,0.08) 40%, transparent 70%)",
+        }} />
+        <div className="absolute top-24 left-0 right-0 h-px pointer-events-none" style={{
+          background: "linear-gradient(90deg, transparent 5%, rgba(0,194,255,0.35) 30%, rgba(0,117,255,0.5) 50%, rgba(0,194,255,0.35) 70%, transparent 95%)",
+        }} />
+
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Left — text */}
+            <div>
+              <Reveal>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-5"
+                  style={{ background: "rgba(0,194,255,0.12)", color: "#38d9ff", border: "1px solid rgba(0,194,255,0.2)" }}>
+                  ✦ {t.hero.badge}
+                </span>
+              </Reveal>
+              <Reveal delay={80}>
+                <h1 className="text-4xl sm:text-5xl font-black leading-[1.1] mb-5 text-white">
+                  {t.hero.h1a}<br />
+                  <span style={{ background: "linear-gradient(135deg, #00e5ff 0%, #00c2ff 50%, #0075ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", filter: "drop-shadow(0 0 20px rgba(0,194,255,0.6))" }}>
+                    {t.hero.h1b}
+                  </span><br />
+                  {t.hero.h1c}
+                </h1>
+              </Reveal>
+              <Reveal delay={140}>
+                <p className="text-base mb-6 leading-relaxed" style={{ color: "#94a3b8" }}>{t.hero.sub}</p>
+              </Reveal>
+              <Reveal delay={200}>
+                <button onClick={handleBuy}
+                  className="btn-blue w-full sm:w-auto px-8 py-4 text-base font-black rounded-xl mb-3"
+                  style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
+                  {t.hero.cta}
+                </button>
+                <p className="text-xs mt-2" style={{ color: "#334155" }}>{t.hero.note}</p>
+              </Reveal>
             </div>
-          </FadeUp>
 
-          <FadeUp delay={80}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-5"
-              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#86efac" }}>
-              ⬇️ <span>47 freelancers downloaded this week</span>
-            </div>
-          </FadeUp>
-
-          <FadeUp delay={120}>
-            <p className="text-sm font-medium mb-3" style={{ color: "#64748b" }}>{t.hero.eyebrow}</p>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-6 tracking-tight text-white">
-              {t.hero.h1a}{" "}
-              <span style={{ background: "linear-gradient(135deg, #3b82f6, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                {t.hero.h1b}
-              </span>
-              <br />{t.hero.h1c}
-            </h1>
-            <p className="text-lg font-medium mb-2" style={{ color: "#cbd5e1" }}>{t.hero.sub}</p>
-            <p className="text-sm mb-8" style={{ color: "#64748b" }}>{t.hero.cats}</p>
-          </FadeUp>
-
-          <FadeUp delay={200}>
-            <div className="flex flex-col items-center gap-3">
-              <button onClick={handleBuy}
-                className="w-full max-w-sm py-4 px-8 text-lg font-black rounded-xl btn-blue"
-                style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
-                {t.hero.cta}
-              </button>
-              <p className="text-xs" style={{ color: "#475569" }}>{t.hero.note}</p>
-            </div>
-          </FadeUp>
-        </div>
-      </section>
-
-      {/* ── STATS ─────────────────────────────────────────── */}
-      <section ref={statsRef.ref} className="py-8 px-5"
-        style={{ background: "rgba(16,21,35,0.8)", borderTop: "1px solid #1e2a3d", borderBottom: "1px solid #1e2a3d" }}>
-        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-4 text-center">
-          {[
-            { num: `${count30}+`, label: t.stats.scripts },
-            { num: count6,        label: t.stats.categories },
-            { num: "$5",          label: t.stats.price },
-          ].map(({ num, label }) => (
-            <div key={String(label)}>
-              <div className="text-2xl sm:text-3xl font-black mb-0.5"
-                style={{ background: "linear-gradient(135deg, #3b82f6, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                {num}
-              </div>
-              <div className="text-xs font-medium" style={{ color: "#64748b" }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── PAIN POINTS ───────────────────────────────────── */}
-      <section className="py-16 px-5">
-        <div className="max-w-2xl mx-auto">
-          <FadeUp>
-            <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: "#3b82f6" }}>{t.pain.tag}</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 leading-tight text-white">
-              {t.pain.h2a}<br /><span style={{ color: "#64748b" }}>{t.pain.h2b}</span>
-            </h2>
-          </FadeUp>
-          <div className="space-y-3">
-            {t.pain.items.map((text, i) => (
-              <FadeUp key={i} delay={i * 80}>
-                <div className="flex items-start gap-4 p-4 rounded-xl"
-                  style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.12)" }}>
-                  <span className="text-xl mt-0.5">{["😶","⏰","😤","🤷"][i]}</span>
-                  <p className="text-base font-medium" style={{ color: "#cbd5e1" }}>{text}</p>
+            {/* Right — DM preview card */}
+            <Reveal delay={120} className="hidden sm:block">
+              <div className="rounded-2xl p-5 relative"
+                style={{ background: "#0e1420", border: "1px solid rgba(0,194,255,0.25)", boxShadow: "0 0 40px rgba(0,194,255,0.08), inset 0 1px 0 rgba(0,194,255,0.1)" }}>
+                {/* phone bar */}
+                <div className="flex items-center gap-2 mb-4 pb-3" style={{ borderBottom: "1px solid #1e2a3d" }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black"
+                    style={{ background: "linear-gradient(135deg, #00c2ff, #0060e0)" }}>A</div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Alex Chen · Designer</p>
+                    <p className="text-xs" style={{ color: "#22c55e" }}>● Active now</p>
+                  </div>
                 </div>
-              </FadeUp>
+                {/* messages */}
+                <div className="space-y-3">
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 text-xs text-white"
+                      style={{ background: "linear-gradient(135deg, #00c2ff, #0075ff)" }}>
+                      Hey Alex 👋 Your post about brand identity was really good. I help startups with exactly this — would it be weird if I shared one quick idea for your page?
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm px-3 py-2 text-xs"
+                      style={{ background: "#1e2a3d", color: "#cbd5e1" }}>
+                      Not weird at all! What did you have in mind? 👀
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 text-xs text-white"
+                      style={{ background: "linear-gradient(135deg, #00c2ff, #0075ff)" }}>
+                      I redesigned your homepage wireframe — takes 2 min to look at. Mind if I send it?
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm px-3 py-2 text-xs"
+                      style={{ background: "#1e2a3d", color: "#cbd5e1" }}>
+                      Sure, send it over! 🙌
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 flex items-center gap-2" style={{ borderTop: "1px solid #1e2a3d" }}>
+                  <div className="flex-1 rounded-xl px-3 py-2 text-xs" style={{ background: "#1e2a3d", color: "#475569" }}>
+                    Message...
+                  </div>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm"
+                    style={{ background: "#00c2ff" }}>↑</div>
+                </div>
+                {/* label */}
+                <div className="absolute -top-3 -right-3 px-2 py-1 rounded-lg text-xs font-black"
+                  style={{ background: "#00c2ff", color: "white" }}>Script #1</div>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Stats row */}
+          <Reveal delay={260}>
+            <div className="grid grid-cols-3 gap-4 mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,194,255,0.15)" }}>
+              {[
+                { n: "30", label: t.stats.scripts },
+                { n: "6",  label: t.stats.categories },
+                { n: "$5", label: t.stats.price },
+              ].map(({ n, label }) => (
+                <div key={String(label)} className="text-center">
+                  <div className="text-2xl sm:text-3xl font-black" style={{ background: "linear-gradient(135deg, #00e5ff, #00c2ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{n}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "#475569" }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+          HOW IT WORKS — 3 steps (unique to this site)
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-16 px-5" style={{ background: "#0a0e1a" }}>
+        <div className="max-w-4xl mx-auto">
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-widest text-center mb-2" style={{ color: "#00c2ff" }}>How it works</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-center mb-12 text-white">Ready to send in 60 seconds</h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {STEPS.map((s, i) => (
+              <Reveal key={s.n} delay={i * 100}>
+                <div className="relative p-6 rounded-2xl"
+                  style={{ background: "#111827", border: "1px solid #1e2a3d" }}>
+                  <div className="text-4xl mb-3">{s.icon}</div>
+                  <div className="text-xs font-black mb-2" style={{ color: "rgba(0,194,255,0.4)", letterSpacing: "0.1em" }}>{s.n}</div>
+                  <h3 className="font-black text-white mb-2">{s.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>{s.body}</p>
+                  {i < 2 && (
+                    <div className="hidden sm:block absolute top-1/2 -right-3 text-xl font-black z-10" style={{ color: "#00c2ff", textShadow: "0 0 12px rgba(0,194,255,0.8)" }}>→</div>
+                  )}
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FREE SAMPLES ──────────────────────────────────── */}
-      <section className="py-16 px-5" style={{ background: "rgba(16,21,35,0.6)" }}>
+      {/* ══════════════════════════════════════════════════════
+          FREE SAMPLES — Chat-style preview
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-16 px-5">
         <div className="max-w-2xl mx-auto">
-          <FadeUp>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
-              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#86efac" }}>
-              🎁 {freeCount} Free Sample Scripts — No purchase needed
+          <Reveal>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="inline-block text-xs font-bold px-3 py-1 rounded-full"
+                style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}>
+                🎁 {freeCount} free scripts
+              </span>
+              {freeCount === 3 && (
+                <span className="text-xs" style={{ color: "#334155" }}>Share to unlock 2 more ↓</span>
+              )}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black mb-2 text-white">Try Before You Buy</h2>
-            <p className="text-sm mb-8" style={{ color: "#64748b" }}>
-              {freeCount === 5
-                ? "You unlocked 5 real scripts — copy, fill in the brackets, send."
-                : "Here are 3 real scripts from the pack. Copy, fill the brackets, send — free."}
-            </p>
-          </FadeUp>
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">Try them right now</h2>
+            <p className="text-sm mb-8" style={{ color: "#64748b" }}>Real scripts from the pack. Copy, fill, send.</p>
+          </Reveal>
+
           <div className="space-y-3">
             {freeSamples.map((s, i) => (
-              <FadeUp key={s.id} delay={i * 100}>
-                <div className="rounded-xl overflow-hidden"
-                  style={{ background: "rgba(16,21,35,0.9)", border: "1px solid #1e2a3d" }}>
+              <Reveal key={s.id} delay={i * 80}>
+                <div className="rounded-2xl overflow-hidden" style={{ background: "#111827", border: "1px solid #1e2a3d" }}>
                   <button onClick={() => setOpenSample(openSample === i ? null : i)}
-                    className="w-full flex items-center justify-between p-4 text-left">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold px-2 py-1 rounded-lg"
-                        style={{ background: "rgba(59,130,246,0.15)", color: "#60a5fa" }}>#{s.id}</span>
-                      <div>
-                        <p className="font-bold text-sm text-white">{s.title}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#475569" }}>{s.category}</p>
-                      </div>
+                    className="w-full p-4 text-left flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black flex-shrink-0"
+                      style={{ background: "rgba(0,194,255,0.15)", color: "#38d9ff" }}>
+                      {s.id}
                     </div>
-                    <span style={{ color: "#3b82f6", flexShrink: 0 }}>{openSample === i ? "−" : "+"}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-white truncate">{s.title}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: "#475569" }}>{s.category}</p>
+                    </div>
+                    <span style={{ color: "#00c2ff", flexShrink: 0, fontSize: 20 }}>{openSample === i ? "−" : "+"}</span>
                   </button>
                   {openSample === i && (
-                    <div className="px-4 pb-4">
-                      <pre className="text-sm leading-relaxed mb-3 whitespace-pre-wrap font-sans"
-                        style={{ color: "#94a3b8" }}>{s.script}</pre>
-                      <button
-                        onClick={() => navigator.clipboard?.writeText(s.script)}
-                        className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                        style={{ background: "rgba(59,130,246,0.12)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}>
+                    <div className="px-4 pb-4 pt-0">
+                      {/* chat bubble style */}
+                      <div className="rounded-xl p-4 mb-3" style={{ background: "#0d1117", border: "1px solid #1e2a3d" }}>
+                        <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans" style={{ color: "#94a3b8" }}>
+                          {s.script}
+                        </pre>
+                      </div>
+                      <button onClick={() => navigator.clipboard?.writeText(s.script)}
+                        className="text-xs px-4 py-2 rounded-lg font-bold"
+                        style={{ background: "rgba(0,194,255,0.12)", color: "#38d9ff", border: "1px solid rgba(0,194,255,0.2)" }}>
                         📋 Copy script
                       </button>
                     </div>
                   )}
                 </div>
-              </FadeUp>
+              </Reveal>
             ))}
           </div>
 
-          {/* Share panel */}
-          <FadeUp delay={280}>
-            <div className="mt-6 rounded-xl p-4"
-              style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.18)" }}>
-              <p className="text-sm font-black text-white mb-1">🔗 Give Friends 5 Free Scripts</p>
-              <p className="text-xs mb-3" style={{ color: "#64748b" }}>
-                Share your link — friends unlock 5 scripts instead of 3.
-              </p>
-              {myRef && (
-                <>
-                  <div className="flex gap-2 mb-2">
-                    <div className="flex-1 min-w-0 px-3 py-2 rounded-lg text-xs overflow-hidden"
-                      style={{ background: "rgba(10,14,22,0.9)", border: "1px solid #1e2a3d", color: "#64748b" }}>
-                      <span className="truncate block">{BASE_URL}/?ref={myRef}</span>
-                    </div>
-                    <button onClick={handleCopy}
-                      className="px-3 py-2 rounded-lg text-xs font-black flex-shrink-0 transition-all"
-                      style={{
-                        background: copied ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)",
-                        color: copied ? "#4ade80" : "#60a5fa",
-                        border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(59,130,246,0.25)"}`,
-                      }}>
-                      {copied ? "✓ Copied!" : "📋 Copy"}
-                    </button>
-                  </div>
-                  <div className="flex gap-2">
-                    <a href={waUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
-                      style={{ background: "rgba(37,211,102,0.1)", color: "#22c55e", border: "1px solid rgba(37,211,102,0.2)" }}>
-                      📱 WhatsApp
-                    </a>
-                    <a href={twUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
-                      style={{ background: "rgba(30,42,61,0.6)", color: "#94a3b8", border: "1px solid #1e2a3d" }}>
-                      𝕏 Twitter
-                    </a>
-                  </div>
-                </>
-              )}
+          {/* Share to unlock */}
+          <Reveal delay={200}>
+            <div className="mt-6 rounded-2xl p-5" style={{ background: "#111827", border: "1px solid rgba(0,194,255,0.15)" }}>
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">🔗</div>
+                <div className="flex-1">
+                  <p className="font-black text-white text-sm mb-1">Give friends 5 scripts</p>
+                  <p className="text-xs mb-3" style={{ color: "#64748b" }}>Share your link — they unlock 5 instead of 3.</p>
+                  {myRef && (
+                    <>
+                      <div className="flex gap-2 mb-2">
+                        <div className="flex-1 min-w-0 rounded-lg px-3 py-2 text-xs" style={{ background: "#0d1117", border: "1px solid #1e2a3d", color: "#475569" }}>
+                          <span className="truncate block">{BASE_URL}/?ref={myRef}</span>
+                        </div>
+                        <button onClick={handleCopy} className="px-3 py-2 rounded-lg text-xs font-black flex-shrink-0"
+                          style={{ background: copied ? "rgba(34,197,94,0.15)" : "rgba(0,194,255,0.15)", color: copied ? "#4ade80" : "#38d9ff", border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(0,194,255,0.3)"}` }}>
+                          {copied ? "✓" : "Copy"}
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                          className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
+                          style={{ background: "rgba(37,211,102,0.08)", color: "#22c55e", border: "1px solid rgba(37,211,102,0.15)" }}>
+                          📱 WhatsApp
+                        </a>
+                        <a href={twUrl} target="_blank" rel="noopener noreferrer"
+                          className="flex-1 text-center text-xs py-2 rounded-lg font-bold"
+                          style={{ background: "rgba(30,42,61,0.5)", color: "#64748b", border: "1px solid #1e2a3d" }}>
+                          𝕏 Twitter
+                        </a>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          </FadeUp>
+          </Reveal>
 
-          <FadeUp delay={340}>
-            <div className="mt-4 p-4 rounded-xl text-center"
-              style={{ background: "rgba(59,130,246,0.05)", border: "1px dashed rgba(59,130,246,0.2)" }}>
-              <p className="text-sm font-semibold mb-3" style={{ color: "#cbd5e1" }}>
-                Want all 30? The other {30 - freeCount} scripts are waiting. 👇
-              </p>
-              <button onClick={handleBuy} className="btn-blue px-6 py-3 text-sm font-black rounded-xl">
+          <Reveal delay={260}>
+            <div className="mt-4 text-center">
+              <p className="text-sm mb-3" style={{ color: "#475569" }}>Want all {30 - freeCount} more? ↓</p>
+              <button onClick={handleBuy} className="btn-blue px-8 py-3 font-black rounded-xl text-sm">
                 ✉️ Get All 30 — $5 Only
               </button>
             </div>
-          </FadeUp>
+          </Reveal>
         </div>
       </section>
 
-      {/* ── SOLUTION ──────────────────────────────────────── */}
-      <section className="py-16 px-5">
-        <div className="max-w-2xl mx-auto">
-          <FadeUp>
-            <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: "#3b82f6" }}>{t.solution.tag}</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 leading-tight text-white">
-              {t.solution.h2a}{" "}
-              <span style={{ background: "linear-gradient(135deg, #3b82f6, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                {t.solution.h2b}
-              </span>
-            </h2>
-          </FadeUp>
-          <div className="space-y-3">
-            {t.solution.items.map((text, i) => (
-              <FadeUp key={i} delay={i * 80}>
-                <div className="flex items-start gap-4 p-4 rounded-xl"
-                  style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)" }}>
-                  <span className="text-xl mt-0.5">✅</span>
-                  <p className="text-base font-medium" style={{ color: "#cbd5e1" }}>{text}</p>
-                </div>
-              </FadeUp>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHAT'S INSIDE ─────────────────────────────────── */}
-      <section className="py-16 px-5" style={{ background: "rgba(16,21,35,0.6)" }}>
+      {/* ══════════════════════════════════════════════════════
+          WHAT'S INSIDE — Bento grid
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-16 px-5" style={{ background: "#0a0e1a" }}>
         <div className="max-w-3xl mx-auto">
-          <FadeUp>
-            <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: "#3b82f6" }}>{t.inside.tag}</p>
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-widest text-center mb-2" style={{ color: "#00c2ff" }}>{t.inside.tag}</p>
             <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-white">{t.inside.h2}</h2>
-          </FadeUp>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {CATEGORIES_META.map(({ icon, key, count, color, examples }, i) => (
-              <FadeUp key={key} delay={i * 70}>
-                <div className="p-5 rounded-2xl h-full"
-                  style={{
-                    background: color === "blue" ? "rgba(59,130,246,0.06)" : "rgba(22,27,39,0.9)",
-                    border: `1px solid ${color === "blue" ? "rgba(59,130,246,0.18)" : "#1e2a3d"}`,
-                  }}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{icon}</span>
-                    <div>
-                      <h3 className="font-bold text-sm text-white">{key}</h3>
-                      <p className="text-xs" style={{ color: color === "blue" ? "#60a5fa" : "#64748b" }}>
-                        {count} {t.inside.scripts}
-                      </p>
-                    </div>
+          </Reveal>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {CATS.map((c, i) => (
+              <Reveal key={c.label} delay={i * 60}>
+                <div className="p-4 rounded-2xl flex flex-col gap-2 h-full"
+                  style={{ background: i % 3 === 0 ? "rgba(0,194,255,0.1)" : "#111827", border: `1px solid ${i % 3 === 0 ? "rgba(0,194,255,0.2)" : "#1e2a3d"}` }}>
+                  <span className="text-2xl">{c.icon}</span>
+                  <div>
+                    <p className="font-black text-sm text-white">{c.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#00c2ff" }}>{c.count} {t.inside.scripts}</p>
                   </div>
-                  <ul className="space-y-1">
-                    {examples.map((ex) => (
-                      <li key={ex} className="text-xs flex items-center gap-1.5" style={{ color: "#64748b" }}>
-                        <span style={{ color: color === "blue" ? "#3b82f6" : "#475569" }}>→</span>{ex}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-xs mt-auto" style={{ color: "#475569" }}>{c.desc}</p>
                 </div>
-              </FadeUp>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── COMPARE ───────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════
+          PAIN — Minimal list style
+      ══════════════════════════════════════════════════════ */}
       <section className="py-16 px-5">
-        <div className="max-w-2xl mx-auto">
-          <FadeUp>
-            <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-white">{t.compare.h2}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#f87171" }}>{t.compare.without}</p>
-                <ul className="space-y-2 text-sm" style={{ color: "#94a3b8" }}>
-                  {t.compare.left.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-              <div className="p-4 rounded-2xl" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.18)" }}>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#60a5fa" }}>{t.compare.with}</p>
-                <ul className="space-y-2 text-sm" style={{ color: "#cbd5e1" }}>
-                  {t.compare.right.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            </div>
-          </FadeUp>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ──────────────────────────────────── */}
-      <section className="py-16 px-5" style={{ background: "rgba(16,21,35,0.6)" }}>
-        <div className="max-w-3xl mx-auto">
-          <FadeUp>
-            <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: "#3b82f6" }}>Real freelancers</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-white">Scripts that get replies</h2>
-          </FadeUp>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {TESTIMONIALS.map((t, i) => (
-              <FadeUp key={i} delay={i * 80}>
-                <div className="p-5 rounded-2xl h-full"
-                  style={{ background: "rgba(16,21,35,0.9)", border: "1px solid #1e2a3d" }}>
-                  <div className="flex items-center gap-1 mb-3">
-                    {"★★★★★".split("").map((s, j) => (
-                      <span key={j} style={{ color: "#f59e0b", fontSize: 14 }}>{s}</span>
-                    ))}
-                  </div>
-                  <p className="text-sm leading-relaxed mb-4" style={{ color: "#cbd5e1" }}>"{t.text}"</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
-                      style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)", color: "white" }}>
-                      {t.name[0]}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">{t.name}</p>
-                      <p className="text-xs" style={{ color: "#475569" }}>{t.country}</p>
-                    </div>
-                  </div>
+        <div className="max-w-xl mx-auto">
+          <Reveal>
+            <h2 className="text-2xl sm:text-3xl font-black mb-8 text-white">
+              {t.pain.h2a}<br />
+              <span style={{ color: "#334155" }}>{t.pain.h2b}</span>
+            </h2>
+          </Reveal>
+          <div className="space-y-4">
+            {t.pain.items.map((text, i) => (
+              <Reveal key={i} delay={i * 70}>
+                <div className="flex items-start gap-4">
+                  <span className="text-xl flex-shrink-0 mt-0.5">{"😶⏰😤🤷"[i * 2]}{"😶⏰😤🤷"[i * 2 + 1]}</span>
+                  <p className="text-base" style={{ color: "#64748b" }}>{text}</p>
                 </div>
-              </FadeUp>
+              </Reveal>
             ))}
           </div>
+          <Reveal delay={320}>
+            <div className="mt-10 p-5 rounded-2xl" style={{ background: "#111827", border: "1px solid rgba(0,194,255,0.15)" }}>
+              <p className="font-black text-white mb-1">{t.solution.h2a} <span style={{ color: "#38d9ff" }}>{t.solution.h2b}</span></p>
+              <ul className="space-y-2 mt-3">
+                {t.solution.items.map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "#94a3b8" }}>
+                    <span style={{ color: "#00c2ff" }}>→</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* ── PRICING ───────────────────────────────────────── */}
-      <section className="py-20 px-5">
-        <div className="max-w-sm mx-auto">
-          <FadeUp>
-            <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: "#3b82f6" }}>{t.pricing.tag}</p>
-            <div className="rounded-3xl p-8 text-center relative overflow-hidden"
-              style={{ background: "#161b27", border: "1px solid rgba(59,130,246,0.3)", boxShadow: "0 0 60px rgba(59,130,246,0.1)" }}>
-              <div className="absolute top-0 right-0 w-32 h-32 opacity-10 blur-2xl rounded-full"
-                style={{ background: "radial-gradient(#3b82f6, transparent)" }} />
-              <div className="relative">
-                <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full mb-5"
-                  style={{ background: "rgba(59,130,246,0.12)", color: "#93c5fd", border: "1px solid rgba(59,130,246,0.25)" }}>
-                  {t.pricing.badge}
+      {/* ══════════════════════════════════════════════════════
+          TESTIMONIALS — Horizontal cards
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-16" style={{ background: "#0a0e1a" }}>
+        <div className="max-w-3xl mx-auto px-5">
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#00c2ff" }}>Results</p>
+            <h2 className="text-2xl font-black text-white mb-8">Scripts that actually work</h2>
+          </Reveal>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-4 px-5 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          {TESTIMONIALS.map((t, i) => (
+            <div key={i} className="flex-shrink-0 w-72 rounded-2xl p-5 snap-start"
+              style={{ background: "#111827", border: "1px solid #1e2a3d" }}>
+              <div className="flex gap-0.5 mb-3">
+                {"★★★★★".split("").map((s, j) => <span key={j} style={{ color: "#f59e0b", fontSize: 13 }}>{s}</span>)}
+              </div>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "#94a3b8" }}>"{t.text}"</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
+                  style={{ background: "linear-gradient(135deg, #00c2ff, #0060e0)", color: "white" }}>
+                  {t.name[0]}
                 </div>
-
-                <div className="mb-5">
-                  <div className="flex justify-between text-xs mb-1.5" style={{ color: "#475569" }}>
-                    <span>🔥 30 of 50 early spots claimed</span>
-                    <span>60%</span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(30,42,61,0.8)" }}>
-                    <div className="h-full rounded-full"
-                      style={{ width: "60%", background: "linear-gradient(90deg, #3b82f6, #60a5fa)", transition: "width 1.5s ease" }} />
-                  </div>
+                <div>
+                  <p className="text-xs font-bold text-white">{t.flag} {t.name}</p>
+                  <p className="text-xs" style={{ color: "#334155" }}>{t.role}</p>
                 </div>
-
-                <div className="mb-1"><span className="text-lg line-through" style={{ color: "#334155" }}>{t.pricing.was}</span></div>
-                <div className="text-7xl font-black mb-1"
-                  style={{ background: "linear-gradient(135deg, #3b82f6, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                  {t.pricing.price}
-                </div>
-                <p className="text-sm mb-1" style={{ color: "#64748b" }}>{t.pricing.sub}</p>
-                <p className="text-xs mb-8" style={{ color: "#334155" }}>{t.pricing.note}</p>
-
-                <ul className="text-left space-y-2 mb-8">
-                  {t.pricing.features.map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "#cbd5e1" }}>
-                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                        style={{ background: "rgba(59,130,246,0.2)", color: "#60a5fa" }}>✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <button onClick={handleBuy}
-                  className="w-full py-4 text-base font-black rounded-xl btn-blue"
-                  style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
-                  {t.pricing.cta}
-                </button>
-                <p className="text-xs mt-3" style={{ color: "#1e2a3d" }}>{t.pricing.secure}</p>
               </div>
             </div>
-          </FadeUp>
+          ))}
         </div>
       </section>
 
-      {/* ── FAQ ───────────────────────────────────────────── */}
-      <section className="py-16 px-5" style={{ background: "rgba(16,21,35,0.6)" }}>
+      {/* ══════════════════════════════════════════════════════
+          PRICING — Minimal, bold
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-20 px-5">
+        <div className="max-w-md mx-auto">
+          <Reveal>
+            <div className="rounded-3xl p-8 relative overflow-hidden"
+              style={{ background: "#0e1420", border: "1px solid rgba(0,194,255,0.4)", boxShadow: "0 0 60px rgba(0,194,255,0.18), 0 0 120px rgba(0,117,255,0.1), inset 0 1px 0 rgba(0,194,255,0.15)" }}>
+              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+                style={{ background: "linear-gradient(90deg, #0060e0, #00c2ff, #00e5ff, #00c2ff, #0075ff)", boxShadow: "0 0 20px rgba(0,194,255,0.8)" }} />
+
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#00c2ff" }}>{t.pricing.tag}</p>
+
+              <div className="flex items-end gap-3 mb-2">
+                <span className="text-7xl font-black text-white leading-none">{t.pricing.price}</span>
+                <div className="mb-2">
+                  <p className="text-sm line-through" style={{ color: "#334155" }}>{t.pricing.was}</p>
+                  <p className="text-xs" style={{ color: "#22c55e" }}>↓ {t.pricing.note}</p>
+                </div>
+              </div>
+              <p className="text-sm mb-6" style={{ color: "#475569" }}>{t.pricing.sub}</p>
+
+              {/* spots bar */}
+              <div className="mb-6">
+                <div className="flex justify-between text-xs mb-1" style={{ color: "#475569" }}>
+                  <span>🔥 {t.pricing.badge}</span>
+                  <span>60%</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ background: "#1e2a3d" }}>
+                  <div className="h-full rounded-full" style={{ width: "60%", background: "linear-gradient(90deg, #0060e0, #00c2ff, #00e5ff)", boxShadow: "0 0 10px rgba(0,194,255,0.6)" }} />
+                </div>
+              </div>
+
+              <ul className="space-y-2.5 mb-8">
+                {t.pricing.features.map((f, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm" style={{ color: "#94a3b8" }}>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                      style={{ background: "rgba(0,194,255,0.15)", color: "#38d9ff" }}>✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <button onClick={handleBuy} className="w-full py-4 font-black text-base rounded-xl btn-blue"
+                style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
+                {t.pricing.cta}
+              </button>
+              <p className="text-xs text-center mt-3" style={{ color: "#1e2a3d" }}>{t.pricing.secure}</p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+          FAQ
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-16 px-5" style={{ background: "#0a0e1a" }}>
         <div className="max-w-2xl mx-auto">
-          <FadeUp>
-            <h2 className="text-2xl font-black text-center mb-10 text-white">{t.faq.h2}</h2>
-          </FadeUp>
-          <div className="space-y-3">
+          <Reveal>
+            <h2 className="text-2xl font-black text-white mb-8">{t.faq.h2}</h2>
+          </Reveal>
+          <div className="space-y-2">
             {t.faq.items.map(({ q, a }, i) => (
-              <FadeUp key={i} delay={i * 60}>
-                <div className="rounded-xl overflow-hidden"
-                  style={{ background: "#161b27", border: "1px solid #1e2a3d" }}>
+              <Reveal key={i} delay={i * 50}>
+                <div className="rounded-xl overflow-hidden" style={{ background: "#111827", border: "1px solid #1e2a3d" }}>
                   <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between p-4 text-left">
-                    <span className="font-semibold text-sm text-white pr-4">{q}</span>
-                    <span style={{ color: "#3b82f6", flexShrink: 0 }}>{openFaq === i ? "−" : "+"}</span>
+                    className="w-full flex items-center justify-between p-4 text-left gap-4">
+                    <span className="font-semibold text-sm text-white">{q}</span>
+                    <span style={{ color: "#00c2ff", flexShrink: 0 }}>{openFaq === i ? "−" : "+"}</span>
                   </button>
                   {openFaq === i && (
-                    <div className="px-4 pb-4 text-sm leading-relaxed" style={{ color: "#94a3b8" }}>{a}</div>
+                    <div className="px-4 pb-4 text-sm leading-relaxed" style={{ color: "#64748b" }}>{a}</div>
                   )}
                 </div>
-              </FadeUp>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FINAL CTA ─────────────────────────────────────── */}
-      <section className="py-20 px-5 text-center relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(59,130,246,0.07) 0%, transparent 70%)" }} />
-        <div className="relative max-w-lg mx-auto">
-          <FadeUp>
-            <h2 className="text-3xl sm:text-4xl font-black mb-4 leading-tight text-white">
-              {t.cta2.h2a}{" "}
-              <span style={{ background: "linear-gradient(135deg, #3b82f6, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+      {/* ══════════════════════════════════════════════════════
+          FINAL CTA
+      ══════════════════════════════════════════════════════ */}
+      <section className="py-20 px-5 text-center">
+        <div className="max-w-lg mx-auto">
+          <Reveal>
+            <p className="text-5xl mb-6">💬</p>
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+              {t.cta2.h2a}<br />
+              <span style={{ background: "linear-gradient(135deg, #00e5ff 0%, #00c2ff 50%, #0075ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", filter: "drop-shadow(0 0 20px rgba(0,194,255,0.5))" }}>
                 {t.cta2.h2b}
               </span>
             </h2>
-            <p className="text-base mb-8" style={{ color: "#64748b" }}>{t.cta2.sub}</p>
-            <button onClick={handleBuy}
-              className="w-full max-w-xs py-4 text-lg font-black rounded-xl btn-blue mx-auto block">
+            <p className="mb-8" style={{ color: "#475569" }}>{t.cta2.sub}</p>
+            <button onClick={handleBuy} className="btn-blue w-full max-w-xs py-4 text-lg font-black rounded-xl mx-auto block">
               {t.cta2.btn}
             </button>
             <p className="text-xs mt-4" style={{ color: "#1e2a3d" }}>{t.cta2.note}</p>
-          </FadeUp>
+          </Reveal>
         </div>
       </section>
 
       {/* ── FOOTER ────────────────────────────────────────── */}
-      <footer className="py-8 px-5 text-center" style={{ borderTop: "1px solid #1e2a3d" }}>
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-black"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}>C</div>
-          <span className="font-bold text-sm text-white">ColdDM Scripts</span>
+      <footer className="py-8 px-5" style={{ borderTop: "1px solid #1e2a3d" }}>
+        <div className="max-w-4xl mx-auto flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-black"
+              style={{ background: "linear-gradient(135deg, #00c2ff, #0060e0)" }}>C</div>
+            <span className="font-bold text-sm text-white">ColdDM Scripts</span>
+          </div>
+          <p className="text-xs" style={{ color: "#1e2a3d" }}>{t.footer.copy}</p>
         </div>
-        <p className="text-xs" style={{ color: "#1e2a3d" }}>{t.footer.copy}</p>
       </footer>
 
       <div style={{ height: 80 }} />

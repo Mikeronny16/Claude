@@ -84,13 +84,13 @@ export function LanguageSelector() {
                 }}
                 className="w-full text-left px-3 py-2 text-xs font-semibold transition-colors flex items-center gap-2"
                 style={{
-                  color: lang === code ? "#60a5fa" : "#94a3b8",
-                  background: lang === code ? "rgba(59,130,246,0.08)" : "transparent",
+                  color: lang === code ? "#00c2ff" : "#94a3b8",
+                  background: lang === code ? "rgba(0,194,255,0.1)" : "transparent",
                 }}
               >
                 {label}
                 {lang === code && (
-                  <span style={{ color: "#60a5fa", marginLeft: "auto" }}>✓</span>
+                  <span style={{ color: "#00c2ff", marginLeft: "auto" }}>✓</span>
                 )}
               </button>
             ))}

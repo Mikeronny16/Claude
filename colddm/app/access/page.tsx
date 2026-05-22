@@ -59,18 +59,18 @@ export default function AccessPage() {
     <main className="min-h-screen flex items-center justify-center px-5 relative overflow-hidden"
       style={{ background: "#0d1117" }}>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] opacity-10 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, #3b82f6 0%, transparent 70%)" }} />
+        style={{ background: "radial-gradient(ellipse, #00c2ff 0%, #0075ff 40%, transparent 70%)" }} />
 
       <div className="w-full max-w-sm relative">
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}>C</div>
+            style={{ background: "linear-gradient(135deg, #00c2ff, #2563eb)" }}>C</div>
           <span className="font-bold text-white">ColdDM Scripts</span>
         </div>
 
         {!success ? (
           <div className="rounded-2xl p-6"
-            style={{ background: "#161b27", border: "1px solid rgba(59,130,246,0.2)" }}>
+            style={{ background: "#161b27", border: "1px solid rgba(0,194,255,0.25)" }}>
             <h1 className="text-xl font-black text-white mb-2">Enter Access Code</h1>
             <p className="text-sm mb-6" style={{ color: "#64748b" }}>
               Enter the code sent to your email after payment.
@@ -95,7 +95,7 @@ export default function AccessPage() {
 
             <p className="text-xs text-center mt-4" style={{ color: "#334155" }}>
               Didn&apos;t get a code?{" "}
-              <a href="mailto:mikeronny18@gmail.com" style={{ color: "#3b82f6" }}>Email us</a>
+              <a href="mailto:mikeronny18@gmail.com" style={{ color: "#00c2ff" }}>Email us</a>
             </p>
           </div>
         ) : (
@@ -106,7 +106,7 @@ export default function AccessPage() {
             <p className="text-sm mb-4" style={{ color: "#94a3b8" }}>
               Your 30 cold DM scripts are downloading now.
             </p>
-            <a href="/" className="text-xs" style={{ color: "#3b82f6" }}>← Back to ColdDM Scripts</a>
+            <a href="/" className="text-xs" style={{ color: "#00c2ff" }}>← Back to ColdDM Scripts</a>
           </div>
         )}
       </div>

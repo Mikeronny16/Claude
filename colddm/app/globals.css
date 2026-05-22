@@ -4,11 +4,11 @@
 
 :root {
   --cdm-bg: #0d1117;
-  --cdm-card: #161b27;
-  --cdm-border: #1e2a3d;
-  --cdm-blue: #3b82f6;
-  --cdm-blue-light: #60a5fa;
-  --cdm-blue-dark: #2563eb;
+  --cdm-card: #0e1420;
+  --cdm-border: #1a2540;
+  --cdm-blue: #00c2ff;
+  --cdm-blue-light: #38d9ff;
+  --cdm-blue-dark: #0075ff;
   --cdm-muted: #64748b;
   --cdm-body: #cbd5e1;
   --cdm-white: #f1f5f9;
@@ -39,19 +39,19 @@ body::before {
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.02;
+  opacity: 0.025;
   pointer-events: none;
   z-index: 9999;
 }
 
-/* Grid background */
+/* Electric grid background */
 .bg-grid {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%233b82f6' stroke-width='0.3' stroke-opacity='0.08'%3E%3Cpath d='M60 0L0 0 0 60'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%2300c2ff' stroke-width='0.4' stroke-opacity='0.1'%3E%3Cpath d='M60 0L0 0 0 60'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Blue button */
+/* Electric blue button */
 .btn-blue {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #00c2ff 0%, #0075ff 100%);
   color: white;
   cursor: pointer;
   transition: all 0.2s;
@@ -59,27 +59,36 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-shadow: 0 0 20px rgba(0,194,255,0.5);
 }
 
 .btn-blue:hover {
-  filter: brightness(1.12);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0,194,255,0.6), 0 8px 32px rgba(0,117,255,0.4);
 }
 
 .btn-blue:active {
   transform: translateY(0);
-  filter: brightness(0.97);
+  filter: brightness(0.95);
 }
 
-/* Glow pulse animation */
+/* Electric glow pulse */
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 20px rgba(0,194,255,0.5), 0 0 40px rgba(0,117,255,0.2);
   }
   50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 50px rgba(0,194,255,0.9), 0 0 80px rgba(0,117,255,0.5), 0 0 120px rgba(0,194,255,0.2);
   }
+}
+
+/* Electric flicker */
+@keyframes electricFlicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.8; }
+  97% { opacity: 1; }
+  98% { opacity: 0.85; }
 }
 
 /* Fade up animation */
@@ -92,6 +101,14 @@ body::before {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Electric scan line (hero accent) */
+@keyframes scanLine {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(100vh); opacity: 0; }
 }
 
 .animate-glow-pulse {
@@ -110,9 +127,9 @@ body::before {
   background: #0d1117;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e2a3d;
+  background: #1a2540;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: #00c2ff;
 }
