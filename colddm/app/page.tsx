@@ -57,6 +57,8 @@ const TESTIMONIALS = [
   { name: "James K.",  flag: "🇺🇬", role: "Video editor",       text: "The objection replies alone are worth way more than $5." },
 ];
 
+const PAIN_ICONS = ["😶", "⏰", "😤", "🤷‍♂️"];
+
 export default function HomePage() {
   const { t } = useLang();
   const [openFaq, setOpenFaq]           = useState<number | null>(null);
@@ -449,7 +451,7 @@ export default function HomePage() {
             {t.pain.items.map((text, i) => (
               <Reveal key={i} delay={i * 70}>
                 <div className="flex items-start gap-4">
-                  <span className="text-xl flex-shrink-0 mt-0.5">{"😶⏰😤🤷"[i * 2]}{"😶⏰😤🤷"[i * 2 + 1]}</span>
+                  <span className="text-xl flex-shrink-0 mt-0.5">{PAIN_ICONS[i]}</span>
                   <p className="text-base" style={{ color: "#64748b" }}>{text}</p>
                 </div>
               </Reveal>
