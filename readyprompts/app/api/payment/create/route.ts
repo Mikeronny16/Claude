@@ -7,7 +7,7 @@ export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   if (!apiKey || apiKey === "placeholder_key") {
-    return NextResponse.json({ error: "Payment not configured" }, { status: 503 });
+    return NextResponse.json({ error: "Payment not configured", detail: "Missing API key" }, { status: 503 });
   }
 
   try {
@@ -20,10 +20,8 @@ export async function POST() {
       body: JSON.stringify({
         price_amount: 2,
         price_currency: "usd",
-        pay_currency: "usdtbsc",
         order_id: `rp_${Date.now()}`,
         order_description: "ReadyPrompts — 105 Ultimate AI Prompt Kit",
-        ipn_callback_url: `${appUrl}/api/payment/ipn`,
         success_url: `${appUrl}/thank-you`,
         cancel_url: `${appUrl}/?cancelled=1`,
         is_fixed_rate: false,
@@ -34,8 +32,11 @@ export async function POST() {
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("NOWPayments error:", data);
-      return NextResponse.json({ error: "Payment creation failed" }, { status: 500 });
+      console.error("NOWPayments error:", JSON.stringify(data));
+      return NextResponse.json(
+        { error: "Payment creation failed", detail: data?.message || data?.error || JSON.stringify(data) },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
