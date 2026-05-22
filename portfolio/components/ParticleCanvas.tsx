@@ -20,9 +20,10 @@ export function ParticleCanvas({ progressRef }: Props) {
       }}
       gl={{
         antialias: false,
-        alpha: true,
+        alpha: false,
         powerPreference: 'high-performance',
       }}
+      onCreated={({ gl }) => gl.setClearColor('#04060e', 1)}
       dpr={[1, 1.5]}
     >
       <ParticleMorph progressRef={progressRef} />

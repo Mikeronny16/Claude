@@ -8,8 +8,8 @@ import { PARTICLE_COUNT, generateSphere, generateFibers, generateTorus } from '@
 // ─── GLSL ────────────────────────────────────────────────────────────────────
 
 const VERT = /* glsl */ `
-  uniform float u_p1;    // 0 = sphere  →  1 = fibers
-  uniform float u_p2;    // 0 = fibers  →  1 = torus
+  uniform float u_p1;
+  uniform float u_p2;
   uniform float u_time;
   uniform float u_size;
 
@@ -20,41 +20,30 @@ const VERT = /* glsl */ `
   varying float v_alpha;
 
   void main() {
-    // three-way morph: sphere → fibers → torus
     vec3 pos = position;
     pos = mix(pos, a_posFibers, u_p1);
     pos = mix(pos, a_posTorus,  u_p2);
 
-    // lively float — spread outward feel
-    float dist  = length(position);
-    float wave  = sin(u_time * 0.7  + position.x * 1.8 + position.z * 1.3) * 0.07;
-    float wave2 = cos(u_time * 0.5  + position.y * 2.1 + position.x * 0.9) * 0.05;
-    float drift = cos(u_time * 0.38 + position.z * 2.4) * 0.04;
-    pos.y += wave  + wave2 * 0.5;
-    pos.x += drift + sin(u_time * 0.3 + position.y * 1.6) * 0.03;
-    pos.z += cos(u_time * 0.4 + position.x * 1.4) * 0.03;
-    // corona particles drift further
-    pos += normalize(position) * sin(u_time * 0.25 + dist * 2.0) * 0.04 * smoothstep(2.0, 4.0, dist);
+    // subtle breathing float — small displacement only
+    float wave = sin(u_time * 0.6 + position.x * 1.8 + position.z * 1.3) * 0.025;
+    float sway = cos(u_time * 0.4 + position.z * 2.2) * 0.018;
+    pos.y += wave;
+    pos.x += sway;
 
     vec4 mvPos   = modelViewMatrix * vec4(pos, 1.0);
-    // corona particles appear slightly larger
-    float sizeMult = 1.0 + smoothstep(2.5, 4.0, dist) * 0.6;
-    gl_PointSize = u_size * sizeMult * (300.0 / -mvPos.z);
+    // small, crisp points — NOT big blobs
+    gl_PointSize = u_size * (180.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
 
-    // color: electric-cyan → white → soft-violet
-    // corona particles are brighter/whiter (sparkle effect)
-    float coreFac = smoothstep(2.8, 4.5, dist);
-    vec3 cyan     = vec3(0.0,  0.85, 1.0);
-    vec3 white    = vec3(1.0,  1.0,  1.0);
-    vec3 violet   = vec3(0.7,  0.55, 1.0);
-    vec3 spark    = vec3(0.9,  0.97, 1.0);  // bright sparkle white
+    // color transition: cyan → white → violet
+    vec3 cyan   = vec3(0.0,  0.82, 1.0);
+    vec3 white  = vec3(0.88, 0.96, 1.0);
+    vec3 violet = vec3(0.65, 0.50, 1.0);
 
     vec3 col = mix(cyan, white, u_p1);
     col      = mix(col, violet, u_p2);
-    col      = mix(col, spark,  coreFac);   // corona → sparkle white
     v_color  = col;
-    v_alpha  = mix(0.9, 0.7, coreFac);      // corona slightly more transparent
+    v_alpha  = 0.85;
   }
 `
 
@@ -67,10 +56,12 @@ const FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    float glow  = exp(-r * 1.8);          // wider, softer glow
-    float core  = exp(-r * 6.0);          // bright hot center
-    float alpha = (glow * 0.7 + core * 0.5) * clamp(v_alpha, 0.0, 1.0);
-    gl_FragColor = vec4(v_color * (0.7 + core * 0.8), alpha);
+    // tight hot core + very subtle halo — looks like a small star, NOT a blob
+    float core = exp(-r * 7.0);
+    float halo = exp(-r * 2.5) * 0.25;
+    float alpha = (core + halo) * v_alpha;
+
+    gl_FragColor = vec4(v_color * (0.6 + core * 0.7), alpha);
   }
 `
 
@@ -91,7 +82,6 @@ export function ParticleMorph({ progressRef }: Props) {
     torus:  generateTorus(PARTICLE_COUNT),
   }), [])
 
-  // set custom attributes imperatively (more reliable than JSX attach for custom names)
   useEffect(() => {
     const geo = geoRef.current
     if (!geo) return
@@ -104,24 +94,22 @@ export function ParticleMorph({ progressRef }: Props) {
     u_p1:   { value: 0 },
     u_p2:   { value: 0 },
     u_time: { value: 0 },
-    u_size: { value: 2.2 },
+    u_size: { value: 1.8 },   // smaller base size
   }), [])
 
   useFrame(({ clock }) => {
     if (!matRef.current || !pointsRef.current) return
 
     const p  = Math.max(0, Math.min(1, progressRef.current))
-    const p1 = Math.min(1, p * 2)           // 0→1 in first half
-    const p2 = Math.max(0, p * 2 - 1)       // 0→1 in second half
+    const p1 = Math.min(1, p * 2)
+    const p2 = Math.max(0, p * 2 - 1)
 
-    // smooth easing
     const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
     matRef.current.uniforms.u_p1.value   = ease(p1)
     matRef.current.uniforms.u_p2.value   = ease(p2)
     matRef.current.uniforms.u_time.value = clock.elapsedTime
 
-    // slow rotation
-    pointsRef.current.rotation.y = clock.elapsedTime * 0.045
+    pointsRef.current.rotation.y = clock.elapsedTime * 0.04
   })
 
   return (
