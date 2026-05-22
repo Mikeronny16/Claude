@@ -33,18 +33,34 @@ const SECTIONS = [
 
 const PROJECTS = [
   {
-    emoji: '🥚',
-    name: 'Spawn AI',
-    tag: 'AI · PET · GAME',
-    desc: 'Buy an egg, whisper to it, and raise a unique AI creature. Each pet has its own personality and lifecycle.',
-    color: '#a78bfa',
-    href: '#',
+    emoji: '📝',
+    name: 'DraftWin',
+    tag: 'AI · FREELANCE · TOOLS',
+    desc: 'AI proposal writer for freelancers. Generate, rewrite, and score winning proposals in seconds.',
+    color: '#06b6d4',
+    href: 'https://claude-hsmg.vercel.app',
   },
   {
     emoji: '💬',
+    name: 'Whispr',
+    tag: 'SOCIAL · ANONYMOUS',
+    desc: 'Anonymous messaging platform. Get honest messages, reactions, and see who\'s whispering about you.',
+    color: '#a78bfa',
+    href: 'https://whispr-shh.vercel.app',
+  },
+  {
+    emoji: '🥚',
+    name: 'Spawn AI',
+    tag: 'AI · PET · GAME',
+    desc: 'Buy an egg, whisper to it, and raise a unique AI creature. Each pet grows its own personality.',
+    color: '#34d399',
+    href: '#',
+  },
+  {
+    emoji: '🎯',
     name: 'ColdDM Scripts',
     tag: 'TOOLS · FREELANCE',
-    desc: '30 copy-paste cold DM scripts for freelancers. Land clients in 60 seconds.',
+    desc: '30 copy-paste cold DM scripts. Land clients in 60 seconds — no cringe, no guessing.',
     color: '#00c2ff',
     href: 'https://colddm.vercel.app',
   },
@@ -54,6 +70,14 @@ const PROJECTS = [
     tag: 'AI · PRODUCTIVITY',
     desc: '105 AI prompts that actually work — for creators, developers, and marketers.',
     color: '#f59e0b',
+    href: 'https://readyprompts.vercel.app',
+  },
+  {
+    emoji: '🧸',
+    name: 'Toynar',
+    tag: 'AI · IMAGE · FUN',
+    desc: 'Upload any photo and turn it into a toy-style illustration with AI. Instant magic.',
+    color: '#f472b6',
     href: '#',
   },
 ]
@@ -189,6 +213,57 @@ export default function HomePage() {
       {/* ── Fixed 3D canvas (z: 0) ─────────────────────────── */}
       <ParticleCanvas progressRef={progressRef} />
 
+      {/* ── Center name hero (z: 5, fades on scroll) ──────── */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          opacity: prog > 0.2 ? Math.max(0, 1 - (prog - 0.2) / 0.12) : 1,
+          transition: 'opacity 0.35s ease',
+        }}
+      >
+        <div style={{ textAlign: 'center', padding: '0 24px' }}>
+          <p style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,194,255,0.65)',
+            marginBottom: '0.8rem',
+          }}>
+            ✦ &nbsp; MIKE RONNY &nbsp; ✦
+          </p>
+          <h1 style={{
+            fontSize: 'clamp(3.5rem, 14vw, 7rem)',
+            fontWeight: 900,
+            color: '#fff',
+            lineHeight: 1.0,
+            letterSpacing: '-0.03em',
+            margin: 0,
+          }}>
+            Builder.
+          </h1>
+          <p style={{
+            marginTop: '1rem',
+            color: 'rgba(255,255,255,0.35)',
+            fontSize: 'clamp(0.75rem, 3vw, 0.95rem)',
+            letterSpacing: '0.06em',
+          }}>
+            Developer &amp; founder — Myanmar
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 28, opacity: 0.35 }}>
+            <div style={{ width: 20, height: 1, background: 'rgba(255,255,255,0.5)' }} />
+            <span style={{ fontSize: '0.65rem', letterSpacing: '0.2em', fontWeight: 600, textTransform: 'uppercase', color: '#fff' }}>Scroll to explore</span>
+            <div style={{ width: 20, height: 1, background: 'rgba(255,255,255,0.5)' }} />
+          </div>
+        </div>
+      </div>
+
       {/* ── Navigation ─────────────────────────────────────── */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
@@ -243,12 +318,15 @@ export default function HomePage() {
 
         {/* Sticky overlay — stays in view during entire scroll */}
         <div
-          className="sticky top-0 flex items-center"
+          className="sticky top-0 flex flex-col items-center justify-center"
           style={{ height: '100vh', zIndex: 10, pointerEvents: 'none' }}
         >
-          <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680 }}>
+          {/* ── Left section text (fades in after center fades out) ── */}
+          <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680, width: '100%' }}>
             {SECTIONS.map((s, i) => {
-              const opacity   = getSectionOpacity(i, prog)
+              const rawOpacity = getSectionOpacity(i, prog)
+              // shift section 0 start later (center block shows first)
+              const opacity    = i === 0 ? Math.min(rawOpacity, Math.max(0, (prog - 0.15) / 0.15)) : rawOpacity
               const translateY = opacity === 0 ? (prog > (i / 3) ? -20 : 20) : 0
               return (
                 <div
@@ -302,14 +380,6 @@ export default function HomePage() {
                     >
                       {s.cta} →
                     </a>
-                  )}
-
-                  {/* Scroll hint — section 0 only */}
-                  {i === 0 && (
-                    <div className="flex items-center gap-3 mt-8" style={{ opacity: 0.35 }}>
-                      <div style={{ width: 28, height: 1, background: 'rgba(255,255,255,0.4)' }} />
-                      <span className="text-xs tracking-[0.2em] font-semibold uppercase">Scroll to explore</span>
-                    </div>
                   )}
                 </div>
               )
