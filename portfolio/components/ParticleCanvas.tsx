@@ -11,7 +11,7 @@ interface Props {
 export function ParticleCanvas({ progressRef }: Props) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 6.5], fov: 55 }}
+      camera={{ position: [0, 0, 5.5], fov: 58 }}
       style={{
         position: 'fixed',
         inset: 0,

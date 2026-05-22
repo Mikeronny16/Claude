@@ -5,76 +5,66 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import {
   PARTICLE_COUNT,
+  SPIKE_COUNT,
   generateSizes,
   generateSphere,
-  generateFibers,
-  generateTorus,
+  generateSpikes,
 } from '@/lib/geometries'
 
-// ─── GLSL — galaxy/starfield style ───────────────────────────────────────────
+// ─── Particle shader — sphere that scatters outward ──────────────────────────
 
-const VERT = /* glsl */ `
-  uniform float u_p1;
-  uniform float u_p2;
+const PARTICLE_VERT = /* glsl */ `
+  uniform float u_scatter;
   uniform float u_time;
   uniform float u_size;
 
-  attribute vec3  a_posFibers;
-  attribute vec3  a_posTorus;
-  attribute float a_size;     // per-star size variation
+  attribute float a_size;
 
   varying vec3  v_color;
   varying float v_alpha;
 
-  // pseudo-random hash for per-particle twinkle rate
-  float hash(vec3 p) {
+  float hash3(vec3 p) {
     return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
   }
 
   void main() {
-    vec3 pos = position;
-    pos = mix(pos, a_posFibers, u_p1);
-    pos = mix(pos, a_posTorus,  u_p2);
+    float h = hash3(position);
 
-    // very gentle drift — enough to feel alive, not enough to distort shape
-    float h   = hash(position);
-    float spd = 0.5 + h * 0.8;
-    pos.y += sin(u_time * spd       + h * 6.28) * 0.018;
-    pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.013;
-    pos.z += sin(u_time * spd * 0.6 + h * 4.71) * 0.013;
+    // staggered departure: each particle waits its own threshold
+    float threshold   = h * 0.5;
+    float denom       = max(0.001, 1.0 - threshold);
+    float localScatter = clamp((u_scatter - threshold) / denom, 0.0, 1.0);
+    localScatter = localScatter * localScatter;   // ease-in
+
+    // scatter outward along position normal + subtle drift
+    vec3 dir = normalize(position);
+    float travelDist = 1.2 + h * 3.5;
+    vec3 pos = position + dir * localScatter * travelDist;
+
+    // gentle alive drift
+    float spd = 0.4 + h * 0.7;
+    pos.y += sin(u_time * spd       + h * 6.28) * 0.018 * (1.0 - localScatter * 0.6);
+    pos.x += cos(u_time * spd * 0.7 + h * 3.14) * 0.013 * (1.0 - localScatter * 0.6);
 
     vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-
-    // size attenuation — stays small even close to camera
     gl_PointSize = a_size * u_size * (14.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
 
-    // --- color ----------------------------------------------------------
-    // mostly cool blue-white, bright stars slightly warmer
-    float hc       = hash(position.yzx);
-    vec3 coolWhite = vec3(0.80, 0.93, 1.00);   // cool blue-white
-    vec3 pureWhite = vec3(1.00, 1.00, 1.00);
-    vec3 cyanTint  = vec3(0.55, 0.90, 1.00);   // subtle cyan for cyan phase
+    // color: cool blue-white at rest → warm orange tint as scatter
+    float hc = hash3(position.yzx);
+    vec3 restCol    = mix(vec3(0.80, 0.93, 1.00), vec3(1.00, 1.00, 1.00), hc);
+    vec3 scatterCol = vec3(1.00, 0.65, 0.22);
+    v_color = mix(restCol, scatterCol, localScatter * 0.65);
 
-    vec3 starCol = mix(coolWhite, pureWhite, hc);
-
-    // morph color tint: sphere=blue-white → fibers=white → torus=violet-white
-    vec3 phaseCol = mix(starCol,           vec3(0.90,0.98,1.00), u_p1);
-    phaseCol      = mix(phaseCol,          vec3(0.82,0.75,1.00), u_p2);
-    // add subtle cyan sparkle for large stars
-    phaseCol      = mix(phaseCol, cyanTint, step(1.6, a_size) * 0.35);
-
-    v_color = phaseCol;
-
-    // twinkle: per-particle sinusoidal brightness
+    // twinkle
     float twinkleSpd = 1.2 + h * 3.5;
     float twinkle    = 0.72 + 0.28 * sin(u_time * twinkleSpd + h * 6.28);
-    // bright stars twinkle more visibly
-    v_alpha = twinkle * (0.55 + step(1.0, a_size) * 0.35);
+    v_alpha = twinkle * (0.55 + step(1.0, a_size) * 0.35)
+            * (1.0 - localScatter * 0.45);   // fade slightly as particles fly off
   }
 `
 
-const FRAG = /* glsl */ `
+const PARTICLE_FRAG = /* glsl */ `
   varying vec3  v_color;
   varying float v_alpha;
 
@@ -83,13 +73,67 @@ const FRAG = /* glsl */ `
     float r  = dot(uv, uv);
     if (r > 1.0) discard;
 
-    // hot bright core + tiny diffraction halo = real star look
-    float core = exp(-r * 9.5);
-    float halo = exp(-r * 2.2) * 0.14;
+    float core  = exp(-r * 9.5);
+    float halo  = exp(-r * 2.2) * 0.14;
     float alpha = (core + halo) * v_alpha;
 
-    // core is brightest, outer halo matches color
     vec3 col = v_color + core * vec3(0.15, 0.18, 0.22);
+    gl_FragColor = vec4(col, alpha);
+  }
+`
+
+// ─── Spike shader — orange-gold fibers radiating outward ─────────────────────
+
+const SPIKE_VERT = /* glsl */ `
+  uniform float u_scatter;
+  uniform float u_time;
+
+  attribute vec3  a_dir;
+  attribute float a_maxLen;
+  attribute float a_speed;
+  attribute float a_tip;     // 0=base, 1=tip
+
+  varying float v_tip;
+  varying float v_visible;
+
+  void main() {
+    // growth driven by scatter, sped per-spike
+    float rawGrowth = clamp(u_scatter * a_speed * 1.8, 0.0, 1.0);
+    float growth    = rawGrowth * rawGrowth;   // ease-in
+
+    // base stays on sphere; tip extends along direction
+    vec3 pos = position + a_dir * a_tip * a_maxLen * growth;
+
+    // very subtle pulse on tip
+    float pulse = 1.0 + 0.04 * sin(u_time * 3.0 + a_maxLen * 5.0);
+    pos += a_dir * a_tip * pulse * 0.02;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+
+    v_tip     = a_tip;
+    v_visible = growth;
+  }
+`
+
+const SPIKE_FRAG = /* glsl */ `
+  varying float v_tip;
+  varying float v_visible;
+
+  void main() {
+    if (v_visible < 0.01) discard;
+
+    // orange core → bright gold-white tip
+    vec3 baseCol = vec3(1.00, 0.30, 0.04);   // deep orange
+    vec3 midCol  = vec3(1.00, 0.68, 0.12);   // amber
+    vec3 tipCol  = vec3(1.00, 0.95, 0.60);   // bright gold-white
+
+    vec3 col = v_tip < 0.5
+      ? mix(baseCol, midCol, v_tip * 2.0)
+      : mix(midCol,  tipCol, (v_tip - 0.5) * 2.0);
+
+    // base is bright/opaque, tip fades
+    float alpha = (0.92 - v_tip * 0.55) * min(1.0, v_visible * 4.0);
+
     gl_FragColor = vec4(col, alpha);
   }
 `
@@ -101,64 +145,100 @@ interface Props {
 }
 
 export function ParticleMorph({ progressRef }: Props) {
-  const pointsRef = useRef<THREE.Points>(null)
-  const matRef    = useRef<THREE.ShaderMaterial>(null)
-  const geoRef    = useRef<THREE.BufferGeometry>(null)
+  const groupRef      = useRef<THREE.Group>(null)
+  const particleRef   = useRef<THREE.Points>(null)
+  const particleMatRef= useRef<THREE.ShaderMaterial>(null)
+  const particleGeoRef= useRef<THREE.BufferGeometry>(null)
+  const spikeRef     = useRef<THREE.LineSegments>(null)
+  const spikeMatRef  = useRef<THREE.ShaderMaterial>(null)
+  const spikeGeoRef  = useRef<THREE.BufferGeometry>(null)
 
-  const { sphere, fibers, torus, sizes } = useMemo(() => ({
+  const { sphere, sizes, spikes } = useMemo(() => ({
     sphere: generateSphere(PARTICLE_COUNT),
-    fibers: generateFibers(PARTICLE_COUNT),
-    torus:  generateTorus(PARTICLE_COUNT),
     sizes:  generateSizes(PARTICLE_COUNT),
+    spikes: generateSpikes(SPIKE_COUNT),
   }), [])
 
+  // Particle attributes
   useEffect(() => {
-    const geo = geoRef.current
+    const geo = particleGeoRef.current
     if (!geo) return
-    geo.setAttribute('a_posFibers', new THREE.BufferAttribute(fibers, 3))
-    geo.setAttribute('a_posTorus',  new THREE.BufferAttribute(torus, 3))
-    geo.setAttribute('a_size',      new THREE.BufferAttribute(sizes, 1))
+    geo.setAttribute('a_size', new THREE.BufferAttribute(sizes, 1))
     return () => { geo.dispose() }
-  }, [fibers, torus, sizes])
+  }, [sizes])
 
-  const uniforms = useMemo(() => ({
-    u_p1:   { value: 0 },
-    u_p2:   { value: 0 },
-    u_time: { value: 0 },
-    u_size: { value: 1.4 },   // base size — small stars
+  // Spike attributes
+  useEffect(() => {
+    const geo = spikeGeoRef.current
+    if (!geo) return
+    geo.setAttribute('a_dir',    new THREE.BufferAttribute(spikes.directions, 3))
+    geo.setAttribute('a_maxLen', new THREE.BufferAttribute(spikes.lengths,    1))
+    geo.setAttribute('a_speed',  new THREE.BufferAttribute(spikes.speeds,     1))
+    geo.setAttribute('a_tip',    new THREE.BufferAttribute(spikes.tipFlags,   1))
+    return () => { geo.dispose() }
+  }, [spikes])
+
+  const particleUniforms = useMemo(() => ({
+    u_scatter: { value: 0 },
+    u_time:    { value: 0 },
+    u_size:    { value: 1.4 },
+  }), [])
+
+  const spikeUniforms = useMemo(() => ({
+    u_scatter: { value: 0 },
+    u_time:    { value: 0 },
   }), [])
 
   useFrame(({ clock }) => {
-    if (!matRef.current || !pointsRef.current) return
+    if (!particleMatRef.current || !spikeMatRef.current || !groupRef.current) return
 
-    const p  = Math.max(0, Math.min(1, progressRef.current))
-    const p1 = Math.min(1, p * 2)
-    const p2 = Math.max(0, p * 2 - 1)
+    const scatter = Math.max(0, Math.min(1, progressRef.current))
+    const t       = clock.elapsedTime
 
-    const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-    matRef.current.uniforms.u_p1.value   = ease(p1)
-    matRef.current.uniforms.u_p2.value   = ease(p2)
-    matRef.current.uniforms.u_time.value = clock.elapsedTime
+    particleMatRef.current.uniforms.u_scatter.value = scatter
+    particleMatRef.current.uniforms.u_time.value    = t
+    spikeMatRef.current.uniforms.u_scatter.value    = scatter
+    spikeMatRef.current.uniforms.u_time.value       = t
 
-    // slow majestic rotation — feels like deep space
-    pointsRef.current.rotation.y = clock.elapsedTime * 0.03
-    pointsRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.015) * 0.08
+    // slow majestic rotation
+    groupRef.current.rotation.y = t * 0.025
+    groupRef.current.rotation.x = Math.sin(t * 0.012) * 0.07
   })
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry ref={geoRef}>
-        <bufferAttribute attach="attributes-position" args={[sphere, 3]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={matRef}
-        vertexShader={VERT}
-        fragmentShader={FRAG}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <group ref={groupRef}>
+      {/* Particle sphere */}
+      <points ref={particleRef}>
+        <bufferGeometry ref={particleGeoRef}>
+          <bufferAttribute attach="attributes-position" args={[sphere, 3]} />
+        </bufferGeometry>
+        <shaderMaterial
+          ref={particleMatRef}
+          vertexShader={PARTICLE_VERT}
+          fragmentShader={PARTICLE_FRAG}
+          uniforms={particleUniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
+      {/* Orange spike fibers — positions are consecutive base/tip pairs, no index needed */}
+      <lineSegments ref={spikeRef}>
+        <bufferGeometry ref={spikeGeoRef}>
+          <bufferAttribute attach="attributes-position" args={[spikes.positions, 3]} />
+        </bufferGeometry>
+        <shaderMaterial
+          ref={spikeMatRef}
+          vertexShader={SPIKE_VERT}
+          fragmentShader={SPIKE_FRAG}
+          uniforms={spikeUniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          linewidth={1}
+        />
+      </lineSegments>
+    </group>
   )
 }
