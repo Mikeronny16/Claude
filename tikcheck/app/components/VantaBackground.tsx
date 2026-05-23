@@ -18,7 +18,7 @@ export default function VantaBackground({ color, children }: Props) {
       try {
         const THREE = await import("three");
         // @ts-expect-error vanta has no types
-        const VANTA = (await import("vanta/dist/vanta.fog.min.js")).default;
+        const VANTA = (await import("vanta/dist/vanta.net.min.js")).default;
         if (cancelled || !bgRef.current) return;
 
         effectRef.current = VANTA({
@@ -27,13 +27,12 @@ export default function VantaBackground({ color, children }: Props) {
           mouseControls: false,
           touchControls: false,
           gyroControls: false,
-          highlightColor: color,
-          midtoneColor: 0x0a0010,
-          lowlightColor: 0x000000,
-          baseColor: 0x000000,
-          blurFactor: 0.72,
-          speed: 0.7,
-          zoom: 0.9,
+          color: color,
+          backgroundColor: 0x000000,
+          points: 9,
+          maxDistance: 22,
+          spacing: 20,
+          showDots: true,
         });
       } catch {
         // Fallback: keep black background
