@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
+
+const RobotScene = dynamic(() => import('./components/RobotScene'), { ssr: false })
 
 const ACCENT = "#FF6B00"
 const ACCENT_RGBA = "rgba(255,107,0,"
@@ -127,69 +130,6 @@ function HeroBackground() {
           background: `linear-gradient(90deg, transparent, ${ACCENT_RGBA}0.06), transparent)`,
         }}
       />
-    </div>
-  )
-}
-
-// ── Avatar with spinning ring ────────────────────────────
-function Avatar() {
-  const [imgError, setImgError] = useState(false)
-  const size = 'clamp(140px, 22vw, 260px)'
-
-  return (
-    <div style={{ position: 'relative', flexShrink: 0 }}>
-      {/* Outer slow-spinning ring */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
-        style={{
-          position: 'absolute', inset: -10,
-          borderRadius: '50%',
-          border: '1.5px solid transparent',
-          borderTopColor: ACCENT,
-          borderRightColor: `${ACCENT_RGBA}0.15)`,
-          borderBottomColor: 'transparent',
-          borderLeftColor: `${ACCENT_RGBA}0.05)`,
-          zIndex: 2, pointerEvents: 'none',
-        }}
-      />
-      {/* Static dim ring */}
-      <div style={{
-        position: 'absolute', inset: -4,
-        borderRadius: '50%',
-        border: `1px solid ${ACCENT_RGBA}0.1)`,
-        zIndex: 1, pointerEvents: 'none',
-      }} />
-      {/* Avatar circle */}
-      <div style={{
-        width: size, height: size,
-        borderRadius: '50%', overflow: 'hidden', position: 'relative',
-        border: `2px solid ${ACCENT_RGBA}0.18)`,
-        background: '#0A0A0A',
-      }}>
-        {!imgError ? (
-          <img
-            src="/mike.jpg"
-            alt="Mike Ronny"
-            onError={() => setImgError(true)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: `linear-gradient(135deg, #1C0800 0%, #0A0A0A 100%)`,
-            fontSize: 'clamp(1.8rem, 5vw, 3rem)',
-            fontWeight: 700, color: ACCENT, letterSpacing: '-0.04em',
-          }}>MR</div>
-        )}
-        {/* Inner glow */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: '50%',
-          background: `radial-gradient(ellipse at 30% 25%, ${ACCENT_RGBA}0.07) 0%, transparent 60%)`,
-          pointerEvents: 'none',
-        }} />
-      </div>
     </div>
   )
 }
@@ -425,13 +365,17 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Avatar */}
+        {/* Robot */}
         <motion.div
           initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-          style={{ position: 'relative', zIndex: 1 }}
+          style={{
+            position: 'relative', zIndex: 1, flexShrink: 0,
+            width: 'clamp(240px, 32vw, 380px)',
+            height: 'clamp(360px, 46vw, 520px)',
+          }}
         >
-          <Avatar />
+          <RobotScene />
         </motion.div>
       </section>
 
