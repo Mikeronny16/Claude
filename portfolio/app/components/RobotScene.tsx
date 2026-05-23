@@ -6,138 +6,154 @@ import { Float, RoundedBox, ContactShadows, Environment, Text } from '@react-thr
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
-const chrome     = { metalness: 1, roughness: 0.07, color: '#C8C8C8', envMapIntensity: 1.2 } as const
-const darkChrome = { metalness: 1, roughness: 0.14, color: '#888',    envMapIntensity: 1.0 } as const
+// Materials
+const chrome  = { metalness: 1, roughness: 0.06, color: '#B8C8C8', envMapIntensity: 1.4 } as const
+const dark    = { metalness: 1, roughness: 0.18, color: '#445', envMapIntensity: 1.0 } as const
+const teal    = { color: '#00FFCC', emissive: '#00FFCC', emissiveIntensity: 8, toneMapped: false } as const
+const orange  = { color: '#FF6B00', emissive: '#FF6B00', emissiveIntensity: 8, toneMapped: false } as const
 
+// Pulsing MR text
 function ChestMR() {
   const glowRef = useRef<THREE.Mesh>(null)
-
   useFrame(({ clock }) => {
     if (!glowRef.current) return
-    const mat = glowRef.current.material as THREE.MeshStandardMaterial
-    mat.emissiveIntensity = 2.5 + Math.sin(clock.elapsedTime * 2.2) * 1.3
+    const m = glowRef.current.material as THREE.MeshStandardMaterial
+    m.emissiveIntensity = 2.5 + Math.sin(clock.elapsedTime * 2.2) * 1.3
   })
-
   return (
-    <group position={[0, -0.78, 0.31]}>
+    <group position={[0, -0.82, 0.32]}>
       <mesh ref={glowRef}>
         <planeGeometry args={[0.28, 0.13]} />
-        <meshStandardMaterial
-          color="#FF6B00" emissive="#FF6B00" emissiveIntensity={2.5}
-          transparent opacity={0.22} toneMapped={false}
-        />
+        <meshStandardMaterial color="#00FFCC" emissive="#00FFCC" emissiveIntensity={2.5}
+          transparent opacity={0.2} toneMapped={false} />
       </mesh>
-      <Text
-        position={[0, 0, 0.01]}
-        fontSize={0.12}
-        color="#FF9944"
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.1}
-      >
+      <Text position={[0, 0, 0.01]} fontSize={0.11} color="#00FFEE"
+        anchorX="center" anchorY="middle" letterSpacing={0.12}>
         MR
       </Text>
     </group>
   )
 }
 
-function RobotHead({ mx, my }: { mx: number; my: number }) {
+// Alien head — elongated, large visor, side fins
+function AlienHead({ mx, my }: { mx: number; my: number }) {
   const ref = useRef<THREE.Group>(null)
-
   useFrame(() => {
     if (!ref.current) return
     ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, mx * 0.65, 0.07)
-    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, -my * 0.3, 0.07)
+    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, -my * 0.32, 0.07)
   })
 
   return (
     <group ref={ref}>
-      <RoundedBox args={[0.70, 0.68, 0.64]} radius={0.08} smoothness={6}>
-        <meshPhysicalMaterial {...chrome} clearcoat={0.7} clearcoatRoughness={0.08} />
+      {/* Cranium — tall, narrow, alien proportions */}
+      <RoundedBox args={[0.62, 1.0, 0.58]} radius={0.08} smoothness={8} position={[0, 0.08, 0]}>
+        <meshPhysicalMaterial {...chrome} clearcoat={0.9} clearcoatRoughness={0.06} />
       </RoundedBox>
 
-      {/* Visor */}
-      <mesh position={[0, 0.05, 0.34]}>
-        <boxGeometry args={[0.46, 0.15, 0.016]} />
-        <meshPhysicalMaterial color="#060606" metalness={0.9} roughness={0.0} />
+      {/* Lower jaw — slightly wider, angular */}
+      <RoundedBox args={[0.56, 0.22, 0.52]} radius={0.04} smoothness={6} position={[0, -0.44, 0]}>
+        <meshPhysicalMaterial {...dark} clearcoat={0.5} />
+      </RoundedBox>
+
+      {/* Large visor — horizontal sweep */}
+      <mesh position={[0, 0.1, 0.30]}>
+        <boxGeometry args={[0.52, 0.14, 0.02]} />
+        <meshPhysicalMaterial color="#001A22" metalness={0.9} roughness={0.0} transmission={0.3} />
       </mesh>
 
-      {/* Eyes */}
-      {([-0.13, 0.13] as number[]).map((x, i) => (
-        <mesh key={i} position={[x, 0.05, 0.36]}>
-          <sphereGeometry args={[0.058, 16, 16]} />
-          <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={10} toneMapped={false} />
-        </mesh>
-      ))}
+      {/* Alien eyes — elongated, wide-set, teal */}
+      <mesh position={[-0.17, 0.10, 0.32]}>
+        <boxGeometry args={[0.09, 0.045, 0.01]} />
+        <meshStandardMaterial {...teal} />
+      </mesh>
+      <mesh position={[0.17, 0.10, 0.32]}>
+        <boxGeometry args={[0.09, 0.045, 0.01]} />
+        <meshStandardMaterial {...teal} />
+      </mesh>
 
-      {/* Side panels */}
+      {/* Side cranium ridges */}
       {([-1, 1] as number[]).map((s, i) => (
-        <mesh key={i} position={[s * 0.37, 0, 0]}>
-          <boxGeometry args={[0.04, 0.52, 0.48]} />
-          <meshPhysicalMaterial {...darkChrome} clearcoat={0.4} />
-        </mesh>
+        <group key={i} position={[s * 0.33, 0.18, 0]}>
+          <RoundedBox args={[0.06, 0.60, 0.44]} radius={0.03} smoothness={4}>
+            <meshPhysicalMaterial {...dark} clearcoat={0.3} />
+          </RoundedBox>
+          {/* Ridge glow line */}
+          <mesh position={[s * -0.02, 0, 0.22]}>
+            <boxGeometry args={[0.005, 0.40, 0.005]} />
+            <meshStandardMaterial {...teal} />
+          </mesh>
+        </group>
       ))}
 
-      {/* Top dome */}
-      <mesh position={[0, 0.38, -0.02]}>
-        <sphereGeometry args={[0.25, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshPhysicalMaterial {...chrome} clearcoat={1} clearcoatRoughness={0.04} />
+      {/* Back crest — swept fin */}
+      <RoundedBox args={[0.08, 0.55, 0.20]} radius={0.03} smoothness={4} position={[0, 0.38, -0.22]}
+        rotation={[0.28, 0, 0]}>
+        <meshPhysicalMaterial {...dark} clearcoat={0.4} />
+      </RoundedBox>
+      {/* Crest glow edge */}
+      <mesh position={[0, 0.52, -0.28]} rotation={[0.28, 0, 0]}>
+        <boxGeometry args={[0.004, 0.38, 0.004]} />
+        <meshStandardMaterial color="#00FFCC" emissive="#00FFCC" emissiveIntensity={6} toneMapped={false} />
       </mesh>
 
-      {/* Antenna */}
-      <mesh position={[0, 0.50, 0]}>
-        <cylinderGeometry args={[0.032, 0.040, 0.11, 10]} />
-        <meshPhysicalMaterial {...darkChrome} />
+      {/* Top antenna */}
+      <mesh position={[0, 0.64, 0]}>
+        <cylinderGeometry args={[0.013, 0.018, 0.22, 8]} />
+        <meshPhysicalMaterial metalness={1} roughness={0.2} color="#556" />
       </mesh>
-      <mesh position={[0, 0.62, 0]}>
-        <cylinderGeometry args={[0.013, 0.013, 0.20, 8]} />
-        <meshPhysicalMaterial metalness={1} roughness={0.2} color="#555" />
-      </mesh>
-      <mesh position={[0, 0.74, 0]}>
-        <sphereGeometry args={[0.043, 16, 16]} />
-        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={8} toneMapped={false} />
+      <mesh position={[0, 0.77, 0]}>
+        <sphereGeometry args={[0.036, 14, 14]} />
+        <meshStandardMaterial color="#00FFCC" emissive="#00FFCC" emissiveIntensity={10} toneMapped={false} />
       </mesh>
     </group>
   )
 }
 
+// Long alien leg
 function Leg({ side }: { side: -1 | 1 }) {
-  const x = side * 0.21
-
+  const x = side * 0.22
   return (
     <group position={[x, 0, 0]}>
-      {/* Hip joint */}
-      <mesh position={[0, 0, 0]}>
+      {/* Hip ball */}
+      <mesh>
         <sphereGeometry args={[0.13, 14, 14]} />
         <meshPhysicalMaterial {...chrome} clearcoat={0.8} />
       </mesh>
-      {/* Upper leg */}
-      <RoundedBox args={[0.19, 0.54, 0.20]} radius={0.06} smoothness={5} position={[0, -0.37, 0]}>
-        <meshPhysicalMaterial {...darkChrome} clearcoat={0.5} />
+      {/* Upper leg — long */}
+      <RoundedBox args={[0.18, 0.72, 0.19]} radius={0.055} smoothness={5} position={[0, -0.48, 0]}>
+        <meshPhysicalMaterial {...dark} clearcoat={0.5} />
       </RoundedBox>
       {/* Knee */}
-      <mesh position={[0, -0.70, 0]}>
-        <sphereGeometry args={[0.115, 14, 14]} />
+      <mesh position={[0, -0.92, 0]}>
+        <sphereGeometry args={[0.11, 14, 14]} />
         <meshPhysicalMaterial {...chrome} clearcoat={0.8} />
       </mesh>
-      {/* Lower leg / shin */}
-      <RoundedBox args={[0.17, 0.50, 0.19]} radius={0.055} smoothness={5} position={[0, -1.04, 0]}>
+      {/* Shin — long */}
+      <RoundedBox args={[0.15, 0.72, 0.17]} radius={0.05} smoothness={5} position={[0, -1.38, 0]}>
         <meshPhysicalMaterial {...chrome} clearcoat={0.5} />
       </RoundedBox>
       {/* Shin glow stripe */}
-      <mesh position={[side * -0.08, -1.04, 0.09]}>
-        <boxGeometry args={[0.007, 0.28, 0.007]} />
-        <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={4} toneMapped={false} />
+      <mesh position={[side * -0.07, -1.38, 0.08]}>
+        <boxGeometry args={[0.006, 0.44, 0.006]} />
+        <meshStandardMaterial {...teal} />
       </mesh>
       {/* Ankle */}
-      <mesh position={[0, -1.34, 0]}>
-        <sphereGeometry args={[0.095, 12, 12]} />
-        <meshPhysicalMaterial {...darkChrome} clearcoat={0.6} />
+      <mesh position={[0, -1.8, 0]}>
+        <sphereGeometry args={[0.085, 12, 12]} />
+        <meshPhysicalMaterial {...dark} clearcoat={0.6} />
       </mesh>
-      {/* Foot */}
-      <RoundedBox args={[0.23, 0.09, 0.34]} radius={0.04} smoothness={4} position={[0, -1.48, 0.05]}>
-        <meshPhysicalMaterial {...darkChrome} clearcoat={0.4} />
+      {/* Foot — angled, alien claw-like */}
+      <RoundedBox args={[0.20, 0.08, 0.36]} radius={0.035} smoothness={4} position={[0, -1.92, 0.06]}>
+        <meshPhysicalMaterial {...dark} clearcoat={0.4} />
       </RoundedBox>
+      {/* Toe claws */}
+      {([0.12, 0, -0.12] as number[]).map((tz, ci) => (
+        <mesh key={ci} position={[0, -1.96, 0.22 + tz]} rotation={[0.25, 0, 0]}>
+          <coneGeometry args={[0.025, 0.12, 6]} />
+          <meshPhysicalMaterial {...dark} />
+        </mesh>
+      ))}
     </group>
   )
 }
@@ -149,116 +165,153 @@ function RobotBody({ mx, my }: { mx: number; my: number }) {
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
-    if (bodyRef.current)  bodyRef.current.rotation.z  =  Math.sin(t * 0.5) * 0.01
-    if (leftArm.current)  leftArm.current.rotation.x  =  Math.sin(t * 0.7) * 0.055
-    if (rightArm.current) rightArm.current.rotation.x = -Math.sin(t * 0.7) * 0.055
+    if (bodyRef.current) bodyRef.current.rotation.z = Math.sin(t * 0.5) * 0.01
+
+    // Arms follow mouse + idle swing
+    if (leftArm.current) {
+      leftArm.current.rotation.x = THREE.MathUtils.lerp(leftArm.current.rotation.x, -my * 0.3 + Math.sin(t * 0.7) * 0.06, 0.06)
+      leftArm.current.rotation.z = THREE.MathUtils.lerp(leftArm.current.rotation.z, mx * 0.18, 0.06)
+    }
+    if (rightArm.current) {
+      rightArm.current.rotation.x = THREE.MathUtils.lerp(rightArm.current.rotation.x, -my * 0.3 - Math.sin(t * 0.7) * 0.06, 0.06)
+      rightArm.current.rotation.z = THREE.MathUtils.lerp(rightArm.current.rotation.z, mx * 0.18, 0.06)
+    }
   })
 
   return (
     <group ref={bodyRef}>
       {/* Head */}
-      <group position={[0, 0.22, 0]}>
-        <RobotHead mx={mx} my={my} />
+      <group position={[0, 0.28, 0]}>
+        <AlienHead mx={mx} my={my} />
       </group>
 
-      {/* Neck */}
-      <mesh position={[0, -0.02, 0]}>
-        <cylinderGeometry args={[0.09, 0.14, 0.20, 14]} />
-        <meshPhysicalMaterial {...chrome} clearcoat={0.5} />
-      </mesh>
-      <mesh position={[0, -0.10, 0]}>
-        <torusGeometry args={[0.16, 0.020, 10, 32]} />
-        <meshPhysicalMaterial metalness={1} roughness={0.04} color="#aaa" />
-      </mesh>
+      {/* Neck — segmented */}
+      {([0, -0.08, -0.16] as number[]).map((y, i) => (
+        <mesh key={i} position={[0, y, 0]}>
+          <cylinderGeometry args={[0.07 + i * 0.01, 0.09 + i * 0.01, 0.07, 10]} />
+          <meshPhysicalMaterial {...chrome} clearcoat={0.5} />
+        </mesh>
+      ))}
 
-      {/* Torso — slim & tall */}
-      <RoundedBox args={[0.82, 1.50, 0.58]} radius={0.09} smoothness={6} position={[0, -0.88, 0]}>
-        <meshPhysicalMaterial {...chrome} clearcoat={0.8} clearcoatRoughness={0.07} />
+      {/* Torso — slim alien */}
+      <RoundedBox args={[0.78, 1.52, 0.56]} radius={0.08} smoothness={6} position={[0, -0.96, 0]}>
+        <meshPhysicalMaterial {...chrome} clearcoat={0.75} clearcoatRoughness={0.07} />
       </RoundedBox>
 
-      {/* Chest panel */}
-      <RoundedBox args={[0.48, 0.54, 0.034]} radius={0.05} position={[0, -0.78, 0.30]}>
-        <meshPhysicalMaterial color="#060606" metalness={0.8} roughness={0.0} />
+      {/* Chest dark panel */}
+      <RoundedBox args={[0.46, 0.60, 0.032]} radius={0.04} position={[0, -0.82, 0.29]}>
+        <meshPhysicalMaterial color="#020A0A" metalness={0.9} roughness={0.0} />
       </RoundedBox>
 
-      {/* LED top */}
-      <mesh position={[0, -0.56, 0.32]}>
-        <boxGeometry args={[0.28, 0.015, 0.004]} />
-        <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={5} toneMapped={false} />
+      {/* LED strips */}
+      <mesh position={[0, -0.60, 0.31]}>
+        <boxGeometry args={[0.26, 0.013, 0.004]} />
+        <meshStandardMaterial {...orange} />
       </mesh>
-      {/* LED bottom */}
-      <mesh position={[0, -1.00, 0.32]}>
-        <boxGeometry args={[0.28, 0.015, 0.004]} />
-        <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={3} toneMapped={false} />
+      <mesh position={[0, -1.06, 0.31]}>
+        <boxGeometry args={[0.26, 0.013, 0.004]} />
+        <meshStandardMaterial color="#00FFCC" emissive="#00FFCC" emissiveIntensity={4} toneMapped={false} />
       </mesh>
 
       <ChestMR />
 
+      {/* Spine glow line on back */}
+      <mesh position={[0, -0.96, -0.29]}>
+        <boxGeometry args={[0.007, 1.2, 0.007]} />
+        <meshStandardMaterial color="#00FFCC" emissive="#00FFCC" emissiveIntensity={5} toneMapped={false} />
+      </mesh>
+
       {/* Waist ring */}
-      <mesh position={[0, -1.30, 0]}>
-        <torusGeometry args={[0.35, 0.026, 10, 32]} />
-        <meshPhysicalMaterial metalness={1} roughness={0.05} color="#999" />
+      <mesh position={[0, -1.44, 0]}>
+        <torusGeometry args={[0.32, 0.024, 10, 32]} />
+        <meshPhysicalMaterial metalness={1} roughness={0.04} color="#9ab" />
       </mesh>
 
       {/* Shoulder caps */}
       {([-1, 1] as number[]).map((s, i) => (
-        <mesh key={i} position={[s * 0.54, -0.42, 0]}>
-          <sphereGeometry args={[0.20, 18, 18, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
+        <mesh key={i} position={[s * 0.52, -0.46, 0]}>
+          <sphereGeometry args={[0.19, 18, 18, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
           <meshPhysicalMaterial {...chrome} clearcoat={1} clearcoatRoughness={0.04} side={THREE.BackSide} />
         </mesh>
       ))}
 
-      {/* Left arm */}
-      <group ref={leftArm} position={[-0.58, -0.76, 0]}>
-        <RoundedBox args={[0.20, 0.48, 0.20]} radius={0.065} smoothness={5} position={[0, -0.04, 0]}>
-          <meshPhysicalMaterial {...darkChrome} clearcoat={0.6} />
+      {/* Left arm — mouse-tracked */}
+      <group ref={leftArm} position={[-0.56, -0.82, 0]}>
+        {/* Upper arm */}
+        <RoundedBox args={[0.18, 0.48, 0.18]} radius={0.06} smoothness={5} position={[0, -0.04, 0]}>
+          <meshPhysicalMaterial {...dark} clearcoat={0.5} />
         </RoundedBox>
+        {/* Elbow */}
         <mesh position={[0, -0.34, 0]}>
-          <sphereGeometry args={[0.12, 16, 16]} />
+          <sphereGeometry args={[0.11, 14, 14]} />
           <meshPhysicalMaterial {...chrome} clearcoat={0.8} />
         </mesh>
-        <RoundedBox args={[0.17, 0.42, 0.17]} radius={0.055} smoothness={5} position={[0, -0.64, 0]}>
+        {/* Forearm */}
+        <RoundedBox args={[0.16, 0.44, 0.16]} radius={0.055} smoothness={5} position={[0, -0.64, 0]}>
           <meshPhysicalMaterial {...chrome} clearcoat={0.5} />
         </RoundedBox>
-        <mesh position={[0, -0.94, 0]}>
-          <sphereGeometry args={[0.10, 14, 14]} />
-          <meshPhysicalMaterial {...darkChrome} clearcoat={0.5} />
+        {/* Wrist */}
+        <mesh position={[0, -0.90, 0]}>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshPhysicalMaterial {...dark} clearcoat={0.5} />
         </mesh>
-        <mesh position={[0.09, -0.64, 0]}>
-          <boxGeometry args={[0.007, 0.24, 0.007]} />
-          <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={4} toneMapped={false} />
+        {/* Hand + alien fingers */}
+        <mesh position={[0, -1.02, 0]}>
+          <sphereGeometry args={[0.085, 12, 12]} />
+          <meshPhysicalMaterial {...dark} />
+        </mesh>
+        {([[-0.06, -1.14, 0.02], [0, -1.16, 0.04], [0.06, -1.14, 0.02]] as [number,number,number][]).map((pos, ci) => (
+          <mesh key={ci} position={pos} rotation={[-0.2, 0, 0]}>
+            <coneGeometry args={[0.018, 0.1, 5]} />
+            <meshPhysicalMaterial {...dark} />
+          </mesh>
+        ))}
+        {/* Arm glow */}
+        <mesh position={[0.08, -0.64, 0]}>
+          <boxGeometry args={[0.006, 0.24, 0.006]} />
+          <meshStandardMaterial {...teal} />
         </mesh>
       </group>
 
-      {/* Right arm */}
-      <group ref={rightArm} position={[0.58, -0.76, 0]}>
-        <RoundedBox args={[0.20, 0.48, 0.20]} radius={0.065} smoothness={5} position={[0, -0.04, 0]}>
-          <meshPhysicalMaterial {...darkChrome} clearcoat={0.6} />
+      {/* Right arm — mouse-tracked */}
+      <group ref={rightArm} position={[0.56, -0.82, 0]}>
+        <RoundedBox args={[0.18, 0.48, 0.18]} radius={0.06} smoothness={5} position={[0, -0.04, 0]}>
+          <meshPhysicalMaterial {...dark} clearcoat={0.5} />
         </RoundedBox>
         <mesh position={[0, -0.34, 0]}>
-          <sphereGeometry args={[0.12, 16, 16]} />
+          <sphereGeometry args={[0.11, 14, 14]} />
           <meshPhysicalMaterial {...chrome} clearcoat={0.8} />
         </mesh>
-        <RoundedBox args={[0.17, 0.42, 0.17]} radius={0.055} smoothness={5} position={[0, -0.64, 0]}>
+        <RoundedBox args={[0.16, 0.44, 0.16]} radius={0.055} smoothness={5} position={[0, -0.64, 0]}>
           <meshPhysicalMaterial {...chrome} clearcoat={0.5} />
         </RoundedBox>
-        <mesh position={[0, -0.94, 0]}>
-          <sphereGeometry args={[0.10, 14, 14]} />
-          <meshPhysicalMaterial {...darkChrome} clearcoat={0.5} />
+        <mesh position={[0, -0.90, 0]}>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshPhysicalMaterial {...dark} clearcoat={0.5} />
         </mesh>
-        <mesh position={[-0.09, -0.64, 0]}>
-          <boxGeometry args={[0.007, 0.24, 0.007]} />
-          <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={4} toneMapped={false} />
+        <mesh position={[0, -1.02, 0]}>
+          <sphereGeometry args={[0.085, 12, 12]} />
+          <meshPhysicalMaterial {...dark} />
+        </mesh>
+        {([[-0.06, -1.14, 0.02], [0, -1.16, 0.04], [0.06, -1.14, 0.02]] as [number,number,number][]).map((pos, ci) => (
+          <mesh key={ci} position={pos} rotation={[-0.2, 0, 0]}>
+            <coneGeometry args={[0.018, 0.1, 5]} />
+            <meshPhysicalMaterial {...dark} />
+          </mesh>
+        ))}
+        <mesh position={[-0.08, -0.64, 0]}>
+          <boxGeometry args={[0.006, 0.24, 0.006]} />
+          <meshStandardMaterial {...teal} />
         </mesh>
       </group>
 
-      {/* Hips block */}
-      <RoundedBox args={[0.64, 0.18, 0.46]} radius={0.07} smoothness={5} position={[0, -1.48, 0]}>
-        <meshPhysicalMaterial {...darkChrome} clearcoat={0.5} />
+      {/* Hips */}
+      <RoundedBox args={[0.60, 0.18, 0.44]} radius={0.06} smoothness={5} position={[0, -1.60, 0]}>
+        <meshPhysicalMaterial {...dark} clearcoat={0.4} />
       </RoundedBox>
 
       {/* Legs */}
-      <group position={[0, -1.63, 0]}>
+      <group position={[0, -1.74, 0]}>
         <Leg side={-1} />
         <Leg side={1} />
       </group>
@@ -269,24 +322,25 @@ function RobotBody({ mx, my }: { mx: number; my: number }) {
 function Scene({ mx, my }: { mx: number; my: number }) {
   return (
     <>
-      <Environment preset="city" />
-      <ambientLight intensity={0.12} />
-      <pointLight position={[3, 5, 4]}   intensity={3.5} color="#ffffff" />
-      <pointLight position={[-3, 2, 3]}  intensity={2.2} color="#FF6B00" />
-      <pointLight position={[0, -4, 2]}  intensity={0.9} color="#4466ff" />
-      <spotLight  position={[0, 8, 2]}   angle={0.28} penumbra={0.85} intensity={4.5} color="#ffffff" />
+      {/* background={false} fixes the brown rectangle */}
+      <Environment preset="city" background={false} />
 
-      <Float speed={1.2} rotationIntensity={0.02} floatIntensity={0.25}>
-        {/* Raise whole robot so it's centered in frame */}
+      <ambientLight intensity={0.10} />
+      <pointLight position={[3, 5, 4]}   intensity={3.5} color="#ffffff" />
+      <pointLight position={[-3, 2, 3]}  intensity={2.0} color="#FF6B00" />
+      <pointLight position={[0, -4, 2]}  intensity={1.2} color="#00FFCC" />
+      <spotLight  position={[0, 8, 2]}   angle={0.28} penumbra={0.85} intensity={4} color="#ffffff" />
+
+      <Float speed={1.1} rotationIntensity={0.02} floatIntensity={0.22}>
         <group position={[0, 0.9, 0]}>
           <RobotBody mx={mx} my={my} />
         </group>
       </Float>
 
-      <ContactShadows position={[0, -2.1, 0]} opacity={0.5} scale={4} blur={2.5} color="#FF6B00" />
+      <ContactShadows position={[0, -2.2, 0]} opacity={0.4} scale={4} blur={2.5} color="#00FFCC" />
 
       <EffectComposer>
-        <Bloom luminanceThreshold={0.55} luminanceSmoothing={0.85} intensity={1.6} mipmapBlur />
+        <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.85} intensity={1.8} mipmapBlur />
       </EffectComposer>
     </>
   )
@@ -317,11 +371,11 @@ export default function RobotScene() {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 7.2], fov: 44 }}
+      camera={{ position: [0, 0, 8.0], fov: 44 }}
       gl={{
         alpha: true, antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.15,
+        toneMappingExposure: 1.1,
       }}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
     >
