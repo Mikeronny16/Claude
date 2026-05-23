@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const PLATFORM_CONTEXT: Record<string, string> = {
   Instagram: "Instagram DM (casual, short, friendly tone, max 3 sentences)",
@@ -28,20 +28,16 @@ Rules:
 - Each message must be unique in angle/approach
 - Lead with their pain or curiosity, NOT "I offer..."
 - End with ONE simple low-pressure question or CTA
-- No generic filler phrases like "I hope this finds you well"
+- No generic filler like "I hope this finds you well"
 - Sound human, not robotic
-${platform === "Email" ? "- For emails, write: Subject: [line]\n\n[body]" : ""}
+${platform === "Email" ? "- For emails write: Subject: [line]\n\n[body]" : ""}
 
 Return ONLY a JSON array with exactly 3 strings, no extra text:
 ["message 1", "message 2", "message 3"]`;
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const raw = response.content[0].type === "text" ? response.content[0].text : "";
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const result = await model.generateContent(prompt);
+  const raw = result.response.text();
 
   const jsonMatch = raw.match(/\[[\s\S]*\]/);
   if (!jsonMatch) {
