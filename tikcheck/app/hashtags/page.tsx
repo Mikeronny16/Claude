@@ -16,6 +16,7 @@ export default function HashtagsPage() {
   async function generate() {
     if (!niche.trim()) return;
     setLoading(true); setResult(null);
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tool: "hashtags" }) });
     const res = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "hashtags", niche, platform }) });
     const data = await res.json();
     if (data.result) setResult(data.result);

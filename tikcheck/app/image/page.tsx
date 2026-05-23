@@ -16,6 +16,7 @@ export default function ImagePage() {
   async function generate() {
     if (!prompt.trim()) return;
     setLoading(true); setImgUrl("");
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tool: "image" }) });
     const fullPrompt = encodeURIComponent(`${prompt}, ${style} style, high quality, detailed`);
     const url = `https://image.pollinations.ai/prompt/${fullPrompt}?width=768&height=768&nologo=true&seed=${Date.now()}`;
     setImgUrl(url);
