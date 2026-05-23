@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import "./globals.css";
 
-const font = Space_Grotesk({ subsets: ["latin"], weight: ["400","500","600","700"] });
+const font = Space_Grotesk({ subsets: ["latin"], weight: ["400","500","600","700","800"] });
 
 export const metadata: Metadata = {
   title: "TikCheck — Creator Toolkit",
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={font.className}>{children}</body>
+      <body className={font.className}>
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

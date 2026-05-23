@@ -11,36 +11,45 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { scroll-behavior: smooth; }
+
 body {
   background: var(--bg);
   color: #ffffff;
   font-family: 'Space Grotesk', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-  padding-bottom: 80px;
+  padding-bottom: 88px;
 }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
 
 ::selection { background: var(--pink); color: white; }
 
-textarea, input {
+textarea, input[type="text"], input[type="password"], input:not([type="button"]):not([type="submit"]) {
   background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
   color: white;
   font-family: inherit;
   font-size: 15px;
   outline: none;
   padding: 14px 16px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
   width: 100%;
   resize: none;
 }
-textarea:focus, input:focus { border-color: var(--pink); }
+textarea:focus, input:focus {
+  border-color: rgba(255,0,80,0.5);
+  background: rgba(255,255,255,0.07);
+}
 textarea::placeholder, input::placeholder { color: var(--muted); }
 
 select {
   background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
   color: white;
   font-family: inherit;
@@ -53,3 +62,17 @@ select {
 }
 select:focus { border-color: var(--cyan); }
 select option { background: #111; color: white; }
+
+.example-card {
+  opacity: 0.45;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+.example-card:hover { opacity: 0.65; }
+.example-card:active { opacity: 0.9; }
+
+.glow-pink { box-shadow: 0 0 32px rgba(255,0,80,0.25); }
+.glow-purple { box-shadow: 0 0 32px rgba(168,85,247,0.25); }
+.glow-orange { box-shadow: 0 0 32px rgba(255,107,53,0.25); }
+.glow-gold { box-shadow: 0 0 32px rgba(255,215,0,0.2); }

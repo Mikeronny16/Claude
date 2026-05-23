@@ -3,10 +3,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import { useLang } from "../contexts/LanguageContext";
 
 const PLATFORMS = ["TikTok", "Instagram", "YouTube Shorts", "Reels"];
 
+const EXAMPLE_TAGS = {
+  mega: ["#fitness", "#workout", "#gym", "#health", "#motivation"],
+  medium: ["#fitnessmotivation", "#gymlife", "#workoutgoals", "#fitfam", "#bodybuilding"],
+  niche: ["#homeworkout30days", "#beginnerfitness", "#noequipmentworkout"],
+};
+
 export default function HashtagsPage() {
+  const { t } = useLang();
   const [niche, setNiche] = useState("");
   const [platform, setPlatform] = useState("TikTok");
   const [result, setResult] = useState<{ mega: string[]; medium: string[]; niche: string[] } | null>(null);
@@ -29,48 +37,94 @@ export default function HashtagsPage() {
   }
 
   const groups = result ? [
-    { key: "mega", label: "MEGA (1M+)", tags: result.mega, color: "#FF6B35" },
-    { key: "medium", label: "MEDIUM (100K-1M)", tags: result.medium, color: "#FF6B35" },
-    { key: "niche", label: "NICHE (<100K)", tags: result.niche, color: "#00F2EA" },
+    { key: "mega",   label: t.hashtags.mega,   tags: result.mega,   color: "#FF6B35" },
+    { key: "medium", label: t.hashtags.medium, tags: result.medium, color: "#FF6B35" },
+    { key: "niche",  label: t.hashtags.niche,  tags: result.niche,  color: "#00F2EA" },
   ] : [];
+
+  const showEmpty = !loading && !result;
 
   return (
     <main style={{ minHeight: "100vh", background: "#000" }}>
       <BackHeader title="#️⃣ Hashtag Finder" color="#FF6B35" />
+
       <div style={{ padding: "20px" }}>
-        <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>30 hashtags — mega, medium & niche for max reach.</p>
+        <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.hashtags.subtitle}</p>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
           {PLATFORMS.map(p => (
             <button key={p} onClick={() => setPlatform(p)} style={{
-              padding: "7px 14px", borderRadius: 20, border: `1px solid ${platform === p ? "#FF6B35" : "rgba(255,255,255,0.08)"}`,
-              background: platform === p ? "rgba(255,0,80,0.12)" : "transparent",
-              color: platform === p ? "#FF6B35" : "#555", fontSize: 12, fontWeight: 600,
-              cursor: "pointer", fontFamily: "inherit",
+              padding: "7px 14px", borderRadius: 20,
+              border: `1px solid ${platform === p ? "#FF6B35" : "rgba(255,255,255,0.08)"}`,
+              background: platform === p ? "rgba(255,107,53,0.12)" : "transparent",
+              color: platform === p ? "#FF6B35" : "#555",
+              fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             }}>{p}</button>
           ))}
         </div>
 
-        <input value={niche} onChange={e => setNiche(e.target.value)} placeholder="Your niche (e.g. fitness, cooking, travel...)" />
+        <input value={niche} onChange={e => setNiche(e.target.value)}
+          placeholder={t.hashtags.placeholder}
+          onKeyDown={e => { if (e.key === "Enter") generate(); }} />
 
-        <motion.button whileTap={{ scale: 0.96 }} onClick={generate} disabled={loading || !niche.trim()}
+        <motion.button whileTap={{ scale: 0.97 }} onClick={generate} disabled={loading || !niche.trim()}
           style={{
-            marginTop: 12, width: "100%", padding: "15px", borderRadius: 14, border: "none",
-            background: loading || !niche.trim() ? "#1a1a1a" : "linear-gradient(135deg, #FF6B35, #ff4080)",
+            marginTop: 12, width: "100%", padding: "15px", borderRadius: 16, border: "none",
+            background: loading || !niche.trim() ? "#0f0f0f" : "linear-gradient(135deg, #FF6B35, #ff4080)",
             color: loading || !niche.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !niche.trim() ? "default" : "pointer",
             fontFamily: "inherit",
-            boxShadow: !loading && niche.trim() ? "0 0 24px rgba(255,0,80,0.35)" : "none",
+            boxShadow: !loading && niche.trim() ? "0 0 28px rgba(255,107,53,0.3)" : "none",
+            transition: "all 0.2s",
           }}>
-          {loading ? "Finding..." : "🔍 Find Hashtags"}
+          {loading ? (
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "white", display: "inline-block", animation: "spin 0.8s linear infinite" }} />
+              {t.hashtags.loading}
+            </span>
+          ) : t.hashtags.button}
         </motion.button>
 
+        {/* Empty state — example hashtag cloud */}
+        <AnimatePresence>
+          {showEmpty && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              style={{ marginTop: 28 }}>
+              <p style={{ fontSize: 9, fontWeight: 700, color: "#333", letterSpacing: "2px", marginBottom: 14 }}>
+                {t.hashtags.exampleLabel}
+              </p>
+              {[
+                { label: t.hashtags.mega,   tags: EXAMPLE_TAGS.mega,   color: "#FF6B35" },
+                { label: t.hashtags.medium, tags: EXAMPLE_TAGS.medium, color: "#FF6B35" },
+                { label: t.hashtags.niche,  tags: EXAMPLE_TAGS.niche,  color: "#00F2EA" },
+              ].map((g, gi) => (
+                <div key={gi} style={{ marginBottom: 12, opacity: 0.35 }}>
+                  <p style={{ fontSize: 9, fontWeight: 700, color: g.color, letterSpacing: "1.5px", marginBottom: 6 }}>{g.label}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {g.tags.map((tag, i) => (
+                      <span key={i} style={{
+                        background: `${g.color}10`, border: `1px solid ${g.color}20`,
+                        borderRadius: 20, padding: "4px 10px", fontSize: 12, color: "#666",
+                      }}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop: 20, textAlign: "center" }}>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "rgba(255,107,53,0.1)", letterSpacing: "-1px" }}>30 HASHTAGS</div>
+                <p style={{ fontSize: 11, color: "#2a2a2a", marginTop: 2 }}>mega + medium + niche · per request</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Results */}
         <AnimatePresence>
           {groups.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 14 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
               {groups.map((g, gi) => (
-                <motion.div key={g.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: gi * 0.1 }}
-                  style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${g.color}25`, borderRadius: 16, padding: "16px" }}>
+                <motion.div key={g.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: gi * 0.08 }}
+                  style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${g.color}22`, borderRadius: 18, padding: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                     <span style={{ fontSize: 9, fontWeight: 700, color: g.color, letterSpacing: "1.5px" }}>{g.label}</span>
                     <button onClick={() => copyGroup(g.key, g.tags)} style={{
@@ -79,11 +133,14 @@ export default function HashtagsPage() {
                       borderRadius: 8, padding: "4px 10px",
                       color: copied === g.key ? g.color : "#555",
                       fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                    }}>{copied === g.key ? "✓ Copied" : "Copy All"}</button>
+                    }}>{copied === g.key ? t.common.copied : t.common.copyAll}</button>
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {g.tags.map((tag, i) => (
-                      <span key={i} style={{ background: `${g.color}12`, border: `1px solid ${g.color}20`, borderRadius: 20, padding: "4px 10px", fontSize: 12, color: "#ccc" }}>{tag}</span>
+                      <span key={i} style={{
+                        background: `${g.color}10`, border: `1px solid ${g.color}20`,
+                        borderRadius: 20, padding: "4px 10px", fontSize: 12, color: "#ccc",
+                      }}>{tag}</span>
                     ))}
                   </div>
                 </motion.div>
@@ -93,6 +150,7 @@ export default function HashtagsPage() {
         </AnimatePresence>
       </div>
       <BottomNav />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </main>
   );
 }
