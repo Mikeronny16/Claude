@@ -40,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push tikcheck
+        continue-on-error: true
         env:
           PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
