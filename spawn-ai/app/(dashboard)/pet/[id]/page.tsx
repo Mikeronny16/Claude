@@ -1,12 +1,14 @@
 "use client"
-import { useEffect, useRef, useState, use } from "react"
+import { useEffect, useRef, useState, use, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { Loader2, Send, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 type Pet = { id: string; name: string; species: string; tier: string; stage: string; level: number; xp: number; hunger: number; energy: number; happiness: number; bond: number; personality: string }
 type Message = { id: string; role: string; content: string; createdAt: string }
+type FloatEmoji = { id: number; emoji: string; x: number }
 
 const stageEmoji: Record<string, string> = { baby: "🐣", child: "🐥", teen: "🦋", adult: "✨" }
 
@@ -17,7 +19,13 @@ function StatBar({ label, value, color }: { label: string; value: number; color:
         <span>{label}</span><span>{value}</span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(2, value)}%`, background: color }} />
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.max(2, value)}%` }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        />
       </div>
     </div>
   )
@@ -31,7 +39,16 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
   const [input, setInput] = useState("")
   const [sending, setSending] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [floatEmojis, setFloatEmojis] = useState<FloatEmoji[]>([])
+  const [showLevelUp, setShowLevelUp] = useState<number | null>(null)
+  const floatIdRef = useRef(0)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  const spawnFloat = useCallback((emoji: string) => {
+    const id = ++floatIdRef.current
+    setFloatEmojis(prev => [...prev, { id, emoji, x: 30 + Math.random() * 40 }])
+    setTimeout(() => setFloatEmojis(prev => prev.filter(f => f.id !== id)), 1500)
+  }, [])
 
   useEffect(() => {
     fetch(`/api/pet/${id}`)
@@ -75,7 +92,10 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
           { id: "u" + Date.now(), role: "user", content: text, createdAt: new Date().toISOString() },
           { id: "p" + Date.now(), role: "pet", content: data.reply, createdAt: new Date().toISOString() },
         ])
-        if (data.newLevel > (pet.level)) toast.success(`🎉 ${pet.name} reached level ${data.newLevel}!`)
+        if (data.newLevel > (pet.level)) {
+          setShowLevelUp(data.newLevel)
+          setTimeout(() => setShowLevelUp(null), 2500)
+        }
         setPet(prev => prev ? { ...prev, level: data.newLevel, stage: data.newStage, bond: Math.min(100, prev.bond + 1), happiness: Math.min(100, prev.happiness + 3) } : prev)
       }
     } catch {
@@ -96,8 +116,10 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
     const data = await res.json()
     if (data.pet) {
       setPet(prev => prev ? { ...prev, ...data.pet } : prev)
-      const msgs: Record<string, string> = { feed: "😋", play: "🎮", sleep: "💤", pet: "🥰" }
-      toast.success(msgs[action] ?? "✨")
+      const emojis: Record<string, string> = { feed: "😋", play: "🎮", sleep: "💤", pet: "🥰" }
+      const e = emojis[action] ?? "✨"
+      spawnFloat(e)
+      spawnFloat(e)
     }
   }
 
@@ -113,6 +135,44 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 64px - 72px)" }}>
+
+      {/* Floating emoji reactions */}
+      <div className="fixed inset-0 pointer-events-none z-40">
+        <AnimatePresence>
+          {floatEmojis.map(f => (
+            <motion.div
+              key={f.id}
+              className="absolute text-3xl"
+              style={{ left: `${f.x}%`, bottom: "20%" }}
+              initial={{ opacity: 1, y: 0, scale: 0.5 }}
+              animate={{ opacity: 0, y: -120, scale: 1.4 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.3, ease: "easeOut" }}
+            >
+              {f.emoji}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Level-up banner */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <motion.div
+            className="fixed inset-x-0 top-20 z-50 flex justify-center pointer-events-none"
+            initial={{ opacity: 0, y: -30, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", bounce: 0.5 }}
+          >
+            <div className="px-6 py-3 rounded-2xl text-white font-black text-lg shadow-xl"
+              style={{ background: "linear-gradient(135deg, #7c3aed, #f59e0b)", boxShadow: "0 0 40px rgba(245,158,11,0.5)" }}>
+              ⭐ LEVEL {showLevelUp}!
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 flex-shrink-0">
         <Link href="/dashboard" className="text-gray-400 hover:text-white">
@@ -145,12 +205,17 @@ export default function PetPage({ params }: { params: Promise<{ id: string }> })
           { action: "sleep", label: "Sleep", emoji: "💤" },
           { action: "pet", label: "Pet", emoji: "💜" },
         ].map(btn => (
-          <button key={btn.action} onClick={() => doAction(btn.action)}
-            className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs font-medium transition-all hover:scale-105 active:scale-95"
-            style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", color: "#a78bfa" }}>
+          <motion.button
+            key={btn.action}
+            onClick={() => doAction(btn.action)}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs font-medium"
+            style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", color: "#a78bfa" }}
+            whileTap={{ scale: 0.88 }}
+            whileHover={{ scale: 1.06, background: "rgba(139,92,246,0.18)" }}
+          >
             <span className="text-lg">{btn.emoji}</span>
             {btn.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 

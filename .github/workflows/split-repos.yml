@@ -1,0 +1,47 @@
+name: Push Projects to Separate Repos
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  push-projects:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - spawn-ai
+          - readyprompts
+          - portfolio
+          - colddm
+          - whispr
+          - draftwin
+          - toynar
+          - sinar-clothing
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+
+      - name: Push ${{ matrix.project }} to its own repo
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          PROJECT: ${{ matrix.project }}
+        run: |
+          cd $PROJECT
+
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+
+          # Remove any .env files just in case
+          find . -name ".env" -not -name ".env.example" -delete
+
+          git add .
+          git commit -m "initial commit — migrated from monorepo"
+          git branch -M main
+
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/$PROJECT.git
+          git push -u origin main --force
+
+          echo "✅ $PROJECT pushed successfully"

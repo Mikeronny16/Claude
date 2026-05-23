@@ -156,10 +156,17 @@ export default function AdminPage() {
               style={{ background: "linear-gradient(135deg, #f97316, #3b82f6)" }}>R</div>
             <span className="font-bold text-white text-sm">Admin</span>
           </div>
-          <button onClick={() => setAuthed(false)}
-            className="text-xs px-3 py-1.5 rounded-lg" style={{ color: "#64748b", background: "rgba(30,41,59,0.5)" }}>
-            Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/admin/emails"
+              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+              style={{ color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)" }}>
+              ✉️ Email Templates
+            </a>
+            <button onClick={() => setAuthed(false)}
+              className="text-xs px-3 py-1.5 rounded-lg" style={{ color: "#64748b", background: "rgba(30,41,59,0.5)" }}>
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}

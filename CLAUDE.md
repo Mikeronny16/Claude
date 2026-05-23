@@ -88,9 +88,9 @@ Spawn AI is positioned as a quiet experiment in caring, not just a pet app. Keep
 - [x] Egg shop UI (tier display, locked tiers for free users)
 - [x] Pricing page with upgrade flow (manual email payment)
 - [x] Admin panel for manual payment approvals
-- [ ] Stats decay over time (cron/background job)
+- [x] Stats decay over time (cron/background job — `/api/cron/decay`, daily at midnight)
 - [ ] Real Anthropic Claude API integration (add API key when ready)
-- [ ] Framer Motion animations for hatching event
+- [x] Framer Motion animations for hatching event + level-up banner + action button floats
 
 ### Phase 3 — Depth
 - [ ] Rare/Epic/Mythic eggs

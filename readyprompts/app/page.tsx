@@ -38,6 +38,37 @@ function useCountUp(to: number, visible: boolean, duration = 1400) {
   return count;
 }
 
+// ─── Countdown to midnight (resets daily) ─────────────────────
+function useCountdown() {
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const calc = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      const diff = Math.floor((midnight.getTime() - now.getTime()) / 1000);
+      setTime({ h: Math.floor(diff / 3600), m: Math.floor((diff % 3600) / 60), s: diff % 60 });
+    };
+    calc();
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+function Countdown() {
+  const { h, m, s } = useCountdown();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    <div className="flex items-center justify-center gap-1.5 text-xs font-bold" style={{ color: "#f97316" }}>
+      <span>⏳ Price resets in</span>
+      <span className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(249,115,22,0.15)" }}>
+        {pad(h)}:{pad(m)}:{pad(s)}
+      </span>
+    </div>
+  );
+}
+
 // ─── Fade-up wrapper ──────────────────────────────────────────
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useInView();
@@ -186,7 +217,9 @@ export default function HomePage() {
       }}>
         <div style={{ flex: 1 }}>
           <p className="text-sm font-black text-white">ReadyPrompts</p>
-          <p className="text-xs" style={{ color: "#f97316" }}>105 AI Prompts · $2 only</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <p className="text-xs" style={{ color: "#f97316" }}>105 prompts · $2</p>
+          </div>
         </div>
         <button onClick={handleBuy} className="btn-orange px-5 py-3 text-sm font-black rounded-xl">
           ✉️ Get for $2
@@ -594,11 +627,28 @@ export default function HomePage() {
                   ))}
                 </ul>
 
+                <div className="mb-4">
+                  <Countdown />
+                </div>
+
                 <button onClick={handleBuy}
                   className="w-full py-4 text-base font-black rounded-xl btn-orange"
                   style={{ animation: "glowPulse 2.5s ease-in-out infinite" }}>
                   {t.pricing.cta}
                 </button>
+
+                {/* Trust badges */}
+                <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
+                  <span className="flex items-center gap-1 text-xs" style={{ color: "#475569" }}>
+                    <span>🔒</span> Secure email
+                  </span>
+                  <span className="flex items-center gap-1 text-xs" style={{ color: "#475569" }}>
+                    <span>⚡</span> Instant delivery
+                  </span>
+                  <span className="flex items-center gap-1 text-xs" style={{ color: "#475569" }}>
+                    <span>✅</span> Satisfaction guaranteed
+                  </span>
+                </div>
                 <p className="text-xs mt-3" style={{ color: "#334155" }}>{t.pricing.secure}</p>
               </div>
             </div>
