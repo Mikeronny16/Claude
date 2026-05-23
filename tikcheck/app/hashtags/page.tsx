@@ -28,23 +28,23 @@ export default function HashtagsPage() {
   }
 
   const groups = result ? [
-    { key: "mega", label: "MEGA (1M+)", tags: result.mega, color: "#FF0050" },
-    { key: "medium", label: "MEDIUM (100K-1M)", tags: result.medium, color: "#FF0050" },
+    { key: "mega", label: "MEGA (1M+)", tags: result.mega, color: "#FF6B35" },
+    { key: "medium", label: "MEDIUM (100K-1M)", tags: result.medium, color: "#FF6B35" },
     { key: "niche", label: "NICHE (<100K)", tags: result.niche, color: "#00F2EA" },
   ] : [];
 
   return (
     <main style={{ minHeight: "100vh", background: "#000" }}>
-      <BackHeader title="#️⃣ Hashtag Finder" color="#FF0050" />
+      <BackHeader title="#️⃣ Hashtag Finder" color="#FF6B35" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>30 hashtags — mega, medium & niche for max reach.</p>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
           {PLATFORMS.map(p => (
             <button key={p} onClick={() => setPlatform(p)} style={{
-              padding: "7px 14px", borderRadius: 20, border: `1px solid ${platform === p ? "#FF0050" : "rgba(255,255,255,0.08)"}`,
+              padding: "7px 14px", borderRadius: 20, border: `1px solid ${platform === p ? "#FF6B35" : "rgba(255,255,255,0.08)"}`,
               background: platform === p ? "rgba(255,0,80,0.12)" : "transparent",
-              color: platform === p ? "#FF0050" : "#555", fontSize: 12, fontWeight: 600,
+              color: platform === p ? "#FF6B35" : "#555", fontSize: 12, fontWeight: 600,
               cursor: "pointer", fontFamily: "inherit",
             }}>{p}</button>
           ))}
@@ -55,7 +55,7 @@ export default function HashtagsPage() {
         <motion.button whileTap={{ scale: 0.96 }} onClick={generate} disabled={loading || !niche.trim()}
           style={{
             marginTop: 12, width: "100%", padding: "15px", borderRadius: 14, border: "none",
-            background: loading || !niche.trim() ? "#1a1a1a" : "linear-gradient(135deg, #FF0050, #ff4080)",
+            background: loading || !niche.trim() ? "#1a1a1a" : "linear-gradient(135deg, #FF6B35, #ff4080)",
             color: loading || !niche.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !niche.trim() ? "default" : "pointer",
             fontFamily: "inherit",

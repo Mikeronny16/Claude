@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import BottomNav from "./components/BottomNav";
 
 const TOOLS = [
-  { href: "/hook", emoji: "🎬", title: "Hook Generator", sub: "STOP THE SCROLL", color: "#FF0050", desc: "5 viral hooks for your next video — instantly" },
-  { href: "/caption", emoji: "✍️", title: "Caption Enhancer", sub: "DRIVE ENGAGEMENT", color: "#00F2EA", desc: "Paste your caption → AI makes it fire" },
-  { href: "/hashtags", emoji: "#️⃣", title: "Hashtag Finder", sub: "GO VIRAL", color: "#FF0050", desc: "30 perfect hashtags for your niche" },
-  { href: "/timing", emoji: "⏰", title: "Best Time to Post", sub: "MAXIMIZE REACH", color: "#00F2EA", desc: "Know exactly when to post for max views" },
-  { href: "/image", emoji: "🖼️", title: "AI Image Generator", sub: "AI VISUALS", color: "#FF0050", desc: "Generate scroll-stopping images free" },
+  { href: "/hook",     emoji: "🎬", title: "Hook Generator",      sub: "STOP THE SCROLL",  color: "#FF0050", desc: "5 viral hooks for your next video — instantly" },
+  { href: "/caption",  emoji: "✍️", title: "Caption Enhancer",    sub: "DRIVE ENGAGEMENT", color: "#A855F7", desc: "Paste your caption → AI makes it fire" },
+  { href: "/hashtags", emoji: "#️⃣", title: "Hashtag Finder",     sub: "GO VIRAL",          color: "#FF6B35", desc: "30 perfect hashtags for your niche" },
+  { href: "/timing",   emoji: "⏰", title: "Best Time to Post",   sub: "MAXIMIZE REACH",   color: "#00FF87", desc: "Know exactly when to post for max views" },
+  { href: "/image",    emoji: "🖼️", title: "AI Image Generator",  sub: "AI VISUALS",        color: "#FFD700", desc: "Generate scroll-stopping images free" },
 ];
 
 export default function Home() {

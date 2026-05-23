@@ -24,7 +24,7 @@ export default function ImagePage() {
 
   return (
     <main style={{ minHeight: "100vh", background: "#000" }}>
-      <BackHeader title="🖼️ AI Image Generator" color="#FF0050" />
+      <BackHeader title="🖼️ AI Image Generator" color="#FFD700" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>Free AI images for your posts. No account needed.</p>
 
@@ -33,9 +33,9 @@ export default function ImagePage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {STYLES.map(s => (
               <button key={s} onClick={() => setStyle(s)} style={{
-                padding: "7px 14px", borderRadius: 20, border: `1px solid ${style === s ? "#FF0050" : "rgba(255,255,255,0.08)"}`,
+                padding: "7px 14px", borderRadius: 20, border: `1px solid ${style === s ? "#FFD700" : "rgba(255,255,255,0.08)"}`,
                 background: style === s ? "rgba(255,0,80,0.12)" : "transparent",
-                color: style === s ? "#FF0050" : "#555", fontSize: 12, fontWeight: 600,
+                color: style === s ? "#FFD700" : "#555", fontSize: 12, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>{s}</button>
             ))}
@@ -48,7 +48,7 @@ export default function ImagePage() {
         <motion.button whileTap={{ scale: 0.96 }} onClick={generate} disabled={loading || !prompt.trim()}
           style={{
             marginTop: 12, width: "100%", padding: "15px", borderRadius: 14, border: "none",
-            background: loading || !prompt.trim() ? "#1a1a1a" : "linear-gradient(135deg, #FF0050, #ff4080)",
+            background: loading || !prompt.trim() ? "#1a1a1a" : "linear-gradient(135deg, #FFD700, #ff4080)",
             color: loading || !prompt.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !prompt.trim() ? "default" : "pointer",
             fontFamily: "inherit",
@@ -69,7 +69,7 @@ export default function ImagePage() {
                 style={{
                   display: "block", marginTop: 12, width: "100%", padding: "13px", borderRadius: 14, textAlign: "center",
                   background: "rgba(255,0,80,0.1)", border: "1px solid rgba(255,0,80,0.25)",
-                  color: "#FF0050", fontSize: 14, fontWeight: 700, textDecoration: "none",
+                  color: "#FFD700", fontSize: 14, fontWeight: 700, textDecoration: "none",
                 }}>
                 ⬇️ Download Image
               </a>
