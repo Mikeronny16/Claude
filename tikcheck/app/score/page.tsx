@@ -135,7 +135,7 @@ export default function ScorePage() {
                 }}>Grade: {result.grade}</span>
               </div>
 
-              <div style={{ background: "rgba(0,255,135,0.05)", border: "1px solid rgba(0,255,135,0.15)", borderRadius: 16, padding: "16px", marginBottom: 10 }}>
+              <div style={{ background: "rgba(0,22,10,0.85)", border: "1px solid rgba(0,255,135,0.18)", borderRadius: 16, padding: "16px", marginBottom: 10 }}>
                 <p style={{ fontSize: 9, fontWeight: 700, color: "#00FF87", letterSpacing: "1.5px", marginBottom: 10 }}>✅ WHAT'S WORKING</p>
                 {result.good?.map((g, i) => (
                   <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
@@ -146,7 +146,7 @@ export default function ScorePage() {
               </div>
 
               <div style={{
-                background: `${ACCENT_RGBA}0.05)`, border: `1px solid ${ACCENT_RGBA}0.15)`,
+                background: "rgba(22,5,0,0.88)", border: `1px solid ${ACCENT_RGBA}0.18)`,
                 borderRadius: 16, padding: "16px", marginBottom: 10,
               }}>
                 <p style={{ fontSize: 9, fontWeight: 700, color: ACCENT, letterSpacing: "1.5px", marginBottom: 10 }}>⚠️ IMPROVE THIS</p>
@@ -160,7 +160,7 @@ export default function ScorePage() {
 
               {result.rewrite && (
                 <div style={{
-                  background: "linear-gradient(180deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.02) 100%)",
+                  background: "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)",
                   border: `1px solid ${ACCENT_RGBA}0.22)`,
                   borderRadius: 16, padding: "16px",
                   boxShadow: "0 4px 24px rgba(0,0,0,0.3)",

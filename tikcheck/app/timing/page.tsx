@@ -67,7 +67,7 @@ export default function TimingPage() {
         {revealed && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{
-              background: "linear-gradient(180deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.02) 100%)",
+              background: "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)",
               border: `1px solid ${ACCENT_RGBA}0.22)`,
               borderRadius: 16, padding: "18px",
               boxShadow: "0 8px 32px rgba(0,0,0,0.4)",

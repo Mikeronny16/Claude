@@ -127,8 +127,8 @@ export default function HashtagsPage() {
               {groups.map((g, gi) => (
                 <motion.div key={g.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: gi * 0.08 }}
                   style={{
-                    background: "linear-gradient(180deg, rgba(255,107,0,0.07) 0%, rgba(255,107,0,0.02) 100%)",
-                    border: `1px solid ${ACCENT_RGBA}0.2)`,
+                    background: "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)",
+                    border: `1px solid ${ACCENT_RGBA}0.22)`,
                     borderRadius: 18, padding: "16px",
                     boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
                   }}>

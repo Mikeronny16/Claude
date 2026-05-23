@@ -136,8 +136,8 @@ export default function CalendarPage() {
                             onClick={() => setExpanded(isExpanded ? null : d.day)}
                             style={{
                               background: isExpanded
-                                ? "linear-gradient(180deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.03) 100%)"
-                                : `${ACCENT_RGBA}0.03)`,
+                                ? "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)"
+                                : "rgba(20,8,0,0.78)",
                               border: `1px solid ${isExpanded ? ACCENT_RGBA + "0.25)" : ACCENT_RGBA + "0.1)"}`,
                               borderRadius: 14, padding: "12px 14px",
                               cursor: "pointer", transition: "all 0.15s",

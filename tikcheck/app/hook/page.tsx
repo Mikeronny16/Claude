@@ -76,8 +76,8 @@ export default function HookPage() {
                 {t.hook.examples.map((ex, i) => (
                   <div key={i} className="example-card" onClick={() => useExample(ex)}
                     style={{
-                      background: `${ACCENT_RGBA}0.05)`,
-                      border: `1px solid ${ACCENT_RGBA}0.15)`,
+                      background: "rgba(22,8,0,0.82)",
+                      border: `1px solid ${ACCENT_RGBA}0.18)`,
                       borderRadius: 14, padding: "14px 16px",
                       display: "flex", alignItems: "flex-start", gap: 10,
                     }}>
@@ -102,8 +102,8 @@ export default function HookPage() {
               {hooks.map((h, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
                   style={{
-                    background: "linear-gradient(180deg, rgba(255,107,0,0.07) 0%, rgba(255,107,0,0.02) 100%)",
-                    border: `1px solid ${ACCENT_RGBA}0.2)`,
+                    background: "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)",
+                    border: `1px solid ${ACCENT_RGBA}0.22)`,
                     borderRadius: 16, padding: "14px 16px",
                     display: "flex", alignItems: "flex-start", gap: 10,
                     boxShadow: "0 4px 24px rgba(0,0,0,0.3)",

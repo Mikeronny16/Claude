@@ -84,7 +84,7 @@ export default function CaptionPage() {
               </p>
 
               <div style={{
-                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(22,8,0,0.80)", border: "1px solid rgba(255,255,255,0.07)",
                 borderRadius: 14, padding: "12px 14px", marginBottom: 6, opacity: 0.5,
               }}>
                 <p style={{ fontSize: 9, fontWeight: 700, color: "#444", letterSpacing: "1.5px", marginBottom: 6 }}>BEFORE</p>
@@ -94,7 +94,7 @@ export default function CaptionPage() {
               <div style={{ textAlign: "center", fontSize: 18, color: ACCENT, opacity: 0.4, margin: "4px 0" }}>↓</div>
 
               <div style={{
-                background: `${ACCENT_RGBA}0.06)`, border: `1px solid ${ACCENT_RGBA}0.18)`,
+                background: "rgba(22,8,0,0.82)", border: `1px solid ${ACCENT_RGBA}0.18)`,
                 borderRadius: 14, padding: "12px 14px", opacity: 0.5,
               }}>
                 <p style={{ fontSize: 9, fontWeight: 700, color: ACCENT, letterSpacing: "1.5px", marginBottom: 6 }}>AFTER ✨</p>
@@ -113,7 +113,7 @@ export default function CaptionPage() {
           {result && (
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 24 }}>
               <div style={{
-                background: "linear-gradient(180deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.02) 100%)",
+                background: "linear-gradient(180deg, rgba(255,107,0,0.15) 0%, rgba(18,8,0,0.90) 55%)",
                 border: `1px solid ${ACCENT_RGBA}0.22)`,
                 borderRadius: 18, padding: "18px",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
