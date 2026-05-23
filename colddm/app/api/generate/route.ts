@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import Groq from "groq-sdk";
 
 const PLATFORM_CONTEXT: Record<string, string> = {
   Instagram: "Instagram DM (casual, short, friendly tone, max 3 sentences)",
@@ -11,15 +9,17 @@ const PLATFORM_CONTEXT: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const { jobTitle, targetClient, platform } = await req.json();
+  try {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const { jobTitle, targetClient, platform } = await req.json();
 
-  if (!jobTitle || !targetClient || !platform) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-  }
+    if (!jobTitle || !targetClient || !platform) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
 
-  const platformGuide = PLATFORM_CONTEXT[platform] ?? "cold message";
+    const platformGuide = PLATFORM_CONTEXT[platform] ?? "cold message";
 
-  const prompt = `You are an expert cold outreach copywriter. Generate exactly 3 different cold ${platformGuide} messages.
+    const prompt = `You are an expert cold outreach copywriter. Generate exactly 3 different cold ${platformGuide} messages.
 
 Sender: ${jobTitle}
 Target: ${targetClient}
@@ -35,18 +35,23 @@ ${platform === "Email" ? "- For emails write: Subject: [line]\n\n[body]" : ""}
 Return ONLY a JSON array with exactly 3 strings, no extra text:
 ["message 1", "message 2", "message 3"]`;
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1024,
+      temperature: 0.8,
+    });
 
+    const raw = completion.choices[0]?.message?.content ?? "";
     const jsonMatch = raw.match(/\[[\s\S]*\]/);
+
     if (!jsonMatch) {
       return NextResponse.json({ error: "Generation failed — try again" }, { status: 500 });
     }
 
     const messages: string[] = JSON.parse(jsonMatch[0]);
     return NextResponse.json({ messages });
+
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });
