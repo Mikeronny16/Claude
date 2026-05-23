@@ -64,7 +64,7 @@ export default function ScorePage() {
 
   return (
     <VantaBackground color={0x00D4FF}>
-      <BackHeader title="⚡ Viral Score Checker" color="#00D4FF" />
+      <BackHeader title="Viral Score Checker" color="#00D4FF" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>
           Paste your caption → AI scores its viral potential 1–100.

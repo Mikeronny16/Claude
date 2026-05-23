@@ -31,7 +31,7 @@ export default function ImagePage() {
 
   return (
     <VantaBackground color={0xFFD700}>
-      <BackHeader title="🖼️ AI Image Generator" color="#FFD700" />
+      <BackHeader title="AI Image Generator" color="#FFD700" />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.image.subtitle}</p>

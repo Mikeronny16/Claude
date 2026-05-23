@@ -47,7 +47,7 @@ export default function HashtagsPage() {
 
   return (
     <VantaBackground color={0xFF6B35}>
-      <BackHeader title="#️⃣ Hashtag Finder" color="#FF6B35" />
+      <BackHeader title="Hashtag Finder" color="#FF6B35" />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.hashtags.subtitle}</p>

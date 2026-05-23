@@ -24,7 +24,7 @@ export default function TimingPage() {
 
   return (
     <main style={{ minHeight: "100vh", background: "#000" }}>
-      <BackHeader title="⏰ Best Time to Post" color="#00FF87" />
+      <BackHeader title="Best Time to Post" color="#00FF87" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>{t.timing.subtitle}</p>
 

@@ -35,7 +35,7 @@ export default function CaptionPage() {
 
   return (
     <VantaBackground color={0xA855F7}>
-      <BackHeader title="✍️ Caption Enhancer" color="#A855F7" />
+      <BackHeader title="Caption Enhancer" color="#A855F7" />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.caption.subtitle}</p>

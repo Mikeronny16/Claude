@@ -36,7 +36,7 @@ export default function HookPage() {
 
   return (
     <VantaBackground color={0xFF0050}>
-      <BackHeader title="🎬 Hook Generator" color="#FF0050" />
+      <BackHeader title="Hook Generator" color="#FF0050" />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.hook.subtitle}</p>

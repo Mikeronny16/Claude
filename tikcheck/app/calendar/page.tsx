@@ -51,7 +51,7 @@ export default function CalendarPage() {
 
   return (
     <VantaBackground color={0x10B981}>
-      <BackHeader title="📅 30-Day Calendar" color="#10B981" />
+      <BackHeader title="30-Day Calendar" color="#10B981" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>
           Get 30 content ideas planned out — one per day, ready to execute.
