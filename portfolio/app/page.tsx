@@ -266,15 +266,15 @@ export default function HomePage() {
       <section style={{
         position: 'relative',
         minHeight: '100vh',
-        display: 'flex', alignItems: 'center',
+        display: 'flex', alignItems: 'center', flexWrap: 'wrap',
         padding: 'clamp(100px, 12vh, 140px) clamp(24px, 6vw, 80px) 60px',
         maxWidth: 1100, margin: '0 auto',
-        gap: 48, overflow: 'hidden',
+        gap: 32, overflow: 'hidden',
       }}>
         <HeroBackground />
 
         {/* Left */}
-        <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 1 }}>
+        <div style={{ flex: '1 1 280px', minWidth: 0, position: 'relative', zIndex: 1 }}>
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -370,9 +370,10 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
           style={{
-            position: 'relative', zIndex: 1, flexShrink: 0,
-            width: 'clamp(240px, 32vw, 380px)',
-            height: 'clamp(360px, 46vw, 520px)',
+            position: 'relative', zIndex: 1,
+            flex: '1 1 260px',
+            width: 'clamp(260px, 34vw, 400px)',
+            height: 'clamp(460px, 60vw, 640px)',
           }}
         >
           <RobotScene />
