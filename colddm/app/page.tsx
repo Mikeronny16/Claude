@@ -153,6 +153,7 @@ export default function HomePage() {
           <span className="font-bold text-white text-sm">ColdDM</span>
         </div>
         <div className="flex items-center gap-2">
+          <a href="/generator" className="text-xs font-bold px-3 py-2 rounded-lg" style={{ color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)" }}>✨ AI Generator</a>
           <LanguageSelector />
           <button onClick={handleBuy} className="btn-blue text-xs font-bold px-4 py-2 rounded-lg">{t.nav.buy}</button>
         </div>
