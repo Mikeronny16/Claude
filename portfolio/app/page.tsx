@@ -161,7 +161,6 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
           >
             <div style={{ position: 'relative', marginBottom: 8 }}>
-              {/* Giant ghost background name */}
               <div style={{
                 position: 'absolute', top: '-0.15em', left: '-0.05em',
                 fontSize: 'clamp(5rem, 18vw, 14rem)',
@@ -311,10 +310,7 @@ export default function HomePage() {
                   }}>
                     {p.name}
                   </h3>
-                  <p style={{
-                    fontSize: 14, lineHeight: 1.65,
-                    color: '#555', maxWidth: 540,
-                  }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.65, color: '#555', maxWidth: 540 }}>
                     {p.desc}
                   </p>
                 </div>

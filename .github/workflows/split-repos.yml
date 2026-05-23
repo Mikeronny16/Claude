@@ -1,47 +1,176 @@
 name: Push Projects to Separate Repos
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'spawn-ai/**'
+      - 'readyprompts/**'
+      - 'portfolio/**'
+      - 'colddm/**'
+      - 'whispr/**'
+      - 'draftwin/**'
+      - 'toynar/**'
+      - 'sinar-clothing/**'
 
 jobs:
-  push-projects:
+  push-spawn-ai:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        project:
-          - spawn-ai
-          - readyprompts
-          - portfolio
-          - colddm
-          - whispr
-          - draftwin
-          - toynar
-          - sinar-clothing
-
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'spawn-ai/')
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v4
-
-      - name: Push ${{ matrix.project }} to its own repo
+      - uses: actions/checkout@v4
+      - name: Push spawn-ai
         env:
           PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          PROJECT: ${{ matrix.project }}
         run: |
-          cd $PROJECT
-
+          cd spawn-ai
           git init
           git config user.email "mikeronny18@gmail.com"
           git config user.name "Mikeronny16"
-
-          # Remove any .env files just in case
           find . -name ".env" -not -name ".env.example" -delete
-
           git add .
-          git commit -m "initial commit — migrated from monorepo"
+          git commit -m "sync from monorepo"
           git branch -M main
-
-          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/$PROJECT.git
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/spawn-ai.git
           git push -u origin main --force
 
-          echo "✅ $PROJECT pushed successfully"
+  push-readyprompts:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'readyprompts/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push readyprompts
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd readyprompts
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/readyprompts.git
+          git push -u origin main --force
+
+  push-portfolio:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'portfolio/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push portfolio
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd portfolio
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/portfolio.git
+          git push -u origin main --force
+
+  push-colddm:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'colddm/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push colddm
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd colddm
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/colddm.git
+          git push -u origin main --force
+
+  push-whispr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'whispr/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push whispr
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd whispr
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/whispr.git
+          git push -u origin main --force
+
+  push-draftwin:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'draftwin/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push draftwin
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd draftwin
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/draftwin.git
+          git push -u origin main --force
+
+  push-toynar:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'toynar/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push toynar
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd toynar
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/toynar.git
+          git push -u origin main --force
+
+  push-sinar-clothing:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'sinar-clothing/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push sinar-clothing
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cd sinar-clothing
+          git init
+          git config user.email "mikeronny18@gmail.com"
+          git config user.name "Mikeronny16"
+          find . -name ".env" -not -name ".env.example" -delete
+          git add .
+          git commit -m "sync from monorepo"
+          git branch -M main
+          git remote add origin https://Mikeronny16:$PAT@github.com/Mikeronny16/sinar-clothing.git
+          git push -u origin main --force
