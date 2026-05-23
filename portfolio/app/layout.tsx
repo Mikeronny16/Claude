@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700", "900"] });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
-  title: "Mike Ronny — Builder of digital products",
-  description: "Developer & founder from Myanmar. I build digital products people actually use.",
+  title: "Mike Ronny — Creator + Developer",
+  description: "Designing & building digital tools for the creator economy. Developer & founder from Myanmar.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body style={{ background: "#04060e" }}>{children}</body>
+    <html lang="en" className={spaceGrotesk.className}>
+      <body>{children}</body>
     </html>
   );
 }

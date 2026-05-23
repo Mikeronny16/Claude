@@ -1,504 +1,426 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import dynamic from 'next/dynamic'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 
-const ParticleCanvas = dynamic(
-  () => import('@/components/ParticleCanvas').then((m) => m.ParticleCanvas),
-  { ssr: false }
-)
-
-// ─── Content ─────────────────────────────────────────────────────────────────
-
-const SECTIONS = [
-  {
-    tag: 'MIKE RONNY',
-    heading: ['I build digital', 'products people', 'actually use.'],
-    sub: 'Developer & founder, based in Myanmar.',
-    cta: null,
-  },
-  {
-    tag: 'THE WORK',
-    heading: ['From raw idea', 'to live product.'],
-    sub: 'Shipped in days, not months.',
-    cta: null,
-  },
-  {
-    tag: "LET'S TALK",
-    heading: ['Have a project', 'in mind?'],
-    sub: 'Open for collabs, freelance, and new ideas.',
-    cta: 'mikeronny18@gmail.com',
-  },
-]
+const ACCENT = "#FF6B00"
+const ACCENT_RGBA = "rgba(255,107,0,"
 
 const PROJECTS = [
   {
-    emoji: '🥚',
-    name: 'Spawn AI',
-    tag: 'AI · PET · GAME',
-    desc: 'Buy an egg, whisper to it, and raise a unique AI creature. Each pet has its own personality and lifecycle.',
-    color: '#a78bfa',
+    name: 'TikCheck',
+    tag: 'CREATOR TOOLS · AI',
+    desc: 'The all-in-one viral toolkit for TikTok creators. Score videos, generate hooks, captions, hashtags, and plan 30 days of content.',
     href: '#',
+    dark: true,
+    year: '2025',
+    live: true,
   },
   {
-    emoji: '💬',
-    name: 'ColdDM Scripts',
-    tag: 'TOOLS · FREELANCE',
-    desc: '30 copy-paste cold DM scripts for freelancers. Land clients in 60 seconds.',
-    color: '#00c2ff',
-    href: 'https://colddm.vercel.app',
-  },
-  {
-    emoji: '⚡',
     name: 'ReadyPrompts',
     tag: 'AI · PRODUCTIVITY',
-    desc: '105 AI prompts that actually work — for creators, developers, and marketers.',
-    color: '#f59e0b',
+    desc: '105 AI prompts that actually work — for creators, developers, and marketers. Built for people who ship, not theorize.',
+    href: 'https://readyprompts.vercel.app',
+    dark: false,
+    year: '2024',
+    live: true,
+  },
+  {
+    name: 'ColdDM Scripts',
+    tag: 'FREELANCE · TOOLS',
+    desc: '30 copy-paste cold DM scripts. Land clients in 60 seconds. No cringe, no guessing — just messages that actually get replies.',
+    href: 'https://colddm.vercel.app',
+    dark: true,
+    year: '2024',
+    live: true,
+  },
+  {
+    name: 'Spawn AI',
+    tag: 'AI · PET · GAME',
+    desc: 'A quiet experiment in caring. Buy an egg, whisper to it, raise a unique AI creature with its own personality.',
     href: '#',
+    dark: false,
+    year: '2025',
+    live: false,
   },
 ]
 
-// ─────────────────────────────────────────────────────────────────────────────
+const SKILLS = ['Next.js', 'TypeScript', 'AI APIs', 'Framer Motion', 'Tailwind CSS', 'Prisma']
 
-// Sparkle dots arranged around the email link
-const SPARKLE_DOTS = [
-  { angle: 0,   r: 90,  size: 5, dur: 2.0, delay: 0.0,  color: '#00e5ff' },
-  { angle: 40,  r: 110, size: 3, dur: 2.5, delay: 0.35, color: '#ffffff' },
-  { angle: 75,  r: 80,  size: 4, dur: 1.8, delay: 0.7,  color: '#00c2ff' },
-  { angle: 120, r: 100, size: 3, dur: 2.3, delay: 0.15, color: '#a78bfa' },
-  { angle: 160, r: 95,  size: 5, dur: 2.1, delay: 0.55, color: '#00e5ff' },
-  { angle: 200, r: 85,  size: 3, dur: 2.4, delay: 0.9,  color: '#ffffff' },
-  { angle: 240, r: 105, size: 4, dur: 1.9, delay: 0.3,  color: '#00c2ff' },
-  { angle: 280, r: 75,  size: 3, dur: 2.2, delay: 0.65, color: '#a78bfa' },
-  { angle: 320, r: 98,  size: 5, dur: 2.0, delay: 0.45, color: '#00e5ff' },
-  // outer scattered
-  { angle: 20,  r: 140, size: 2, dur: 3.0, delay: 0.2,  color: '#ffffff' },
-  { angle: 100, r: 130, size: 2, dur: 2.8, delay: 0.8,  color: '#00c2ff' },
-  { angle: 190, r: 145, size: 2, dur: 3.2, delay: 0.4,  color: '#a78bfa' },
-  { angle: 300, r: 135, size: 2, dur: 2.9, delay: 0.1,  color: '#ffffff' },
-]
+const inView = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.55, ease: "easeOut" as const },
+}
 
-function SparkleEmail() {
-  return (
-    <div style={{ position: 'relative', display: 'inline-block', padding: '20px 0' }}>
-      {/* Sparkle dots */}
-      {SPARKLE_DOTS.map((d, i) => {
-        const rad = (d.angle * Math.PI) / 180
-        const x   = Math.cos(rad) * d.r
-        const y   = Math.sin(rad) * d.r * 0.55  // flatten vertically
-        return (
-          <span
-            key={i}
-            style={{
-              position: 'absolute',
-              top:  `calc(50% + ${y}px)`,
-              left: `calc(50% + ${x}px)`,
-              width:  d.size,
-              height: d.size,
-              borderRadius: '50%',
-              background: d.color,
-              boxShadow: `0 0 ${d.size * 3}px ${d.color}`,
-              animation: `sparklePop ${d.dur}s ease-in-out ${d.delay}s infinite`,
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none',
-            }}
-          />
-        )
-      })}
+function Avatar() {
+  const [imgError, setImgError] = useState(false)
 
-      {/* Email link */}
-      <a
-        href="mailto:mikeronny18@gmail.com"
+  if (!imgError) {
+    return (
+      <img
+        src="/mike.jpg"
+        alt="Mike Ronny"
+        onError={() => setImgError(true)}
         style={{
-          display: 'inline-block',
-          fontSize: 'clamp(1rem, 3vw, 1.4rem)',
-          fontWeight: 900,
-          letterSpacing: '-0.01em',
-          textDecoration: 'none',
-          background: 'linear-gradient(135deg, #00e5ff 0%, #00c2ff 50%, #a78bfa 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          animation: 'electricText 4s ease-in-out infinite',
-          position: 'relative',
-          zIndex: 1,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          borderRadius: '50%',
+          display: 'block',
         }}
-      >
-        mikeronny18@gmail.com →
-      </a>
+      />
+    )
+  }
 
-      {/* Underline glow */}
-      <div style={{
-        height: 1,
-        background: 'linear-gradient(90deg, transparent, #00c2ff, #a78bfa, transparent)',
-        marginTop: 6,
-        opacity: 0.5,
-        animation: 'sparklePop 2s ease-in-out infinite',
-      }} />
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      borderRadius: '50%',
+      background: `linear-gradient(135deg, ${ACCENT_RGBA}0.25) 0%, rgba(30,10,0,0.9) 100%)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 'clamp(2.5rem, 8vw, 4rem)',
+      fontWeight: 700,
+      color: ACCENT,
+      letterSpacing: '-0.04em',
+    }}>
+      MR
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-function easeInOut(t: number) {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-}
-
-function getSectionOpacity(idx: number, p: number): number {
-  // 3 equal zones (0-0.33, 0.33-0.66, 0.66-1.0), fade 0.1 crossfade
-  const FADE = 0.12
-  const start = idx / 3
-  const end   = (idx + 1) / 3
-  if (idx === SECTIONS.length - 1) {
-    // last section stays visible till end
-    if (p < start - FADE) return 0
-    if (p < start)        return easeInOut((p - (start - FADE)) / FADE)
-    return 1
-  }
-  if (p < start - FADE || p > end + FADE) return 0
-  if (p < start)  return easeInOut((p - (start - FADE)) / FADE)
-  if (p < end)    return 1
-  return easeInOut(1 - (p - end) / FADE)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function HomePage() {
-  const progressRef    = useRef(0)
-  const [prog, setProg] = useState(0)
-
-  // Scroll → progress (0…1 across the 300vh hero zone)
-  useEffect(() => {
-    const onScroll = () => {
-      const el = document.getElementById('hero-scroll')
-      if (!el) return
-      const scrollY    = window.scrollY
-      const heroHeight = el.offsetHeight - window.innerHeight
-      const p          = Math.max(0, Math.min(1, scrollY / heroHeight))
-      progressRef.current = p
-      setProg(p)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   return (
-    <>
-      {/* ── Fixed 3D canvas (z: 0) ─────────────────────────── */}
-      <ParticleCanvas progressRef={progressRef} />
+    <main style={{ background: '#0A0A0A', minHeight: '100vh', color: '#fff' }}>
 
-      {/* ── Navigation ─────────────────────────────────────── */}
-      <nav
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
-        style={{ padding: '20px 28px', backdropFilter: 'blur(0px)' }}
-      >
-        {/* Logo */}
-        <span
-          className="font-black tracking-tighter text-xl select-none"
-          style={{ color: '#fff', letterSpacing: '-0.03em' }}
-        >
-          MR
-        </span>
-
-        {/* Pill nav — desktop only */}
-        <div
-          className="hidden md:flex items-center gap-0.5 rounded-full px-2 py-1.5"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(20px)',
-          }}
-        >
-          {['Work', 'About', 'Contact'].map((label) => (
-            <a
-              key={label}
-              href={`#${label.toLowerCase()}`}
-              className="px-5 py-1.5 rounded-full text-sm font-semibold transition-colors"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#fff')}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.5)')}
-            >
-              {label}
-            </a>
-          ))}
+      {/* ── Nav ───────────────────────────────────────── */}
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '18px 28px',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        background: 'rgba(10,10,10,0.85)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.03em' }}>MR</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <span style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            border: `1px solid ${ACCENT_RGBA}0.35)`,
+            borderRadius: 100, padding: '4px 12px',
+            fontSize: 11, fontWeight: 700, letterSpacing: '0.06em',
+            color: ACCENT,
+          }}>
+            <span style={{
+              width: 5, height: 5, borderRadius: '50%',
+              background: ACCENT, display: 'inline-block',
+              animation: 'pulse-dot 2s ease-in-out infinite',
+            }} />
+            Available
+          </span>
+          <a href="mailto:mikeronny18@gmail.com" style={{
+            fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.65)',
+            textDecoration: 'none', letterSpacing: '-0.01em',
+          }}>
+            Contact →
+          </a>
         </div>
-
-        {/* Hamburger */}
-        <button
-          className="flex flex-col justify-center gap-[5px] p-1.5"
-          style={{ width: 36, height: 36 }}
-          aria-label="Menu"
-        >
-          <span style={{ display: 'block', width: 22, height: 1.5, background: 'rgba(255,255,255,0.7)', borderRadius: 1 }} />
-          <span style={{ display: 'block', width: 15, height: 1.5, background: 'rgba(255,255,255,0.7)', borderRadius: 1 }} />
-        </button>
       </nav>
 
-      {/* ══════════════════════════════════════════════════════
-          HERO — 300 vh scroll zone
-      ══════════════════════════════════════════════════════ */}
-      <div id="hero-scroll" style={{ height: '300vh', position: 'relative' }}>
+      {/* ── Hero ──────────────────────────────────────── */}
+      <section style={{
+        minHeight: '100vh',
+        display: 'flex', alignItems: 'center',
+        padding: 'clamp(100px, 12vh, 140px) clamp(24px, 6vw, 80px) 60px',
+        maxWidth: 1100, margin: '0 auto',
+        gap: 48,
+      }}>
 
-        {/* Sticky overlay — stays in view during entire scroll */}
-        <div
-          className="sticky top-0 flex items-center"
-          style={{ height: '100vh', zIndex: 10, pointerEvents: 'none' }}
-        >
-          <div style={{ paddingLeft: 'clamp(28px, 6vw, 96px)', paddingRight: 'clamp(28px, 6vw, 96px)', maxWidth: 680 }}>
-            {SECTIONS.map((s, i) => {
-              const opacity   = getSectionOpacity(i, prog)
-              const translateY = opacity === 0 ? (prog > (i / 3) ? -20 : 20) : 0
-              return (
-                <div
-                  key={i}
-                  style={{
-                    position: i === 0 ? 'relative' : 'absolute',
-                    top: i === 0 ? undefined : 0,
-                    left: 0,
-                    paddingLeft: 'clamp(28px, 6vw, 96px)',
-                    opacity,
-                    transform: `translateY(${translateY}px)`,
-                    transition: 'opacity 0.5s ease, transform 0.5s ease',
-                    pointerEvents: opacity > 0.5 ? 'auto' : 'none',
-                  }}
-                >
-                  {/* Tag */}
-                  <p
-                    className="text-xs font-bold tracking-[0.22em] uppercase mb-4"
-                    style={{ color: '#00c2ff' }}
-                  >
-                    ✦ {s.tag}
-                  </p>
-
-                  {/* Heading */}
-                  <h1
-                    className="font-black text-white leading-[1.05]"
-                    style={{ fontSize: 'clamp(2.4rem, 6vw, 4.5rem)', marginBottom: '1.2rem' }}
-                  >
-                    {s.heading.map((line, li) => (
-                      <span key={li} style={{ display: 'block' }}>{line}</span>
-                    ))}
-                  </h1>
-
-                  {/* Sub */}
-                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', marginBottom: '1.5rem' }}>
-                    {s.sub}
-                  </p>
-
-                  {/* CTA (section 3 only) */}
-                  {s.cta && (
-                    <a
-                      href={`mailto:${s.cta}`}
-                      className="inline-block font-bold text-sm rounded-full transition-all"
-                      style={{
-                        padding: '12px 28px',
-                        background: 'linear-gradient(135deg, #00c2ff, #0075ff)',
-                        color: '#fff',
-                        boxShadow: '0 0 30px rgba(0,194,255,0.4)',
-                        pointerEvents: 'auto',
-                      }}
-                    >
-                      {s.cta} →
-                    </a>
-                  )}
-
-                  {/* Scroll hint — section 0 only */}
-                  {i === 0 && (
-                    <div className="flex items-center gap-3 mt-8" style={{ opacity: 0.35 }}>
-                      <div style={{ width: 28, height: 1, background: 'rgba(255,255,255,0.4)' }} />
-                      <span className="text-xs tracking-[0.2em] font-semibold uppercase">Scroll to explore</span>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-
-            {/* Scroll progress dots */}
-            <div
-              style={{
-                position: 'absolute',
-                right: 'clamp(20px, 4vw, 48px)',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-              }}
-            >
-              {SECTIONS.map((_, i) => {
-                const active = getSectionOpacity(i, prog) > 0.5
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      width: active ? 6 : 4,
-                      height: active ? 6 : 4,
-                      borderRadius: '50%',
-                      background: active ? '#00c2ff' : 'rgba(255,255,255,0.2)',
-                      boxShadow: active ? '0 0 8px rgba(0,194,255,0.8)' : 'none',
-                      transition: 'all 0.3s ease',
-                    }}
-                  />
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════
-          PROJECTS — id="work"
-      ══════════════════════════════════════════════════════ */}
-      <section
-        id="work"
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          background: 'transparent',
-          padding: 'clamp(60px, 8vw, 120px) clamp(28px, 6vw, 96px)',
-        }}
-      >
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p className="text-xs font-bold tracking-[0.22em] uppercase mb-3" style={{ color: '#00c2ff' }}>
-            ✦ SELECTED WORK
-          </p>
-          <h2
-            className="font-black text-white"
-            style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', marginBottom: '3rem', lineHeight: 1.1 }}
+        {/* Left — text */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{ marginBottom: 20 }}
           >
-            Products I&apos;ve built
-          </h2>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 100,
+              padding: '5px 14px', fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.1em', color: '#666',
+            }}>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: ACCENT }} />
+              CREATOR + DEVELOPER
+            </span>
+          </motion.div>
 
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
+          >
+            <div style={{ position: 'relative', marginBottom: 8 }}>
+              {/* Giant ghost background name */}
+              <div style={{
+                position: 'absolute', top: '-0.15em', left: '-0.05em',
+                fontSize: 'clamp(5rem, 18vw, 14rem)',
+                fontWeight: 700, lineHeight: 0.85,
+                color: 'rgba(255,255,255,0.025)',
+                letterSpacing: '-0.05em',
+                userSelect: 'none', pointerEvents: 'none',
+                whiteSpace: 'nowrap', zIndex: 0,
+              }}>
+                MIKE
+              </div>
+              <h1 style={{
+                position: 'relative', zIndex: 1,
+                fontSize: 'clamp(2.6rem, 6vw, 5rem)',
+                fontWeight: 700, lineHeight: 1.05,
+                letterSpacing: '-0.04em', margin: 0,
+              }}>
+                Designing &amp; building<br />
+                <span style={{ color: ACCENT }}>for the creator</span><br />
+                economy.
+              </h1>
+            </div>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.18, ease: "easeOut" }}
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
-              gap: 16,
+              fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+              color: '#666', lineHeight: 1.7,
+              maxWidth: 440, margin: '20px 0 36px',
             }}
           >
-            {PROJECTS.map((p) => (
-              <a
-                key={p.name}
-                href={p.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group block rounded-2xl transition-all duration-300"
-                style={{
-                  padding: '28px 26px',
-                  background: 'rgba(4,6,14,0.72)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  textDecoration: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.border = `1px solid ${p.color}55`
-                  el.style.background = `rgba(4,6,14,0.6)`
-                  el.style.transform = 'translateY(-4px)'
-                  el.style.boxShadow = `0 0 40px ${p.color}20`
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.border = '1px solid rgba(255,255,255,0.08)'
-                  el.style.background = 'rgba(4,6,14,0.72)'
-                  el.style.transform = 'translateY(0)'
-                  el.style.boxShadow = 'none'
-                }}
-              >
-                <div style={{ fontSize: 36, marginBottom: 18 }}>{p.emoji}</div>
-                <p
-                  className="text-xs font-bold tracking-[0.2em] uppercase mb-2"
-                  style={{ color: p.color }}
-                >
-                  {p.tag}
-                </p>
-                <h3
-                  className="font-black text-white mb-3"
-                  style={{ fontSize: '1.25rem' }}
-                >
-                  {p.name}
-                </h3>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                  {p.desc}
-                </p>
-                <div
-                  className="flex items-center gap-1.5 mt-5 text-xs font-bold"
-                  style={{ color: p.color }}
-                >
-                  View project <span>→</span>
-                </div>
-              </a>
-            ))}
-          </div>
+            Mike Ronny — Developer &amp; founder from Myanmar. I ship digital tools used by creators across Southeast Asia and beyond.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.26, ease: "easeOut" }}
+            style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}
+          >
+            <a href="#work" style={{
+              display: 'inline-block', padding: '12px 24px', borderRadius: 100,
+              background: ACCENT, color: '#fff',
+              fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              letterSpacing: '-0.01em',
+            }}>
+              View Work ↓
+            </a>
+            <a href="mailto:mikeronny18@gmail.com" style={{
+              display: 'inline-block', padding: '12px 24px', borderRadius: 100,
+              border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)',
+              fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              letterSpacing: '-0.01em',
+            }}>
+              Let&apos;s talk
+            </a>
+          </motion.div>
         </div>
+
+        {/* Right — avatar photo */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          style={{
+            flexShrink: 0,
+            width: 'clamp(160px, 26vw, 300px)',
+            height: 'clamp(160px, 26vw, 300px)',
+            borderRadius: '50%',
+            border: `2px solid ${ACCENT_RGBA}0.25)`,
+            boxShadow: `0 0 80px ${ACCENT_RGBA}0.12), 0 0 0 1px rgba(255,255,255,0.04)`,
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <Avatar />
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: '50%',
+            background: `radial-gradient(ellipse at 30% 20%, ${ACCENT_RGBA}0.08) 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+        </motion.div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════
-          CONTACT — id="contact"
-      ══════════════════════════════════════════════════════ */}
-      <section
-        id="contact"
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          background: 'transparent',
-          padding: 'clamp(60px, 8vw, 120px) clamp(28px, 6vw, 96px)',
-          textAlign: 'center',
-        }}
-      >
-
-        <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative' }}>
-          <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4" style={{ color: '#00c2ff' }}>
-            ✦ CONTACT
+      {/* ── Work ──────────────────────────────────────── */}
+      <section id="work" style={{
+        padding: 'clamp(60px, 8vw, 100px) clamp(24px, 6vw, 80px)',
+        maxWidth: 1100, margin: '0 auto',
+      }}>
+        <motion.div {...inView} style={{ marginBottom: 40 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: '#444', marginBottom: 10 }}>
+            SELECTED WORK
           </p>
-          <h2
-            className="font-black text-white"
-            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.1, marginBottom: '1.2rem' }}
-          >
-            Let&apos;s build<br />
-            <span
+          <h2 style={{
+            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
+            fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1,
+          }}>
+            Products I&apos;ve shipped
+          </h2>
+        </motion.div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {PROJECTS.map((p, i) => (
+            <motion.a
+              key={p.name}
+              href={p.href}
+              target={p.live ? '_blank' : undefined}
+              rel="noopener noreferrer"
+              {...inView}
+              transition={{ ...inView.transition, delay: i * 0.07 }}
+              whileHover={{ y: -2 }}
               style={{
-                background: 'linear-gradient(135deg, #00e5ff 0%, #00c2ff 45%, #7c3aed 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                display: 'block', textDecoration: 'none',
+                padding: 'clamp(20px, 3vw, 28px)',
+                borderRadius: 18,
+                background: p.dark ? '#141414' : '#1C1C1C',
+                border: p.dark
+                  ? '1px solid rgba(255,255,255,0.07)'
+                  : `1px solid ${ACCENT_RGBA}0.12)`,
+                color: '#fff', cursor: p.live ? 'pointer' : 'default',
               }}
             >
-              something great.
-            </span>
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '3rem', fontSize: '1rem' }}>
-            Open for new projects, collabs, and ideas.
-          </p>
-
-          {/* ── Sparkle CTA ─────────────────────────── */}
-          <SparkleEmail />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+                      color: p.dark ? '#444' : '#555',
+                    }}>
+                      {p.tag}
+                    </span>
+                    {!p.live && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                        background: `${ACCENT_RGBA}0.15)`, color: ACCENT,
+                        border: `1px solid ${ACCENT_RGBA}0.25)`,
+                        borderRadius: 100, padding: '2px 8px',
+                      }}>
+                        SOON
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{
+                    fontSize: 'clamp(1.3rem, 3vw, 1.9rem)',
+                    fontWeight: 700, letterSpacing: '-0.03em',
+                    lineHeight: 1.1, marginBottom: 8,
+                  }}>
+                    {p.name}
+                  </h3>
+                  <p style={{
+                    fontSize: 14, lineHeight: 1.65,
+                    color: '#555', maxWidth: 540,
+                  }}>
+                    {p.desc}
+                  </p>
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'right', paddingTop: 4 }}>
+                  <p style={{ fontSize: 11, color: '#333', fontWeight: 600 }}>{p.year}</p>
+                  {p.live && (
+                    <div style={{ marginTop: 20, fontSize: 16, color: '#333' }}>→</div>
+                  )}
+                </div>
+              </div>
+            </motion.a>
+          ))}
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────── */}
-      <footer
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          background: 'rgba(4,6,14,0.85)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '28px clamp(28px, 6vw, 96px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <span className="font-black text-white" style={{ letterSpacing: '-0.02em' }}>MR</span>
-        <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: '0.75rem' }}>
-          © 2025 Mike Ronny · Built with Next.js
-        </p>
+      {/* ── About ─────────────────────────────────────── */}
+      <section style={{
+        padding: 'clamp(40px, 6vw, 80px) clamp(24px, 6vw, 80px)',
+        maxWidth: 1100, margin: '0 auto',
+      }}>
+        <motion.div
+          {...inView}
+          style={{
+            background: '#141414',
+            border: `1px solid ${ACCENT_RGBA}0.15)`,
+            borderRadius: 20, padding: 'clamp(28px, 4vw, 48px)',
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div style={{
+            position: 'absolute', top: -60, right: -60,
+            width: 200, height: 200, borderRadius: '50%',
+            background: `radial-gradient(circle, ${ACCENT_RGBA}0.08) 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: '#444', marginBottom: 16 }}>
+            ABOUT
+          </p>
+          <p style={{
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.55rem)',
+            fontWeight: 600, color: '#ccc', lineHeight: 1.6,
+            letterSpacing: '-0.02em', maxWidth: 640,
+          }}>
+            I build tools for people who create. Based in Myanmar, working at the intersection of AI + creator economy — shipping fast, shipping real.
+          </p>
+          <div style={{ marginTop: 24, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {SKILLS.map(s => (
+              <span key={s} style={{
+                fontSize: 11, fontWeight: 600,
+                color: '#444', border: '1px solid #222',
+                borderRadius: 100, padding: '5px 13px',
+              }}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Contact ───────────────────────────────────── */}
+      <section style={{
+        padding: 'clamp(60px, 8vw, 100px) clamp(24px, 6vw, 80px) clamp(80px, 10vw, 120px)',
+        textAlign: 'center', maxWidth: 700, margin: '0 auto',
+      }}>
+        <motion.div {...inView}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: '#444', marginBottom: 14 }}>
+            GET IN TOUCH
+          </p>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontWeight: 700, letterSpacing: '-0.04em',
+            lineHeight: 1.1, marginBottom: 14,
+          }}>
+            Let&apos;s build something<br />
+            <span style={{ color: ACCENT }}>together.</span>
+          </h2>
+          <p style={{ color: '#555', fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>
+            Open for new projects, collabs, and ideas.
+          </p>
+          <motion.a
+            href="mailto:mikeronny18@gmail.com"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              display: 'inline-block',
+              padding: '15px 36px', borderRadius: 100,
+              background: ACCENT, color: '#fff',
+              fontSize: 15, fontWeight: 700, textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              boxShadow: `0 0 40px ${ACCENT_RGBA}0.3)`,
+            }}
+          >
+            mikeronny18@gmail.com →
+          </motion.a>
+        </motion.div>
+      </section>
+
+      {/* ── Footer ────────────────────────────────────── */}
+      <footer style={{
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '22px clamp(24px, 6vw, 80px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontWeight: 700, letterSpacing: '-0.03em', fontSize: 15 }}>MR</span>
+        <p style={{ color: '#333', fontSize: 12 }}>© 2025 Mike Ronny</p>
       </footer>
-    </>
+    </main>
   )
 }
