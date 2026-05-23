@@ -6,6 +6,9 @@ import BottomNav from "../components/BottomNav";
 import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
+const ACCENT = "#FF6B00";
+const ACCENT_RGBA = "rgba(255,107,0,";
+
 export default function HookPage() {
   const { t } = useLang();
   const [topic, setTopic] = useState("");
@@ -35,8 +38,8 @@ export default function HookPage() {
   const showEmpty = !loading && hooks.length === 0;
 
   return (
-    <VantaBackground color={0xFF0050}>
-      <BackHeader title="Hook Generator" color="#FF0050" />
+    <VantaBackground color={0xFF6B00}>
+      <BackHeader title="Hook Generator" color={ACCENT} />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.hook.subtitle}</p>
@@ -47,11 +50,11 @@ export default function HookPage() {
         <motion.button whileTap={{ scale: 0.97 }} onClick={generate} disabled={loading || !topic.trim()}
           style={{
             marginTop: 12, width: "100%", padding: "15px", borderRadius: 16, border: "none",
-            background: loading || !topic.trim() ? "#0f0f0f" : "linear-gradient(135deg, #FF0050, #ff4080)",
+            background: loading || !topic.trim() ? "#0f0a00" : "linear-gradient(135deg, #FF6B00, #FF3D00)",
             color: loading || !topic.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !topic.trim() ? "default" : "pointer",
             fontFamily: "inherit",
-            boxShadow: !loading && topic.trim() ? "0 0 28px rgba(255,0,80,0.3)" : "none",
+            boxShadow: !loading && topic.trim() ? `0 0 28px ${ACCENT_RGBA}0.35)` : "none",
             transition: "all 0.2s",
           }}>
           {loading ? (
@@ -62,7 +65,6 @@ export default function HookPage() {
           ) : t.hook.button}
         </motion.button>
 
-        {/* Empty state — example cards */}
         <AnimatePresence>
           {showEmpty && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -74,27 +76,25 @@ export default function HookPage() {
                 {t.hook.examples.map((ex, i) => (
                   <div key={i} className="example-card" onClick={() => useExample(ex)}
                     style={{
-                      background: "rgba(255,0,80,0.04)",
-                      border: "1px solid rgba(255,0,80,0.1)",
+                      background: `${ACCENT_RGBA}0.05)`,
+                      border: `1px solid ${ACCENT_RGBA}0.15)`,
                       borderRadius: 14, padding: "14px 16px",
                       display: "flex", alignItems: "flex-start", gap: 10,
                     }}>
-                    <span style={{ color: "#FF0050", fontWeight: 800, fontSize: 11, minWidth: 18, opacity: 0.6 }}>#{i + 1}</span>
+                    <span style={{ color: ACCENT, fontWeight: 800, fontSize: 11, minWidth: 18, opacity: 0.6 }}>#{i + 1}</span>
                     <p style={{ fontSize: 13, lineHeight: 1.5, color: "#666", flex: 1 }}>{ex}</p>
                     <span style={{ fontSize: 10, color: "#333", fontWeight: 600, flexShrink: 0, marginTop: 1 }}>tap</span>
                   </div>
                 ))}
               </div>
-              {/* Decorative stat */}
               <div style={{ marginTop: 24, textAlign: "center" }}>
-                <div style={{ fontSize: 32, fontWeight: 800, color: "rgba(255,0,80,0.12)", letterSpacing: "-2px" }}>5 HOOKS</div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: `${ACCENT_RGBA}0.1)`, letterSpacing: "-2px" }}>5 HOOKS</div>
                 <p style={{ fontSize: 11, color: "#2a2a2a", marginTop: 2 }}>generated per request · free forever</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Results */}
         <AnimatePresence>
           {hooks.length > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -102,17 +102,19 @@ export default function HookPage() {
               {hooks.map((h, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
                   style={{
-                    background: "rgba(255,0,80,0.05)", border: "1px solid rgba(255,0,80,0.12)",
+                    background: "linear-gradient(180deg, rgba(255,107,0,0.07) 0%, rgba(255,107,0,0.02) 100%)",
+                    border: `1px solid ${ACCENT_RGBA}0.2)`,
                     borderRadius: 16, padding: "14px 16px",
                     display: "flex", alignItems: "flex-start", gap: 10,
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
                   }}>
-                  <span style={{ color: "#FF0050", fontWeight: 800, fontSize: 12, minWidth: 20 }}>#{i + 1}</span>
+                  <span style={{ color: ACCENT, fontWeight: 800, fontSize: 12, minWidth: 20 }}>#{i + 1}</span>
                   <p style={{ flex: 1, fontSize: 14, lineHeight: 1.55, color: "#ddd" }}>{h}</p>
                   <button onClick={() => copy(i)} style={{
-                    background: copied === i ? "rgba(0,242,234,0.15)" : "rgba(255,255,255,0.06)",
-                    border: `1px solid ${copied === i ? "rgba(0,242,234,0.3)" : "rgba(255,255,255,0.1)"}`,
+                    background: copied === i ? `${ACCENT_RGBA}0.2)` : "rgba(255,255,255,0.06)",
+                    border: `1px solid ${copied === i ? ACCENT_RGBA + "0.4)" : "rgba(255,255,255,0.1)"}`,
                     borderRadius: 8, padding: "5px 10px",
-                    color: copied === i ? "#00F2EA" : "#555",
+                    color: copied === i ? ACCENT : "#555",
                     fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", flexShrink: 0,
                   }}>{copied === i ? t.common.copied : t.common.copy}</button>
                 </motion.div>

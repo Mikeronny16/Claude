@@ -2,7 +2,7 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
-export default function BackHeader({ title, color = "#FF0050" }: { title: string; color?: string }) {
+export default function BackHeader({ title, color = "#FF6B00" }: { title: string; color?: string }) {
   return (
     <header style={{
       position: "sticky", top: 0, zIndex: 40,

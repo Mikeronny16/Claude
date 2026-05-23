@@ -7,6 +7,9 @@ import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 const PLATFORMS = ["TikTok", "Instagram", "YouTube Shorts", "Reels"];
+const ACCENT = "#FF6B00";
+const ACCENT_LIGHT = "#FFAA55";
+const ACCENT_RGBA = "rgba(255,107,0,";
 
 const EXAMPLE_TAGS = {
   mega: ["#fitness", "#workout", "#gym", "#health", "#motivation"],
@@ -38,16 +41,16 @@ export default function HashtagsPage() {
   }
 
   const groups = result ? [
-    { key: "mega",   label: t.hashtags.mega,   tags: result.mega,   color: "#FF6B35" },
-    { key: "medium", label: t.hashtags.medium, tags: result.medium, color: "#FF6B35" },
-    { key: "niche",  label: t.hashtags.niche,  tags: result.niche,  color: "#00F2EA" },
+    { key: "mega",   label: t.hashtags.mega,   tags: result.mega,   color: ACCENT },
+    { key: "medium", label: t.hashtags.medium, tags: result.medium, color: ACCENT },
+    { key: "niche",  label: t.hashtags.niche,  tags: result.niche,  color: ACCENT_LIGHT },
   ] : [];
 
   const showEmpty = !loading && !result;
 
   return (
-    <VantaBackground color={0xFF6B35}>
-      <BackHeader title="Hashtag Finder" color="#FF6B35" />
+    <VantaBackground color={0xFF6B00}>
+      <BackHeader title="Hashtag Finder" color={ACCENT} />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.hashtags.subtitle}</p>
@@ -56,9 +59,9 @@ export default function HashtagsPage() {
           {PLATFORMS.map(p => (
             <button key={p} onClick={() => setPlatform(p)} style={{
               padding: "7px 14px", borderRadius: 20,
-              border: `1px solid ${platform === p ? "#FF6B35" : "rgba(255,255,255,0.08)"}`,
-              background: platform === p ? "rgba(255,107,53,0.12)" : "transparent",
-              color: platform === p ? "#FF6B35" : "#555",
+              border: `1px solid ${platform === p ? ACCENT : "rgba(255,255,255,0.08)"}`,
+              background: platform === p ? `${ACCENT_RGBA}0.12)` : "transparent",
+              color: platform === p ? ACCENT : "#555",
               fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             }}>{p}</button>
           ))}
@@ -71,11 +74,11 @@ export default function HashtagsPage() {
         <motion.button whileTap={{ scale: 0.97 }} onClick={generate} disabled={loading || !niche.trim()}
           style={{
             marginTop: 12, width: "100%", padding: "15px", borderRadius: 16, border: "none",
-            background: loading || !niche.trim() ? "#0f0f0f" : "linear-gradient(135deg, #FF6B35, #ff4080)",
+            background: loading || !niche.trim() ? "#0f0a00" : "linear-gradient(135deg, #FF6B00, #FF3D00)",
             color: loading || !niche.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !niche.trim() ? "default" : "pointer",
             fontFamily: "inherit",
-            boxShadow: !loading && niche.trim() ? "0 0 28px rgba(255,107,53,0.3)" : "none",
+            boxShadow: !loading && niche.trim() ? `0 0 28px ${ACCENT_RGBA}0.35)` : "none",
             transition: "all 0.2s",
           }}>
           {loading ? (
@@ -86,7 +89,6 @@ export default function HashtagsPage() {
           ) : t.hashtags.button}
         </motion.button>
 
-        {/* Empty state — example hashtag cloud */}
         <AnimatePresence>
           {showEmpty && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -95,16 +97,16 @@ export default function HashtagsPage() {
                 {t.hashtags.exampleLabel}
               </p>
               {[
-                { label: t.hashtags.mega,   tags: EXAMPLE_TAGS.mega,   color: "#FF6B35" },
-                { label: t.hashtags.medium, tags: EXAMPLE_TAGS.medium, color: "#FF6B35" },
-                { label: t.hashtags.niche,  tags: EXAMPLE_TAGS.niche,  color: "#00F2EA" },
+                { label: t.hashtags.mega,   tags: EXAMPLE_TAGS.mega,   color: ACCENT },
+                { label: t.hashtags.medium, tags: EXAMPLE_TAGS.medium, color: ACCENT },
+                { label: t.hashtags.niche,  tags: EXAMPLE_TAGS.niche,  color: ACCENT_LIGHT },
               ].map((g, gi) => (
                 <div key={gi} style={{ marginBottom: 12, opacity: 0.35 }}>
                   <p style={{ fontSize: 9, fontWeight: 700, color: g.color, letterSpacing: "1.5px", marginBottom: 6 }}>{g.label}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {g.tags.map((tag, i) => (
                       <span key={i} style={{
-                        background: `${g.color}10`, border: `1px solid ${g.color}20`,
+                        background: `${g.color}18`, border: `1px solid ${g.color}28`,
                         borderRadius: 20, padding: "4px 10px", fontSize: 12, color: "#666",
                       }}>{tag}</span>
                     ))}
@@ -112,34 +114,38 @@ export default function HashtagsPage() {
                 </div>
               ))}
               <div style={{ marginTop: 20, textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: "rgba(255,107,53,0.1)", letterSpacing: "-1px" }}>30 HASHTAGS</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: `${ACCENT_RGBA}0.1)`, letterSpacing: "-1px" }}>30 HASHTAGS</div>
                 <p style={{ fontSize: 11, color: "#2a2a2a", marginTop: 2 }}>mega + medium + niche · per request</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Results */}
         <AnimatePresence>
           {groups.length > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
               {groups.map((g, gi) => (
                 <motion.div key={g.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: gi * 0.08 }}
-                  style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${g.color}22`, borderRadius: 18, padding: "16px" }}>
+                  style={{
+                    background: "linear-gradient(180deg, rgba(255,107,0,0.07) 0%, rgba(255,107,0,0.02) 100%)",
+                    border: `1px solid ${ACCENT_RGBA}0.2)`,
+                    borderRadius: 18, padding: "16px",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+                  }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                     <span style={{ fontSize: 9, fontWeight: 700, color: g.color, letterSpacing: "1.5px" }}>{g.label}</span>
                     <button onClick={() => copyGroup(g.key, g.tags)} style={{
-                      background: copied === g.key ? `${g.color}20` : "rgba(255,255,255,0.05)",
-                      border: `1px solid ${copied === g.key ? g.color + "40" : "rgba(255,255,255,0.08)"}`,
+                      background: copied === g.key ? `${ACCENT_RGBA}0.2)` : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${copied === g.key ? ACCENT_RGBA + "0.4)" : "rgba(255,255,255,0.08)"}`,
                       borderRadius: 8, padding: "4px 10px",
-                      color: copied === g.key ? g.color : "#555",
+                      color: copied === g.key ? ACCENT : "#555",
                       fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                     }}>{copied === g.key ? t.common.copied : t.common.copyAll}</button>
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {g.tags.map((tag, i) => (
                       <span key={i} style={{
-                        background: `${g.color}10`, border: `1px solid ${g.color}20`,
+                        background: `${ACCENT_RGBA}0.08)`, border: `1px solid ${ACCENT_RGBA}0.15)`,
                         borderRadius: 20, padding: "4px 10px", fontSize: 12, color: "#ccc",
                       }}>{tag}</span>
                     ))}

@@ -9,6 +9,8 @@ import { useLang } from "../contexts/LanguageContext";
 
 const STYLES_EN = ["Cinematic", "Anime", "Realistic", "Digital Art", "Minimalist", "Vintage"];
 const STYLE_COLORS = ["#FFD700", "#FF6B9D", "#00D4FF", "#A855F7", "#888", "#D4A843"];
+const ACCENT = "#FF6B00";
+const ACCENT_RGBA = "rgba(255,107,0,";
 
 export default function ImagePage() {
   const { t } = useLang();
@@ -30,13 +32,12 @@ export default function ImagePage() {
   const showEmpty = !loading && !imgUrl;
 
   return (
-    <VantaBackground color={0xFFD700}>
-      <BackHeader title="AI Image Generator" color="#FFD700" />
+    <VantaBackground color={0xFF6B00}>
+      <BackHeader title="AI Image Generator" color={ACCENT} />
 
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 16 }}>{t.image.subtitle}</p>
 
-        {/* Style selector */}
         <p style={{ fontSize: 9, fontWeight: 700, color: "#333", letterSpacing: "2px", marginBottom: 8 }}>{t.image.styleLabel}</p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
           {STYLES_EN.map((s, i) => (
@@ -57,11 +58,11 @@ export default function ImagePage() {
         <motion.button whileTap={{ scale: 0.97 }} onClick={generate} disabled={loading || !prompt.trim()}
           style={{
             marginTop: 12, width: "100%", padding: "15px", borderRadius: 16, border: "none",
-            background: loading || !prompt.trim() ? "#0f0f0f" : "linear-gradient(135deg, #FFD700, #ff4080)",
+            background: loading || !prompt.trim() ? "#0f0a00" : "linear-gradient(135deg, #FF6B00, #FF3D00)",
             color: loading || !prompt.trim() ? "#333" : "white",
             fontSize: 15, fontWeight: 700, cursor: loading || !prompt.trim() ? "default" : "pointer",
             fontFamily: "inherit",
-            boxShadow: !loading && prompt.trim() ? "0 0 28px rgba(255,215,0,0.25)" : "none",
+            boxShadow: !loading && prompt.trim() ? `0 0 28px ${ACCENT_RGBA}0.3)` : "none",
             transition: "all 0.2s",
           }}>
           {loading ? (
@@ -72,7 +73,6 @@ export default function ImagePage() {
           ) : t.image.button}
         </motion.button>
 
-        {/* Empty state — style preview cards */}
         <AnimatePresence>
           {showEmpty && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -99,18 +99,22 @@ export default function ImagePage() {
               </div>
 
               <div style={{ marginTop: 24, textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: "rgba(255,215,0,0.08)", letterSpacing: "-1px" }}>FREE AI ART</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: `${ACCENT_RGBA}0.1)`, letterSpacing: "-1px" }}>FREE AI ART</div>
                 <p style={{ fontSize: 11, color: "#2a2a2a", marginTop: 2 }}>powered by pollinations.ai · no account needed</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Result */}
         <AnimatePresence>
           {imgUrl && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ marginTop: 24 }}>
-              <div style={{ borderRadius: 18, overflow: "hidden", border: "1px solid rgba(255,215,0,0.2)", position: "relative" }}>
+              <div style={{
+                borderRadius: 18, overflow: "hidden",
+                border: `1px solid ${ACCENT_RGBA}0.25)`,
+                boxShadow: `0 8px 40px rgba(0,0,0,0.5), 0 0 60px ${ACCENT_RGBA}0.08)`,
+                position: "relative",
+              }}>
                 <Image src={imgUrl} alt="Generated" width={768} height={768}
                   style={{ width: "100%", height: "auto", display: "block" }}
                   unoptimized onLoad={() => setLoading(false)} />
@@ -119,8 +123,8 @@ export default function ImagePage() {
                 style={{
                   display: "block", marginTop: 12, width: "100%", padding: "13px",
                   borderRadius: 14, textAlign: "center",
-                  background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)",
-                  color: "#FFD700", fontSize: 14, fontWeight: 700, textDecoration: "none",
+                  background: `${ACCENT_RGBA}0.1)`, border: `1px solid ${ACCENT_RGBA}0.25)`,
+                  color: ACCENT, fontSize: 14, fontWeight: 700, textDecoration: "none",
                 }}>
                 {t.image.download}
               </a>
