@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 const STYLES_EN = ["Cinematic", "Anime", "Realistic", "Digital Art", "Minimalist", "Vintage"];
@@ -29,7 +30,7 @@ export default function ImagePage() {
   const showEmpty = !loading && !imgUrl;
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <VantaBackground color={0xFFD700}>
       <BackHeader title="🖼️ AI Image Generator" color="#FFD700" />
 
       <div style={{ padding: "20px" }}>
@@ -129,6 +130,6 @@ export default function ImagePage() {
       </div>
       <BottomNav />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </main>
+    </VantaBackground>
   );
 }

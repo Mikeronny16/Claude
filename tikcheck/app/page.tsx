@@ -10,6 +10,11 @@ const TOOL_KEYS = ["hook", "caption", "hashtags", "timing", "image"] as const;
 const COLORS = ["#FF0050", "#A855F7", "#FF6B35", "#00FF87", "#FFD700"];
 const EMOJIS = ["🎬", "✍️", "#️⃣", "⏰", "🖼️"];
 
+const EXTRA_TOOLS = [
+  { href: "/score",    emoji: "⚡", title: "Viral Score Checker", sub: "SCORE YOUR CAPTION",     color: "#00D4FF", desc: "See how viral your caption is — AI rates 1-100" },
+  { href: "/calendar", emoji: "📅", title: "30-Day Calendar",     sub: "PLAN YOUR CONTENT",      color: "#10B981", desc: "30 post ideas for your niche, week by week" },
+];
+
 export default function Home() {
   const { t } = useLang();
 
@@ -110,6 +115,37 @@ export default function Home() {
           );
         })}
       </motion.div>
+
+      {/* Extra tools */}
+      <div style={{ padding: "0 20px", marginBottom: 4 }}>
+        <p style={{ fontSize: 9, fontWeight: 700, color: "#333", letterSpacing: "2px", marginBottom: 10 }}>MORE TOOLS</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {EXTRA_TOOLS.map(tool => (
+            <motion.div key={tool.href} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
+              <Link href={tool.href} style={{ textDecoration: "none" }}>
+                <motion.div whileTap={{ scale: 0.97 }} style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: `1px solid ${tool.color}28`,
+                  borderRadius: 18, padding: "14px",
+                  display: "flex", alignItems: "center", gap: 12,
+                  position: "relative", overflow: "hidden",
+                }}>
+                  <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: `radial-gradient(circle, ${tool.color}18, transparent 70%)`, pointerEvents: "none" }} />
+                  <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: `${tool.color}14`, border: `1px solid ${tool.color}22`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+                    {tool.emoji}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 9, fontWeight: 700, color: tool.color, letterSpacing: "1.5px", marginBottom: 2 }}>{tool.sub}</p>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "white" }}>{tool.title}</p>
+                    <p style={{ fontSize: 12, color: "#444", marginTop: 1 }}>{tool.desc}</p>
+                  </div>
+                  <span style={{ color: tool.color, fontSize: 16, flexShrink: 0, opacity: 0.8 }}>›</span>
+                </motion.div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
 
       {/* Pricing teaser */}
       <motion.div

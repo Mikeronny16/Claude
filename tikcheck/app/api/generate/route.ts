@@ -27,10 +27,26 @@ Mix: 10 mega (1M+), 10 medium (100K-1M), 10 niche (under 100K).
 Return ONLY a JSON object: {"mega": ["#tag1",...], "medium": ["#tag1",...], "niche": ["#tag1",...]}`;
     }
 
+    if (action === "score") {
+      prompt = `You are a viral content expert. Analyze this social media caption and give it a virality score.
+Caption: "${input}"
+
+Score it 1-100 based on: hook strength, emotional pull, clarity, CTA quality, platform fit.
+Return ONLY a JSON object:
+{"score": 72, "grade": "B+", "good": ["strength1","strength2","strength3"], "improve": ["weakness1","weakness2","weakness3"], "rewrite": "improved version here"}`;
+    }
+
+    if (action === "calendar") {
+      prompt = `Create a 30-day content calendar for a ${platform || "TikTok"} creator in the "${niche || input}" niche.
+Return exactly 30 post ideas. Use these content types: Tutorial, POV, Story, Tips, Challenge, Trend, Behind the scenes, Q&A, Motivation, Reaction.
+Return ONLY a JSON array of exactly 30 objects:
+[{"day":1,"type":"Tutorial","idea":"specific post idea","hook":"opening line"},...] `;
+    }
+
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 1024,
+      max_tokens: action === "calendar" ? 2048 : 1024,
       temperature: 0.85,
     });
 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 const PLATFORMS = ["TikTok", "Instagram", "YouTube", "Twitter"];
@@ -33,7 +34,7 @@ export default function CaptionPage() {
   const showEmpty = !loading && !result;
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <VantaBackground color={0xA855F7}>
       <BackHeader title="✍️ Caption Enhancer" color="#A855F7" />
 
       <div style={{ padding: "20px" }}>
@@ -143,6 +144,6 @@ export default function CaptionPage() {
       </div>
       <BottomNav />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </main>
+    </VantaBackground>
   );
 }

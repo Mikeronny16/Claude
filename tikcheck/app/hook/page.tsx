@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 export default function HookPage() {
@@ -34,7 +35,7 @@ export default function HookPage() {
   const showEmpty = !loading && hooks.length === 0;
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <VantaBackground color={0xFF0050}>
       <BackHeader title="🎬 Hook Generator" color="#FF0050" />
 
       <div style={{ padding: "20px" }}>
@@ -122,6 +123,6 @@ export default function HookPage() {
       </div>
       <BottomNav />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </main>
+    </VantaBackground>
   );
 }

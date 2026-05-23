@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 const PLATFORMS = ["TikTok", "Instagram", "YouTube Shorts", "Reels"];
@@ -45,7 +46,7 @@ export default function HashtagsPage() {
   const showEmpty = !loading && !result;
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <VantaBackground color={0xFF6B35}>
       <BackHeader title="#️⃣ Hashtag Finder" color="#FF6B35" />
 
       <div style={{ padding: "20px" }}>
@@ -151,6 +152,6 @@ export default function HashtagsPage() {
       </div>
       <BottomNav />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </main>
+    </VantaBackground>
   );
 }
