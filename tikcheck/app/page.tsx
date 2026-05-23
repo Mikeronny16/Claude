@@ -3,7 +3,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import BottomNav from "./components/BottomNav";
 import LanguageSelector from "./components/LanguageSelector";
+import ThemeToggle from "./components/ThemeToggle";
 import { useLang } from "./contexts/LanguageContext";
+import { useTheme } from "./contexts/ThemeContext";
 
 const TOOL_HREFS = ["/hook", "/caption", "/hashtags", "/timing", "/image"] as const;
 const TOOL_KEYS = ["hook", "caption", "hashtags", "timing", "image"] as const;
@@ -17,9 +19,11 @@ const EXTRA_TOOLS = [
 
 export default function Home() {
   const { t } = useLang();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <main style={{ minHeight: "100vh", background: isDark ? "#000" : "#f5f5f7" }}>
       {/* Header */}
       <header style={{ padding: "20px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
@@ -32,7 +36,10 @@ export default function Home() {
           </div>
           <div style={{ fontSize: 9, color: "#333", fontWeight: 700, letterSpacing: "2.5px", marginTop: 1 }}>CREATOR TOOLKIT</div>
         </div>
-        <LanguageSelector />
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <ThemeToggle />
+          <LanguageSelector />
+        </div>
       </header>
 
       {/* Hero */}
