@@ -17,7 +17,7 @@ on:
 jobs:
   push-spawn-ai:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'spawn-ai/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'spawn-ai/') || contains(toJson(github.event.commits.*.added), 'spawn-ai/')
     steps:
       - uses: actions/checkout@v4
       - name: Push spawn-ai
@@ -37,7 +37,7 @@ jobs:
 
   push-readyprompts:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'readyprompts/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'readyprompts/') || contains(toJson(github.event.commits.*.added), 'readyprompts/')
     steps:
       - uses: actions/checkout@v4
       - name: Push readyprompts
@@ -57,7 +57,7 @@ jobs:
 
   push-portfolio:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'portfolio/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'portfolio/') || contains(toJson(github.event.commits.*.added), 'portfolio/')
     steps:
       - uses: actions/checkout@v4
       - name: Push portfolio
@@ -77,7 +77,7 @@ jobs:
 
   push-colddm:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'colddm/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'colddm/') || contains(toJson(github.event.commits.*.added), 'colddm/')
     steps:
       - uses: actions/checkout@v4
       - name: Push colddm
@@ -97,7 +97,7 @@ jobs:
 
   push-whispr:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'whispr/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'whispr/') || contains(toJson(github.event.commits.*.added), 'whispr/')
     steps:
       - uses: actions/checkout@v4
       - name: Push whispr
@@ -117,7 +117,7 @@ jobs:
 
   push-draftwin:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'draftwin/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'draftwin/') || contains(toJson(github.event.commits.*.added), 'draftwin/')
     steps:
       - uses: actions/checkout@v4
       - name: Push draftwin
@@ -137,7 +137,7 @@ jobs:
 
   push-toynar:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'toynar/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'toynar/') || contains(toJson(github.event.commits.*.added), 'toynar/')
     steps:
       - uses: actions/checkout@v4
       - name: Push toynar
@@ -157,7 +157,7 @@ jobs:
 
   push-sinar-clothing:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added), 'sinar-clothing/')
+    if: github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits.*.modified), 'sinar-clothing/') || contains(toJson(github.event.commits.*.added), 'sinar-clothing/')
     steps:
       - uses: actions/checkout@v4
       - name: Push sinar-clothing
