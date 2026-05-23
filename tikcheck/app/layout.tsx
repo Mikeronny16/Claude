@@ -3,7 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import "./globals.css";
 
-const font = Space_Grotesk({ subsets: ["latin"], weight: ["400","500","600","700","800"] });
+const font = Space_Grotesk({ subsets: ["latin"], weight: ["400","500","600","700"] });
 
 export const metadata: Metadata = {
   title: "TikCheck — Creator Toolkit",
