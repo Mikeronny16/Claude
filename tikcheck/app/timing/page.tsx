@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
+import VantaBackground from "../components/VantaBackground";
 import { useLang } from "../contexts/LanguageContext";
 
 const PLATFORMS: Record<string, { times: string[]; days: string; tip: string }> = {
@@ -23,7 +24,7 @@ export default function TimingPage() {
   const data = PLATFORMS[platform];
 
   return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
+    <VantaBackground color={0x00FF87}>
       <BackHeader title="Best Time to Post" color="#00FF87" />
       <div style={{ padding: "20px" }}>
         <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>{t.timing.subtitle}</p>
@@ -87,6 +88,6 @@ export default function TimingPage() {
         )}
       </div>
       <BottomNav />
-    </main>
+    </VantaBackground>
   );
 }
