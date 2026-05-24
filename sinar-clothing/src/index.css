@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&family=Padauk:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -78,7 +78,7 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  .font-mm { font-family: "Padauk", "Pyidaungsu", sans-serif; }
+  .font-mm { font-family: "Noto Sans Myanmar", "Pyidaungsu", sans-serif; font-feature-settings: "kern" 1; -webkit-font-smoothing: antialiased; }
 
   /* Grain texture for editorial sections */
   .grain-texture {

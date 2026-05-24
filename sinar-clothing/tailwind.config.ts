@@ -36,7 +36,7 @@ export default {
         serif: ["'DM Serif Display'", "'Playfair Display'", "Georgia", "serif"],
         "serif-alt": ["'Playfair Display'", "Georgia", "serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
-        mm: ["Padauk", "Pyidaungsu", "sans-serif"],
+        mm: ["'Noto Sans Myanmar'", "Pyidaungsu", "sans-serif"],
       },
       boxShadow: {
         card: "0 2px 20px rgba(0,0,0,0.4)",
