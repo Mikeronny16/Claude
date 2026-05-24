@@ -9,6 +9,8 @@ import CursorFollower from "./components/CursorFollower"
 import { useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
+import { LangProvider } from "./lib/lang"
+import { ThemeProvider } from "./lib/theme"
 
 const queryClient = new QueryClient()
 
@@ -22,7 +24,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (session === undefined) return (
-    <div className="min-h-screen bg-forest flex items-center justify-center">
+    <div className="min-h-screen bg-[#0A1A0F] flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
@@ -32,18 +34,27 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Toaster position="bottom-center" toastOptions={{ style: { background: "#0F2415", border: "1px solid #1C3020", color: "#F5F0E8" } }} />
-      <LoadingScreen />
-      <CursorFollower />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <LangProvider>
+        <QueryClientProvider client={queryClient}>
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              style: { background: "#0F2415", border: "1px solid #1C3020", color: "#F5F0E8" },
+            }}
+          />
+          <LoadingScreen />
+          <CursorFollower />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </LangProvider>
+    </ThemeProvider>
   )
 }
