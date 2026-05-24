@@ -7,7 +7,7 @@ import Admin from "./pages/Admin"
 import LoadingScreen from "./components/LoadingScreen"
 import CursorFollower from "./components/CursorFollower"
 import { useEffect, useState } from "react"
-import { supabase } from "./lib/supabase"
+import { supabase, isConfigured } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
 import { LangProvider } from "./lib/lang"
 import { ThemeProvider } from "./lib/theme"
@@ -15,25 +15,36 @@ import { trackVisit } from "./lib/analytics"
 
 const queryClient = new QueryClient()
 
+const LOCAL_ADMIN_KEY = "sinar_admin_auth"
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null | undefined>(undefined)
+  const [auth, setAuth] = useState<boolean | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setSession(s))
-    return () => subscription.unsubscribe()
+    if (isConfigured) {
+      let session: Session | null = null
+      supabase.auth.getSession().then(({ data }) => {
+        session = data.session
+        setAuth(!!session)
+      })
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => {
+        setAuth(!!s)
+      })
+      return () => subscription.unsubscribe()
+    } else {
+      setAuth(localStorage.getItem(LOCAL_ADMIN_KEY) === "true")
+    }
   }, [])
 
-  if (session === undefined) return (
+  if (auth === null) return (
     <div className="min-h-screen bg-[#0A1A0F] flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
-  return session ? <>{children}</> : <Navigate to="/auth" replace />
+  return auth ? <>{children}</> : <Navigate to="/auth" replace />
 }
 
-// Track visit once on load
 if (typeof window !== "undefined") trackVisit()
 
 export default function App() {

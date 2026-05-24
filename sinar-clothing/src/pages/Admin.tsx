@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase, isConfigured, type Product } from "@/lib/supabase"
 import { SITE } from "@/config"
 import { FALLBACK_IMG } from "@/lib/products"
 import { getLocalAnalytics, getLast7Days, getTodayVisits, getTotalVisits } from "@/lib/analytics"
@@ -272,7 +272,11 @@ export default function Admin() {
   })
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    if (isConfigured) {
+      await supabase.auth.signOut()
+    } else {
+      localStorage.removeItem("sinar_admin_auth")
+    }
     navigate("/auth", { replace: true })
   }
 

@@ -15,10 +15,10 @@ type Filter = "All" | Category
 
 const FILTERS: { key: Filter; mm: string; en: string }[] = [
   { key: "All", mm: "အားလုံး", en: "All" },
-  { key: "Tops", mm: "အပေါ်ဆောင်း", en: "Tops" },
-  { key: "Cardigans", mm: "Cardigan", en: "Cardigans" },
-  { key: "Dresses", mm: "ဂါဝန်", en: "Dresses" },
-  { key: "Jeans", mm: "ဂျင်း", en: "Jeans" },
+  { key: "Tops", mm: "ရှပ်အကျီ", en: "Tops" },
+  { key: "Cardigans", mm: "ကာဒီဂင်", en: "Cardigans" },
+  { key: "Dresses", mm: "ဝတ်စုံ", en: "Dresses" },
+  { key: "Jeans", mm: "ဂျင်းဘောင်းဘီ", en: "Jeans" },
   { key: "Sweaters", mm: "ဆွယ်တာ", en: "Sweaters" },
 ]
 
