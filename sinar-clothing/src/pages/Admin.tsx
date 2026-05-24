@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -23,6 +23,9 @@ type FormData = {
 const CATEGORIES = ["Tops", "Cardigans", "Dresses", "Jeans", "Sweaters"]
 const STATUSES = ["In Stock", "Low Stock", "Out of Stock"]
 
+const inputCls = "w-full bg-forest border border-hairline focus:border-pink rounded-xl px-3 py-2.5 text-sm text-cream placeholder-muted focus:outline-none transition-colors"
+const labelCls = "text-[10px] font-medium text-muted uppercase tracking-widest block mb-1.5"
+
 function ProductForm({
   initial,
   onClose,
@@ -45,12 +48,7 @@ function ProductForm({
           sold_out: initial.sold_out,
           sort_order: initial.sort_order,
         }
-      : {
-          status: "In Stock",
-          sold_out: false,
-          sort_order: 99,
-          price: 0,
-        },
+      : { status: "In Stock", sold_out: false, sort_order: 99, price: 0 },
   })
 
   const [uploading, setUploading] = useState(false)
@@ -66,7 +64,7 @@ function ProductForm({
       const { data } = supabase.storage.from("product-images").getPublicUrl(path)
       setImagePreview(data.publicUrl)
       return data.publicUrl
-    } catch (err) {
+    } catch {
       toast.error("Image upload မအောင်မြင်ပါ")
       return null
     } finally {
@@ -79,30 +77,37 @@ function ProductForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-soft w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-forest-mid rounded-2xl border border-hairline w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-hairline">
-          <h2 className="font-serif text-xl font-semibold">
+          <h2 className="font-serif text-xl text-cream">
             {initial ? "ပစ္စည်း ပြင်ဆင်ရန်" : "ပစ္စည်း အသစ်ထည့်ရန်"}
           </h2>
-          <button onClick={onClose} className="text-muted hover:text-ink p-1"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-muted hover:text-cream p-1">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           {/* Image */}
           <div>
-            <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">ပုံ</label>
+            <label className={labelCls}>ပုံ</label>
             {imagePreview && (
-              <img src={imagePreview} onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }} alt="" className="w-full h-40 object-cover rounded-xl mb-2 border border-hairline" />
+              <img
+                src={imagePreview}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }}
+                alt=""
+                className="w-full h-40 object-cover rounded-xl mb-2 border border-hairline"
+              />
             )}
             <div className="flex gap-2">
               <input
                 {...register("image_url")}
                 placeholder="Image URL (https://...)"
-                className="flex-1 border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep"
+                className={inputCls + " flex-1"}
                 onChange={(e) => setImagePreview(e.target.value)}
               />
-              <label className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-hairline cursor-pointer hover:bg-cream transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+              <label className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium border border-hairline cursor-pointer hover:border-pink text-muted hover:text-cream transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
                 {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                 Upload
                 <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={async (e) => {
@@ -115,28 +120,28 @@ function ProductForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">မြန်မာနာမည် *</label>
-              <input {...register("name_mm", { required: "လိုအပ်သည်" })} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep font-mm" placeholder="ဝတ်စုံနာမည်" />
-              {errors.name_mm && <p className="text-red-500 text-xs mt-1">{errors.name_mm.message}</p>}
+              <label className={labelCls}>မြန်မာနာမည် *</label>
+              <input {...register("name_mm", { required: "လိုအပ်သည်" })} className={inputCls + " font-mm"} placeholder="ဝတ်စုံနာမည်" />
+              {errors.name_mm && <p className="text-pink text-xs mt-1">{errors.name_mm.message}</p>}
             </div>
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">English Name *</label>
-              <input {...register("name_en", { required: "Required" })} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep" placeholder="Product name" />
-              {errors.name_en && <p className="text-red-500 text-xs mt-1">{errors.name_en.message}</p>}
+              <label className={labelCls}>English Name *</label>
+              <input {...register("name_en", { required: "Required" })} className={inputCls} placeholder="Product name" />
+              {errors.name_en && <p className="text-pink text-xs mt-1">{errors.name_en.message}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">Category *</label>
-              <select {...register("category", { required: true })} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep bg-white">
+              <label className={labelCls}>Category *</label>
+              <select {...register("category", { required: true })} className={inputCls}>
                 <option value="">ရွေးချယ်ပါ</option>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">Status</label>
-              <select {...register("status")} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep bg-white">
+              <label className={labelCls}>Status</label>
+              <select {...register("status")} className={inputCls}>
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -144,28 +149,30 @@ function ProductForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">ဈေးနှုန်း (ကျပ်)</label>
-              <input type="number" {...register("price", { valueAsNumber: true, min: 0 })} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep" placeholder="18000" />
+              <label className={labelCls}>ဈေးနှုန်း (ကျပ်)</label>
+              <input type="number" {...register("price", { valueAsNumber: true, min: 0 })} className={inputCls} placeholder="18000" />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">Sort Order</label>
-              <input type="number" {...register("sort_order", { valueAsNumber: true })} className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep" />
+              <label className={labelCls}>Sort Order</label>
+              <input type="number" {...register("sort_order", { valueAsNumber: true })} className={inputCls} />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-medium text-muted uppercase tracking-wide block mb-1.5">Sizes (comma separated)</label>
-            <input {...register("sizes")} placeholder="S, M, L, XL or 28, 29, 30" className="w-full border border-hairline rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-deep" />
+            <label className={labelCls}>Sizes (comma separated)</label>
+            <input {...register("sizes")} placeholder="S, M, L, XL or 28, 29, 30" className={inputCls} />
           </div>
 
-          <div className="flex items-center gap-3">
-            <input type="checkbox" {...register("sold_out")} id="sold_out" className="w-4 h-4 accent-deep rounded" />
-            <label htmlFor="sold_out" className="text-sm font-mm">Sold Out ဖြစ်သည်</label>
+          <div className="flex items-center gap-3 py-1">
+            <input type="checkbox" {...register("sold_out")} id="sold_out" className="w-4 h-4 accent-pink rounded" />
+            <label htmlFor="sold_out" className="text-sm font-mm text-cream">Sold Out ဖြစ်သည်</label>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 border border-hairline py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition-colors">ဖျက်သိမ်းမည်</button>
-            <button type="submit" disabled={isSubmitting || uploading} className="flex-1 bg-deep text-cream py-2.5 rounded-xl text-sm font-medium hover:bg-ink transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+            <button type="button" onClick={onClose} className="flex-1 border border-hairline text-muted hover:text-cream py-2.5 rounded-xl text-sm font-medium hover:border-pink transition-colors font-mm">
+              ဖျက်သိမ်းမည်
+            </button>
+            <button type="submit" disabled={isSubmitting || uploading} className="flex-1 bg-pink text-white py-2.5 rounded-xl text-sm font-semibold hover:shadow-pink transition-shadow disabled:opacity-50 flex items-center justify-center gap-2 font-mm">
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               သိမ်းဆည်းမည်
             </button>
@@ -234,20 +241,20 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-forest">
       {/* Header */}
-      <header className="bg-white border-b border-hairline sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="bg-forest-mid border-b border-hairline sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-serif text-xl text-ink">{SITE.name}</span>
-            <span className="text-xs bg-deep/10 text-deep px-2.5 py-1 rounded-full font-medium">Admin</span>
+            <span className="font-serif text-xl font-black tracking-widest text-cream">{SITE.name.toUpperCase()}</span>
+            <span className="text-[10px] bg-pink/20 text-pink px-2.5 py-1 rounded-full font-bold tracking-widest uppercase">Admin</span>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/" target="_blank" className="flex items-center gap-1.5 text-sm text-muted hover:text-ink transition-colors">
+          <div className="flex items-center gap-4">
+            <a href="/" target="_blank" className="flex items-center gap-1.5 text-sm text-muted hover:text-cream transition-colors">
               <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline">Website ကြည့်ရန်</span>
+              <span className="hidden sm:inline">Website</span>
             </a>
-            <button onClick={handleLogout} className="flex items-center gap-1.5 text-sm text-muted hover:text-red-600 transition-colors">
+            <button onClick={handleLogout} className="flex items-center gap-1.5 text-sm text-muted hover:text-pink transition-colors">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Logout</span>
             </button>
@@ -255,15 +262,15 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-6xl mx-auto px-5 sm:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="font-serif text-2xl text-ink">ကုန်ပစ္စည်း စီမံခန့်ခွဲရန်</h1>
+            <h1 className="font-serif text-2xl text-cream">ကုန်ပစ္စည်း စီမံခန့်ခွဲရန်</h1>
             <p className="text-muted text-sm mt-1 font-mm">ပစ္စည်း {products.length} ခု</p>
           </div>
           <button
             onClick={() => setEditing("new")}
-            className="flex items-center gap-2 bg-deep text-cream px-5 py-2.5 rounded-full text-sm font-medium hover:bg-ink transition-colors shadow-card"
+            className="flex items-center gap-2 bg-pink text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:shadow-pink transition-shadow"
           >
             <Plus className="w-4 h-4" />
             <span className="font-mm">ပစ္စည်းအသစ်</span>
@@ -272,55 +279,57 @@ export default function Admin() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-muted" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink" />
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-hairline shadow-card overflow-hidden">
+          <div className="bg-forest-mid rounded-2xl border border-hairline overflow-hidden">
             {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-hairline bg-cream">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">ပုံ</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">ပစ္စည်း</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">Category</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">ဈေးနှုန်း</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">Status</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wide">Sizes</th>
-                    <th className="px-5 py-3" />
+                  <tr className="border-b border-hairline">
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">ပုံ</th>
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">ပစ္စည်း</th>
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">Category</th>
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">ဈေးနှုန်း</th>
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">Status</th>
+                    <th className="text-left px-5 py-3.5 text-[10px] font-bold text-muted uppercase tracking-widest">Sizes</th>
+                    <th className="px-5 py-3.5" />
                   </tr>
                 </thead>
                 <tbody>
                   {products.map((p) => (
-                    <tr key={p.id} className="border-b border-hairline last:border-0 hover:bg-cream/50 transition-colors">
+                    <tr key={p.id} className="border-b border-hairline last:border-0 hover:bg-forest transition-colors">
                       <td className="px-5 py-3">
-                        <img src={p.image_url || FALLBACK_IMG} alt={p.name_en} onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }} className="w-12 h-12 rounded-lg object-cover border border-hairline" />
+                        <img src={p.image_url || FALLBACK_IMG} alt={p.name_en} onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }} className="w-12 h-12 rounded-xl object-cover border border-hairline" />
                       </td>
                       <td className="px-5 py-3">
-                        <p className="font-mm font-medium text-sm text-ink">{p.name_mm}</p>
+                        <p className="font-mm font-semibold text-sm text-cream">{p.name_mm}</p>
                         <p className="text-xs text-muted">{p.name_en}</p>
-                        {p.sold_out && <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium mt-0.5 inline-block">Sold Out</span>}
+                        {p.sold_out && <span className="text-[9px] bg-pink/20 text-pink px-2 py-0.5 rounded-full font-bold mt-0.5 inline-block uppercase tracking-wider">Sold Out</span>}
                       </td>
                       <td className="px-5 py-3 text-sm text-muted">{p.category}</td>
-                      <td className="px-5 py-3 text-sm font-mm font-medium text-deep">{p.price > 0 ? `${p.price.toLocaleString()} ကျပ်` : "—"}</td>
+                      <td className="px-5 py-3 text-sm font-mm font-bold text-pink">{p.price > 0 ? `${p.price.toLocaleString()} ကျပ်` : "—"}</td>
                       <td className="px-5 py-3">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.status === "In Stock" ? "bg-sage/20 text-sage" : "bg-amber-100 text-amber-700"}`}>
+                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
+                          p.status === "In Stock" ? "bg-emerald-dim text-emerald" : "bg-yellow-500/20 text-yellow-400"
+                        }`}>
                           {p.status}
                         </span>
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex gap-1 flex-wrap">
                           {p.sizes.map((s) => (
-                            <span key={s} className="text-[10px] border border-hairline px-1.5 py-0.5 rounded font-bold">{s}</span>
+                            <span key={s} className="text-[10px] border border-hairline text-muted px-1.5 py-0.5 rounded font-bold">{s}</span>
                           ))}
                         </div>
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2 justify-end">
-                          <button onClick={() => setEditing(p)} className="p-1.5 text-muted hover:text-deep transition-colors hover:bg-cream rounded-lg">
+                          <button onClick={() => setEditing(p)} className="p-1.5 text-muted hover:text-cream transition-colors hover:bg-forest rounded-lg">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setDeleting(p.id)} className="p-1.5 text-muted hover:text-red-500 transition-colors hover:bg-red-50 rounded-lg">
+                          <button onClick={() => setDeleting(p.id)} className="p-1.5 text-muted hover:text-pink transition-colors hover:bg-forest rounded-lg">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -337,13 +346,13 @@ export default function Admin() {
                 <div key={p.id} className="p-4 flex items-center gap-4">
                   <img src={p.image_url || FALLBACK_IMG} alt={p.name_en} onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }} className="w-16 h-16 rounded-xl object-cover border border-hairline flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-mm font-semibold text-sm text-ink truncate">{p.name_mm}</p>
+                    <p className="font-mm font-semibold text-sm text-cream truncate">{p.name_mm}</p>
                     <p className="text-xs text-muted">{p.category} · {p.status}</p>
-                    {p.price > 0 && <p className="font-mm text-xs font-bold text-deep mt-0.5">{p.price.toLocaleString()} ကျပ်</p>}
+                    {p.price > 0 && <p className="font-mm text-xs font-bold text-pink mt-0.5">{p.price.toLocaleString()} ကျပ်</p>}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <button onClick={() => setEditing(p)} className="p-1.5 text-muted hover:text-deep"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => setDeleting(p.id)} className="p-1.5 text-muted hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => setEditing(p)} className="p-1.5 text-muted hover:text-cream"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => setDeleting(p.id)} className="p-1.5 text-muted hover:text-pink"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               ))}
@@ -352,14 +361,13 @@ export default function Admin() {
             {products.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-muted font-mm">ပစ္စည်းမရှိသေးပါ</p>
-                <button onClick={() => setEditing("new")} className="mt-4 text-deep text-sm underline font-mm">ပထမဆုံးပစ္စည်းထည့်ပါ</button>
+                <button onClick={() => setEditing("new")} className="mt-4 text-pink text-sm font-mm underline">ပထမဆုံးပစ္စည်းထည့်ပါ</button>
               </div>
             )}
           </div>
         )}
       </main>
 
-      {/* Product form modal */}
       {editing !== null && (
         <ProductForm
           initial={editing === "new" ? null : editing}
@@ -368,19 +376,20 @@ export default function Admin() {
         />
       )}
 
-      {/* Delete confirm modal */}
       {deleting && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-soft p-6 max-w-sm w-full text-center">
-            <Trash2 className="w-10 h-10 text-red-500 mx-auto mb-3" />
-            <h3 className="font-serif text-lg font-semibold mb-2">ဖျက်ရန် သေချာပါသလား?</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-forest-mid rounded-2xl border border-hairline p-6 max-w-sm w-full text-center">
+            <Trash2 className="w-10 h-10 text-pink mx-auto mb-3" />
+            <h3 className="font-serif text-lg text-cream mb-2">ဖျက်ရန် သေချာပါသလား?</h3>
             <p className="text-muted text-sm font-mm mb-6">ဤ action ကို ပြန်မဖြစ်နိုင်ပါ</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleting(null)} className="flex-1 border border-hairline py-2.5 rounded-xl text-sm font-medium hover:bg-cream">မဖျက်တော့ပါ</button>
+              <button onClick={() => setDeleting(null)} className="flex-1 border border-hairline text-muted hover:text-cream py-2.5 rounded-xl text-sm font-mm hover:border-pink transition-colors">
+                မဖျက်တော့ပါ
+              </button>
               <button
                 onClick={() => deleteMutation.mutate(deleting)}
                 disabled={deleteMutation.isPending}
-                className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-pink text-white py-2.5 rounded-xl text-sm font-semibold hover:shadow-pink disabled:opacity-50 flex items-center justify-center gap-2 font-mm"
               >
                 {deleteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 ဖျက်မည်

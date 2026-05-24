@@ -1,10 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Toaster } from "sonner"
 import Home from "./pages/Home"
 import Auth from "./pages/Auth"
 import Admin from "./pages/Admin"
+import LoadingScreen from "./components/LoadingScreen"
+import CursorFollower from "./components/CursorFollower"
 import { useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
+
+const queryClient = new QueryClient()
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -16,8 +22,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (session === undefined) return (
-    <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-deep border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-forest flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -26,13 +32,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <Toaster position="bottom-center" toastOptions={{ style: { background: "#0F2415", border: "1px solid #1C3020", color: "#F5F0E8" } }} />
+      <LoadingScreen />
+      <CursorFollower />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
