@@ -6,42 +6,15 @@ import Auth from "./pages/Auth"
 import Admin from "./pages/Admin"
 import LoadingScreen from "./components/LoadingScreen"
 import CursorFollower from "./components/CursorFollower"
-import { useEffect, useState } from "react"
-import { supabase, isConfigured } from "./lib/supabase"
-import type { Session } from "@supabase/supabase-js"
+import { useEffect } from "react"
 import { LangProvider } from "./lib/lang"
 import { ThemeProvider } from "./lib/theme"
 import { trackVisit } from "./lib/analytics"
 
 const queryClient = new QueryClient()
 
-const LOCAL_ADMIN_KEY = "sinar_admin_auth"
-
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const [auth, setAuth] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    if (isConfigured) {
-      let session: Session | null = null
-      supabase.auth.getSession().then(({ data }) => {
-        session = data.session
-        setAuth(!!session)
-      })
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => {
-        setAuth(!!s)
-      })
-      return () => subscription.unsubscribe()
-    } else {
-      setAuth(localStorage.getItem(LOCAL_ADMIN_KEY) === "true")
-    }
-  }, [])
-
-  if (auth === null) return (
-    <div className="min-h-screen bg-[#0A1A0F] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-pink border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
-
+  const auth = localStorage.getItem("sinar_admin_auth") === "true"
   return auth ? <>{children}</> : <Navigate to="/auth" replace />
 }
 

@@ -271,12 +271,8 @@ export default function Admin() {
     onError: (e: Error) => toast.error(e.message),
   })
 
-  async function handleLogout() {
-    if (isConfigured) {
-      await supabase.auth.signOut()
-    } else {
-      localStorage.removeItem("sinar_admin_auth")
-    }
+  function handleLogout() {
+    localStorage.removeItem("sinar_admin_auth")
     navigate("/auth", { replace: true })
   }
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { supabase, isConfigured } from "@/lib/supabase"
 import { SITE } from "@/config"
 import { Loader2, Lock } from "lucide-react"
 import { toast } from "sonner"
@@ -11,18 +10,11 @@ const LOCAL_ADMIN_PWD = "sinar2025"
 export default function Auth() {
   const navigate = useNavigate()
   const [password, setPassword] = useState("")
-  const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (isConfigured) {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session) navigate("/admin", { replace: true })
-      })
-    } else {
-      if (localStorage.getItem(LOCAL_ADMIN_KEY) === "true") {
-        navigate("/admin", { replace: true })
-      }
+    if (localStorage.getItem(LOCAL_ADMIN_KEY) === "true") {
+      navigate("/admin", { replace: true })
     }
   }, [navigate])
 
@@ -30,13 +22,8 @@ export default function Auth() {
     e.preventDefault()
     setLoading(true)
     try {
-      if (isConfigured) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-      } else {
-        if (password !== LOCAL_ADMIN_PWD) throw new Error("Password မှားနေသည်")
-        localStorage.setItem(LOCAL_ADMIN_KEY, "true")
-      }
+      if (password !== LOCAL_ADMIN_PWD) throw new Error("Password မှားနေသည်")
+      localStorage.setItem(LOCAL_ADMIN_KEY, "true")
       navigate("/admin", { replace: true })
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "ဝင်ရောက်မရပါ")
@@ -68,21 +55,6 @@ export default function Auth() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isConfigured && (
-              <div>
-                <label className="text-[10px] font-medium text-muted uppercase tracking-widest block mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-forest border border-hairline focus:border-pink rounded-xl px-4 py-3 text-sm text-cream placeholder-muted focus:outline-none transition-colors"
-                  placeholder="admin@example.com"
-                />
-              </div>
-            )}
             <div>
               <label className="text-[10px] font-medium text-muted uppercase tracking-widest block mb-1.5">
                 Password
