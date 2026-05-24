@@ -2,9 +2,11 @@ import type { Config } from "tailwindcss"
 
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
+        // Static brand colors (always the same)
         forest: "#0A1A0F",
         "forest-light": "#0F2415",
         "forest-mid": "#122B19",
@@ -15,9 +17,24 @@ export default {
         cream: "#F5F0E8",
         muted: "#7A8F7D",
         hairline: "#1C3020",
+
+        // CSS-variable-based theming
+        bg: "var(--color-bg)",
+        "bg-mid": "var(--color-bg-mid)",
+        "bg-card": "var(--color-bg-card)",
+        surface: "var(--color-surface)",
+        text: "var(--color-text)",
+        "text-sub": "var(--color-text-sub)",
+        "text-muted": "var(--color-text-muted)",
+        border: "var(--color-border)",
+        accent: "#FF1F6E",
+        "green-brand": "#2D5A3D",
+        "green-light": "#3D7A52",
+        "cream-warm": "#FAF7F2",
       },
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
+        serif: ["'DM Serif Display'", "'Playfair Display'", "Georgia", "serif"],
+        "serif-alt": ["'Playfair Display'", "Georgia", "serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
         mm: ["Padauk", "Pyidaungsu", "sans-serif"],
       },
@@ -26,6 +43,8 @@ export default {
         pink: "0 0 30px rgba(255,31,110,0.4)",
         "pink-sm": "0 0 15px rgba(255,31,110,0.3)",
         glow: "0 0 40px rgba(0,255,136,0.15)",
+        editorial: "0 8px 60px rgba(0,0,0,0.25)",
+        "editorial-dark": "0 8px 60px rgba(0,0,0,0.6)",
       },
       animation: {
         marquee: "marquee 25s linear infinite",
