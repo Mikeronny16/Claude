@@ -11,6 +11,7 @@ import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
 import { LangProvider } from "./lib/lang"
 import { ThemeProvider } from "./lib/theme"
+import { trackVisit } from "./lib/analytics"
 
 const queryClient = new QueryClient()
 
@@ -31,6 +32,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   return session ? <>{children}</> : <Navigate to="/auth" replace />
 }
+
+// Track visit once on load
+if (typeof window !== "undefined") trackVisit()
 
 export default function App() {
   return (
