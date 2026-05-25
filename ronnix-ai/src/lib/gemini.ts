@@ -1,7 +1,17 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import Groq from "groq-sdk"
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+const MODEL = "llama-3.3-70b-versatile"
+
+async function ask(prompt: string): Promise<string> {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+  const res = await groq.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: "user", content: prompt }],
+    max_tokens: 512,
+    temperature: 0.8,
+  })
+  return res.choices[0]?.message?.content?.trim() ?? ""
+}
 
 export async function generateCaption(input: {
   product: string
@@ -9,7 +19,7 @@ export async function generateCaption(input: {
   platform: string
   language: "mm" | "en"
 }): Promise<string> {
-  const lang = input.language === "mm" ? "Myanmar (Unicode)" : "English"
+  const lang = input.language === "mm" ? "Myanmar Unicode" : "English"
   const prompt = `You are a social media expert for Myanmar online sellers.
 Write a ${input.platform} caption for: "${input.product}"
 Tone: ${input.tone}
@@ -20,8 +30,7 @@ Rules:
 - Keep it engaging and short (under 150 words)
 - No explanation, just the caption`
 
-  const result = await model.generateContent(prompt)
-  return result.response.text().trim()
+  return ask(prompt)
 }
 
 export async function generateReply(input: {
@@ -30,7 +39,7 @@ export async function generateReply(input: {
   tone: string
   language: "mm" | "en"
 }): Promise<string> {
-  const lang = input.language === "mm" ? "Myanmar (Unicode)" : "English"
+  const lang = input.language === "mm" ? "Myanmar Unicode" : "English"
   const prompt = `You are a Myanmar online seller's customer service assistant.
 Customer comment: "${input.comment}"
 Business context: "${input.context || "Online clothing/product shop"}"
@@ -42,8 +51,7 @@ Rules:
 - Under 80 words
 - No explanation, just the reply`
 
-  const result = await model.generateContent(prompt)
-  return result.response.text().trim()
+  return ask(prompt)
 }
 
 export async function generateDescription(input: {
@@ -52,7 +60,7 @@ export async function generateDescription(input: {
   price: string
   language: "mm" | "en"
 }): Promise<string> {
-  const lang = input.language === "mm" ? "Myanmar (Unicode)" : "English"
+  const lang = input.language === "mm" ? "Myanmar Unicode" : "English"
   const prompt = `You are a Myanmar e-commerce copywriter.
 Product: "${input.product}"
 Features/Details: "${input.features}"
@@ -65,6 +73,5 @@ Rules:
 - Under 200 words
 - No explanation, just the description`
 
-  const result = await model.generateContent(prompt)
-  return result.response.text().trim()
+  return ask(prompt)
 }
