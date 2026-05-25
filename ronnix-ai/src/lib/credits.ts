@@ -15,6 +15,14 @@ export const TOOL_COST = {
   caption:     1,
   reply:       1,
   description: 1,
+  live:        2,
+  promo:       1,
+  testimonial: 1,
+  variants:    2,
+  hashtags:    1,
+  comparison:  1,
+  reel:        1,
+  seasonal:    1,
 } as const
 
 export const FREE_DAILY_LIMIT = 3

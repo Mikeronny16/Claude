@@ -2,7 +2,7 @@
 
 import { motion, useMotionValue, useTransform, animate } from "framer-motion"
 import Link from "next/link"
-import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, ChevronRight } from "lucide-react"
+import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, ChevronRight, Video, Flame, Layers, Star, Hash, TrendingUp, Play, Calendar } from "lucide-react"
 import BottomNav from "@/components/BottomNav"
 import ThemeToggle from "@/components/ThemeToggle"
 import type { Profile } from "@/lib/supabase"
@@ -10,24 +10,17 @@ import { toast } from "sonner"
 import { useEffect, useRef } from "react"
 
 const TOOLS = [
-  {
-    href: "/tools/caption", icon: Sparkles,
-    title: "Caption Generator", mm: "Post caption ကို AI ရေးပေးသည်",
-    hint: "30 မိနစ် → 5 စက္ကန့်",
-    color: "var(--yellow)", border: "rgba(254,203,0,0.3)", glow: "rgba(254,203,0,0.15)",
-  },
-  {
-    href: "/tools/reply", icon: MessageSquare,
-    title: "Reply Helper", mm: "Customer comment reply အမြန်ရ",
-    hint: "Professional · Trust တက်မည်",
-    color: "var(--green-xl)", border: "rgba(109,201,58,0.3)", glow: "rgba(109,201,58,0.12)",
-  },
-  {
-    href: "/tools/description", icon: FileText,
-    title: "Product Description", mm: "ကုန်ဖော်ပြချက် Pro level",
-    hint: "Conversion rate မြင့်တက်မည်",
-    color: "#6EE7B7", border: "rgba(110,231,183,0.3)", glow: "rgba(110,231,183,0.1)",
-  },
+  { href: "/tools/caption",     icon: Sparkles,      title: "Caption Generator",   mm: "Post caption AI ရေးပေးသည်",        hint: "30 မိနစ် → 5 စက္ကန့်",          color: "var(--yellow)",  border: "rgba(254,203,0,0.3)",    glow: "rgba(254,203,0,0.12)"    },
+  { href: "/tools/reply",       icon: MessageSquare, title: "Reply Helper",         mm: "Customer reply အမြန်ရ",             hint: "Professional · Trust တက်မည်",   color: "var(--green-xl)",border: "rgba(109,201,58,0.3)",   glow: "rgba(109,201,58,0.10)"   },
+  { href: "/tools/description", icon: FileText,      title: "Product Description",  mm: "ကုန်ဖော်ပြချက် Pro level",          hint: "Conversion rate မြင့်တက်မည်",  color: "#6EE7B7",        border: "rgba(110,231,183,0.3)", glow: "rgba(110,231,183,0.08)"  },
+  { href: "/tools/live",        icon: Video,         title: "FB Live Script",        mm: "Live ရောင်းချ script အပြည့်အစုံ",   hint: "2 credits · Script ပြည့်",       color: "#FF6B35",        border: "rgba(255,107,53,0.30)", glow: "rgba(255,107,53,0.08)"   },
+  { href: "/tools/promo",       icon: Flame,         title: "Promo Post",            mm: "Flash sale / ပရိုမိုး post",        hint: "Urgency-driven · Viral",         color: "#FF3B6F",        border: "rgba(255,59,111,0.30)", glow: "rgba(255,59,111,0.08)"   },
+  { href: "/tools/variants",    icon: Layers,        title: "Caption Variants",      mm: "Caption 3 မျိုး တစ်ချက်တည်းရ",     hint: "A/B test ဖို့ · 2 credits",      color: "#A3FF47",        border: "rgba(163,255,71,0.30)", glow: "rgba(163,255,71,0.07)"   },
+  { href: "/tools/testimonial", icon: Star,          title: "Testimonial",           mm: "Customer review ကို post ဖြစ်အောင်", hint: "Trust building · Shareable",    color: "#00D2B8",        border: "rgba(0,210,184,0.30)",  glow: "rgba(0,210,184,0.08)"    },
+  { href: "/tools/hashtags",    icon: Hash,          title: "Hashtag Generator",     mm: "Myanmar seller hashtag pack",        hint: "15-20 targeted hashtags",        color: "#47C8FF",        border: "rgba(71,200,255,0.30)", glow: "rgba(71,200,255,0.07)"   },
+  { href: "/tools/comparison",  icon: TrendingUp,    title: "Comparison Post",       mm: "ဘာကြောင့် ငါ့ဆိုင်ကိုရွေးသင့်လဲ", hint: "Persuasive · Converts",          color: "#FB923C",        border: "rgba(251,146,60,0.30)", glow: "rgba(251,146,60,0.08)"   },
+  { href: "/tools/reel",        icon: Play,          title: "Reel Caption",          mm: "Short video punchy caption",         hint: "TikTok · Reels · Viral",         color: "#BF5FFF",        border: "rgba(191,95,255,0.30)", glow: "rgba(191,95,255,0.08)"   },
+  { href: "/tools/seasonal",    icon: Calendar,      title: "Seasonal Campaign",     mm: "ပွဲတော် special post",               hint: "Thingyan · Eid · Xmas",          color: "#FFD166",        border: "rgba(255,209,102,0.35)",glow: "rgba(255,209,102,0.08)"  },
 ]
 
 function AnimatedNumber({ value }: { value: number }) {

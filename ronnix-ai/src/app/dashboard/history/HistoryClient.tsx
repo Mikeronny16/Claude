@@ -1,17 +1,26 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Sparkles, MessageSquare, FileText, Clock, Copy, Check, ChevronDown, Loader2 } from "lucide-react"
+import { Sparkles, MessageSquare, FileText, Clock, Copy, Check, ChevronDown, Loader2, Video, Flame, Layers, Star, Hash, TrendingUp, Play, Calendar } from "lucide-react"
+import React from "react"
 import BottomNav from "@/components/BottomNav"
 import type { Generation } from "@/lib/supabase"
 import { useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 
-const TOOL_META = {
-  caption:     { label: "Caption", icon: <Sparkles style={{ width: 14, height: 14 }} />, color: "var(--yellow)" },
-  reply:       { label: "Reply",   icon: <MessageSquare style={{ width: 14, height: 14 }} />, color: "var(--green-xl)" },
-  description: { label: "Description", icon: <FileText style={{ width: 14, height: 14 }} />, color: "#6EE7B7" },
+const TOOL_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  caption:     { label: "Caption",      icon: <Sparkles     style={{ width:14,height:14 }} />, color: "var(--yellow)"  },
+  reply:       { label: "Reply",        icon: <MessageSquare style={{ width:14,height:14 }} />, color: "var(--green-xl)"},
+  description: { label: "Description",  icon: <FileText     style={{ width:14,height:14 }} />, color: "#6EE7B7"        },
+  live:        { label: "Live Script",  icon: <Video        style={{ width:14,height:14 }} />, color: "#FF6B35"        },
+  promo:       { label: "Promo",        icon: <Flame        style={{ width:14,height:14 }} />, color: "#FF3B6F"        },
+  variants:    { label: "Variants",     icon: <Layers       style={{ width:14,height:14 }} />, color: "#A3FF47"        },
+  testimonial: { label: "Testimonial",  icon: <Star         style={{ width:14,height:14 }} />, color: "#00D2B8"        },
+  hashtags:    { label: "Hashtags",     icon: <Hash         style={{ width:14,height:14 }} />, color: "#47C8FF"        },
+  comparison:  { label: "Comparison",   icon: <TrendingUp   style={{ width:14,height:14 }} />, color: "#FB923C"        },
+  reel:        { label: "Reel",         icon: <Play         style={{ width:14,height:14 }} />, color: "#BF5FFF"        },
+  seasonal:    { label: "Seasonal",     icon: <Calendar     style={{ width:14,height:14 }} />, color: "#FFD166"        },
 }
 
 function GenCard({ g }: { g: Generation }) {

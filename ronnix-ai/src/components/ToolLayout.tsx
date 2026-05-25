@@ -14,7 +14,7 @@ type Props = {
   color: string
   border: string
   profile: Profile | null
-  tool: "caption" | "reply" | "description"
+  tool: "caption" | "reply" | "description" | "live" | "promo" | "testimonial" | "variants" | "hashtags" | "comparison" | "reel" | "seasonal"
   requiredField: string
   children: (props: {
     input: Record<string, string>

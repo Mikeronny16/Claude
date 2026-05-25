@@ -1,24 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase-server"
-import { generateCaption, generateReply, generateDescription } from "@/lib/gemini"
+import {
+  generateCaption, generateReply, generateDescription,
+  generateLiveScript, generatePromo, generateTestimonial,
+  generateVariants, generateHashtags, generateComparison,
+  generateReel, generateSeasonal,
+} from "@/lib/gemini"
 import { TOOL_COST, FREE_DAILY_LIMIT } from "@/lib/credits"
+
+const VALID_TOOLS = ["caption","reply","description","live","promo","testimonial","variants","hashtags","comparison","reel","seasonal"]
 
 export async function POST(req: NextRequest) {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.json({ error: "ဝင်ရောက်ပါ" }, { status: 401 })
-  }
+  if (!user) return NextResponse.json({ error: "ဝင်ရောက်ပါ" }, { status: 401 })
 
   const body = await req.json()
   const { tool, ...input } = body
 
-  if (!["caption", "reply", "description"].includes(tool)) {
+  if (!VALID_TOOLS.includes(tool)) {
     return NextResponse.json({ error: "Invalid tool" }, { status: 400 })
   }
 
-  // Input length limits — prevent prompt injection and runaway costs
+  // Input length limits
   const MAX = 500
   for (const val of Object.values(input)) {
     if (typeof val === "string" && val.length > MAX) {
@@ -27,24 +32,17 @@ export async function POST(req: NextRequest) {
   }
 
   const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
+    .from("profiles").select("*").eq("id", user.id).single()
 
-  if (!profile) {
-    return NextResponse.json({ error: "Profile မတွေ့ပါ" }, { status: 404 })
-  }
+  if (!profile) return NextResponse.json({ error: "Profile မတွေ့ပါ" }, { status: 404 })
 
-  // Check daily limit for free users
   const today = new Date().toISOString().split("T")[0]
   const resetDate = profile.daily_reset?.split("T")[0]
-
   let dailyCount = profile.daily_count || 0
+
   if (resetDate !== today) {
     dailyCount = 0
-    await supabase
-      .from("profiles")
+    await supabase.from("profiles")
       .update({ daily_count: 0, daily_reset: new Date().toISOString() })
       .eq("id", user.id)
   }
@@ -56,38 +54,39 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  if (profile.plan !== "free" && profile.credits < TOOL_COST[tool as keyof typeof TOOL_COST]) {
-    return NextResponse.json(
-      { error: "Credits မလုံလောက်ပါ" },
-      { status: 402 }
-    )
+  const cost = TOOL_COST[tool as keyof typeof TOOL_COST]
+
+  if (profile.plan !== "free" && profile.credits < cost) {
+    return NextResponse.json({ error: "Credits မလုံလောက်ပါ" }, { status: 402 })
   }
 
   try {
     let output = ""
-    if (tool === "caption") output = await generateCaption(input)
-    else if (tool === "reply") output = await generateReply(input)
+    if (tool === "caption")          output = await generateCaption(input)
+    else if (tool === "reply")       output = await generateReply(input)
     else if (tool === "description") output = await generateDescription(input)
+    else if (tool === "live")        output = await generateLiveScript(input)
+    else if (tool === "promo")       output = await generatePromo(input)
+    else if (tool === "testimonial") output = await generateTestimonial(input)
+    else if (tool === "variants")    output = await generateVariants(input)
+    else if (tool === "hashtags")    output = await generateHashtags(input)
+    else if (tool === "comparison")  output = await generateComparison(input)
+    else if (tool === "reel")        output = await generateReel(input)
+    else if (tool === "seasonal")    output = await generateSeasonal(input)
 
-    // Deduct credits / increment daily count
     if (profile.plan === "free") {
-      await supabase
-        .from("profiles")
-        .update({ daily_count: dailyCount + 1 })
-        .eq("id", user.id)
+      await supabase.from("profiles")
+        .update({ daily_count: dailyCount + 1 }).eq("id", user.id)
     } else {
-      await supabase
-        .from("profiles")
-        .update({ credits: profile.credits - TOOL_COST[tool as keyof typeof TOOL_COST] })
-        .eq("id", user.id)
+      await supabase.from("profiles")
+        .update({ credits: profile.credits - cost }).eq("id", user.id)
     }
 
     await supabase.from("generations").insert({
-      user_id: user.id,
-      tool,
+      user_id: user.id, tool,
       input_text: JSON.stringify(input),
       output_text: output,
-      credits_used: profile.plan === "free" ? 0 : TOOL_COST[tool as keyof typeof TOOL_COST],
+      credits_used: profile.plan === "free" ? 0 : cost,
     })
 
     return NextResponse.json({ output })
