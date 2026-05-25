@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ShareCard from "@/components/ShareCard";
@@ -19,6 +19,8 @@ type Stats = { total: number; unread: number; today: number; week: number; moods
 type User = { id: string; username: string; displayName: string; avatarEmoji: string };
 
 const REACTIONS = ["❤️", "😂", "😮", "💯", "🔥"];
+const MOOD_FILTERS = ["All", "💬", "❤️", "🔥", "🤔", "😂", "🥳"];
+type SortMode = "newest" | "unread_first" | "oldest";
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -30,7 +32,13 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-function MessageCard({ msg, onReact, onReply, onShare }: { msg: Msg; onReact: (id: string, r: string) => void; onReply: (id: string, text: string) => void; onShare: (msg: Msg) => void }) {
+function MessageCard({ msg, onReact, onReply, onShare, onMarkRead }: {
+  msg: Msg;
+  onReact: (id: string, r: string) => void;
+  onReply: (id: string, text: string) => void;
+  onShare: (msg: Msg) => void;
+  onMarkRead: (id: string) => void;
+}) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [replying, setReplying] = useState(false);
@@ -46,21 +54,31 @@ function MessageCard({ msg, onReact, onReply, onShare }: { msg: Msg; onReact: (i
   }
 
   function copyMsg() {
-    navigator.clipboard.writeText(msg.content);
+    navigator.clipboard.writeText(msg.content).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleReact(r: string) {
+    onReact(msg.id, r);
+    if (!msg.is_read) onMarkRead(msg.id);
+  }
+
   return (
-    <div className="glass p-5 space-y-3 message-pop card-hover">
+    <div
+      className="glass p-5 space-y-3 message-pop card-hover"
+      style={{ borderLeft: !msg.is_read ? `3px solid ${a}` : undefined }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {msg.sender_mood && <span className="text-2xl shrink-0 mt-0.5">{msg.sender_mood}</span>}
           <p className="text-sm leading-relaxed" style={{ color: "var(--text)", wordBreak: "break-word" }}>{msg.content}</p>
         </div>
-        {!msg.is_read && (
-          <span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: a }} />
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {!msg.is_read && (
+            <span className="w-2 h-2 rounded-full" style={{ background: a }} />
+          )}
+        </div>
       </div>
 
       {msg.public_reply && (
@@ -73,7 +91,7 @@ function MessageCard({ msg, onReact, onReply, onShare }: { msg: Msg; onReact: (i
       <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
         <div className="flex items-center gap-1">
           {REACTIONS.map(r => (
-            <button key={r} onClick={() => onReact(msg.id, r)}
+            <button key={r} onClick={() => handleReact(r)}
               className="w-8 h-8 rounded-lg text-base flex items-center justify-center cursor-pointer transition-all"
               style={{ background: msg.reaction === r ? "rgba(6,182,212,0.2)" : "var(--glass)", border: `1px solid ${msg.reaction === r ? "rgba(6,182,212,0.4)" : "var(--glass-border)"}` }}>
               {r}
@@ -120,6 +138,8 @@ export default function InboxPage() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareMsg, setShareMsg] = useState<Msg | null>(null);
   const [streak, setStreak] = useState(0);
+  const [moodFilter, setMoodFilter] = useState("All");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const a = "#06b6d4";
 
   const load = useCallback(async (u: User) => {
@@ -151,6 +171,7 @@ export default function InboxPage() {
   async function react(messageId: string, reaction: string) {
     await fetch("/api/messages/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messageId, reaction }) });
     setMessages(prev => prev.map(m => m.id === messageId ? { ...m, reaction, is_read: true } : m));
+    setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - (messages.find(m => m.id === messageId)?.is_read ? 0 : 1)) }));
   }
 
   async function reply(messageId: string, text: string) {
@@ -158,16 +179,36 @@ export default function InboxPage() {
     setMessages(prev => prev.map(m => m.id === messageId ? { ...m, public_reply: text, is_read: true } : m));
   }
 
+  function markRead(messageId: string) {
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
+    setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
+  }
+
+  async function markAllRead() {
+    if (!user) return;
+    await fetch("/api/messages/mark-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id }) });
+    setMessages(prev => prev.map(m => ({ ...m, is_read: true })));
+    setStats(prev => ({ ...prev, unread: 0 }));
+  }
+
   function copyLink() {
     const url = `${window.location.origin}/${user?.username}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(url).catch(() => {});
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2500);
   }
 
+  const filteredMessages = useMemo(() => {
+    let result = moodFilter === "All" ? messages : messages.filter(m => m.sender_mood === moodFilter);
+    if (sortMode === "newest") result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    else if (sortMode === "oldest") result = [...result].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    else if (sortMode === "unread_first") result = [...result].sort((a, b) => (a.is_read ? 1 : 0) - (b.is_read ? 1 : 0));
+    return result;
+  }, [messages, moodFilter, sortMode]);
+
   if (!user) return null;
 
-  const myLink = `whispr.app/${user.username}`;
+  const myLink = `${typeof window !== "undefined" ? window.location.host : "whispr.app"}/${user.username}`;
 
   function openShare(msg: Msg) { setShareMsg(msg); }
 
@@ -175,6 +216,7 @@ export default function InboxPage() {
   const weekPct = Math.min(100, Math.round(((stats.week ?? 0) / WEEKLY_GOAL) * 100));
   const topMood = Object.entries(stats.moods ?? {}).sort((a, b) => b[1] - a[1])[0];
   const moodPct = topMood && stats.total > 0 ? Math.round((topMood[1] / stats.total) * 100) : 0;
+  const unreadCount = messages.filter(m => !m.is_read).length;
 
   return (
     <>
@@ -194,9 +236,13 @@ export default function InboxPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl relative"
             style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.3)" }}>
             {user.avatarEmoji}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center"
+                style={{ background: a, color: "#040d1a" }}>{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
           </div>
           <div>
             <p className="font-bold text-sm" style={{ color: "var(--text)" }}>{user.displayName}</p>
@@ -238,22 +284,16 @@ export default function InboxPage() {
       {/* Streak + Mood + Challenge */}
       {!loading && (
         <div className="grid grid-cols-3 gap-3 mb-6">
-
-          {/* Streak */}
           <div className="glass p-3 text-center col-span-1">
             <div className="text-2xl mb-1">🔥</div>
             <div className="font-extrabold text-lg" style={{ color: streak >= 3 ? "#f59e0b" : "var(--text)" }}>{streak}</div>
             <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>day streak</div>
           </div>
-
-          {/* Top Mood */}
           <div className="glass p-3 text-center col-span-1">
             <div className="text-2xl mb-1">{topMood ? topMood[0] : "💬"}</div>
             <div className="font-extrabold text-lg" style={{ color: a }}>{moodPct}%</div>
             <div className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>top vibe</div>
           </div>
-
-          {/* Weekly */}
           <div className="glass p-3 text-center col-span-1">
             <div className="text-2xl mb-1">{weekPct >= 100 ? "🏆" : "🎯"}</div>
             <div className="font-extrabold text-lg" style={{ color: weekPct >= 100 ? "#f59e0b" : "var(--text)" }}>{stats.week ?? 0}</div>
@@ -264,7 +304,7 @@ export default function InboxPage() {
 
       {/* Weekly Challenge Bar */}
       {!loading && (
-        <div className="glass p-4 mb-6">
+        <div className="glass p-4 mb-5">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold" style={{ color: a }}>🎯 Weekly Challenge</p>
             <p className="text-xs font-bold" style={{ color: weekPct >= 100 ? "#f59e0b" : "var(--text-faint)" }}>
@@ -283,10 +323,51 @@ export default function InboxPage() {
 
       {/* Leaderboard Link */}
       {!loading && (
-        <div className="text-center mb-4">
+        <div className="text-center mb-5">
           <Link href="/leaderboard" className="text-xs font-semibold" style={{ color: "rgba(6,182,212,0.6)" }}>
             🏆 View public leaderboard →
           </Link>
+        </div>
+      )}
+
+      {/* Filters & Sort bar */}
+      {!loading && messages.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {/* Mood filter chips */}
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {MOOD_FILTERS.map(mood => {
+              const count = mood === "All" ? messages.length : messages.filter(m => m.sender_mood === mood).length;
+              if (mood !== "All" && count === 0) return null;
+              return (
+                <button key={mood} onClick={() => setMoodFilter(mood)}
+                  className="shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all"
+                  style={{
+                    background: moodFilter === mood ? a : "var(--glass)",
+                    border: `1px solid ${moodFilter === mood ? a : "var(--glass-border)"}`,
+                    color: moodFilter === mood ? "#040d1a" : "var(--text-dim)",
+                  }}>
+                  {mood} {count}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sort + Mark all read */}
+          <div className="flex items-center justify-between">
+            <select value={sortMode} onChange={e => setSortMode(e.target.value as SortMode)}
+              className="text-xs px-2 py-1 rounded-lg cursor-pointer"
+              style={{ background: "var(--glass)", border: "1px solid var(--glass-border)", color: "var(--text-dim)" }}>
+              <option value="newest">Newest first</option>
+              <option value="unread_first">Unread first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+            {unreadCount > 0 && (
+              <button onClick={markAllRead} className="text-xs px-3 py-1 rounded-lg cursor-pointer font-semibold"
+                style={{ color: a, border: `1px solid rgba(6,182,212,0.3)` }}>
+                ✓ Mark all read
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -295,7 +376,7 @@ export default function InboxPage() {
         <div className="space-y-3">
           {[1,2,3].map(i => <div key={i} className="skeleton h-28 rounded-3xl" />)}
         </div>
-      ) : messages.length === 0 ? (
+      ) : filteredMessages.length === 0 && messages.length === 0 ? (
         <div className="text-center py-20 space-y-4">
           <div className="text-5xl">👻</div>
           <p className="font-bold" style={{ color: "var(--text)" }}>No messages yet</p>
@@ -305,11 +386,23 @@ export default function InboxPage() {
             {linkCopied ? "✅ Copied!" : "📋 Copy Your Link"}
           </button>
         </div>
+      ) : filteredMessages.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-3xl mb-2">{moodFilter}</div>
+          <p className="text-sm" style={{ color: "var(--text-dim)" }}>No {moodFilter} messages yet</p>
+          <button onClick={() => setMoodFilter("All")} className="mt-3 text-xs px-3 py-1.5 rounded-lg cursor-pointer"
+            style={{ color: a, border: `1px solid rgba(6,182,212,0.3)` }}>
+            Show all
+          </button>
+        </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-xs font-semibold" style={{ color: "var(--text-faint)" }}>{messages.length} message{messages.length !== 1 ? "s" : ""}</p>
-          {messages.map(msg => (
-            <MessageCard key={msg.id} msg={msg} onReact={react} onReply={reply} onShare={openShare} />
+          <p className="text-xs font-semibold" style={{ color: "var(--text-faint)" }}>
+            {filteredMessages.length} message{filteredMessages.length !== 1 ? "s" : ""}
+            {moodFilter !== "All" ? ` · ${moodFilter}` : ""}
+          </p>
+          {filteredMessages.map(msg => (
+            <MessageCard key={msg.id} msg={msg} onReact={react} onReply={reply} onShare={openShare} onMarkRead={markRead} />
           ))}
         </div>
       )}

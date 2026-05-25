@@ -17,21 +17,39 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 export default function LeaderboardPage() {
   const [board, setBoard] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<"all" | "week">("all");
 
   useEffect(() => {
-    fetch("/api/leaderboard")
+    setLoading(true);
+    fetch(`/api/leaderboard?period=${period}`)
       .then(r => r.json())
       .then(d => { setBoard(d.leaderboard ?? []); setLoading(false); });
-  }, []);
+  }, [period]);
 
   return (
     <main className="min-h-screen px-4 py-8 max-w-lg mx-auto">
 
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <div className="text-5xl mb-3">🏆</div>
         <h1 className="text-2xl font-extrabold" style={{ color: "var(--text)" }}>Leaderboard</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-dim)" }}>Most anonymous messages received</p>
+      </div>
+
+      {/* Period toggle */}
+      <div className="flex justify-center mb-6">
+        <div className="flex rounded-xl overflow-hidden" style={{ border: "1px solid var(--glass-border)" }}>
+          {(["all", "week"] as const).map(p => (
+            <button key={p} onClick={() => setPeriod(p)}
+              className="px-5 py-2 text-sm font-bold cursor-pointer transition-all"
+              style={{
+                background: period === p ? a : "var(--glass)",
+                color: period === p ? "#040d1a" : "var(--text-dim)",
+              }}>
+              {p === "all" ? "🌍 All Time" : "📅 This Week"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -40,8 +58,10 @@ export default function LeaderboardPage() {
         </div>
       ) : board.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-4xl mb-3">👻</div>
-          <p style={{ color: "var(--text-dim)" }}>No one on the board yet. Be first!</p>
+          <div className="text-4xl mb-3">{period === "week" ? "📅" : "👻"}</div>
+          <p style={{ color: "var(--text-dim)" }}>
+            {period === "week" ? "No messages this week yet. Be first!" : "No one on the board yet. Be first!"}
+          </p>
         </div>
       ) : (
         <div className="space-y-2">

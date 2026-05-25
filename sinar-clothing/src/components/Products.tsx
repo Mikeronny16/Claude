@@ -7,11 +7,12 @@ import ProductCard from "./ProductCard"
 import QuickViewModal from "./QuickViewModal"
 import OrderInstructions from "./OrderInstructions"
 import SizeGuide from "./SizeGuide"
-import { HelpCircle, Ruler } from "lucide-react"
+import { HelpCircle, Ruler, Search, X } from "lucide-react"
 import { useLang } from "@/lib/lang"
 import { useTheme } from "@/lib/theme"
 
 type Filter = "All" | Category
+type SortOption = "default" | "price_asc" | "price_desc" | "newest"
 
 const FILTERS: { key: Filter; mm: string; en: string }[] = [
   { key: "All", mm: "အားလုံး", en: "All" },
@@ -27,6 +28,8 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const [showInstructions, setShowInstructions] = useState(false)
   const [showSizeGuide, setShowSizeGuide] = useState(false)
+  const [search, setSearch] = useState("")
+  const [sortBy, setSortBy] = useState<SortOption>("default")
   const { t, lang } = useLang()
   const { isDark } = useTheme()
 
@@ -45,10 +48,17 @@ export default function Products() {
   })
 
   const all = live && live.length > 0 ? live : (FALLBACK_PRODUCTS as unknown as Product[])
-  const items = useMemo(
-    () => filter === "All" ? all : all.filter((p) => p.category === filter),
-    [filter, all]
-  )
+  const items = useMemo(() => {
+    let result = filter === "All" ? all : all.filter((p) => p.category === filter)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(p => p.name_en.toLowerCase().includes(q) || p.name_mm.includes(q))
+    }
+    if (sortBy === "price_asc") result = [...result].sort((a, b) => a.price - b.price)
+    else if (sortBy === "price_desc") result = [...result].sort((a, b) => b.price - a.price)
+    else if (sortBy === "newest") result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    return result
+  }, [filter, all, search, sortBy])
 
   const bgSection = isDark ? "bg-[#0A1A0F]" : "bg-[#FAF7F2]"
   const textMain = isDark ? "text-[#F5F0E8]" : "text-[#1A2E1F]"
@@ -136,6 +146,56 @@ export default function Products() {
           </motion.div>
         </div>
 
+        {/* Search + Sort bar */}
+        <motion.div
+          className="mb-6 flex gap-3 flex-wrap items-center"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Search input */}
+          <div className="relative flex-1 min-w-[180px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDark ? "#7A8F7D" : "#3D5A45" }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t("ရှာဖွေရန်...", "Search products...")}
+              className={`w-full pl-9 pr-8 py-2.5 rounded-full text-sm outline-none border transition-colors font-mm ${
+                isDark
+                  ? "bg-[#0F2415] border-[rgba(255,255,255,0.08)] text-[#F5F0E8] placeholder:text-[#7A8F7D] focus:border-pink/40"
+                  : "bg-white border-[rgba(45,90,61,0.12)] text-[#1A2E1F] placeholder:text-[#3D5A45] focus:border-pink/40"
+              }`}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="w-3.5 h-3.5" style={{ color: isDark ? "#7A8F7D" : "#3D5A45" }} />
+              </button>
+            )}
+          </div>
+
+          {/* Sort select */}
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value as SortOption)}
+            className={`px-4 py-2.5 rounded-full text-xs border outline-none cursor-pointer transition-colors ${
+              isDark
+                ? "bg-[#0F2415] border-[rgba(255,255,255,0.08)] text-[#F5F0E8]"
+                : "bg-white border-[rgba(45,90,61,0.12)] text-[#1A2E1F]"
+            }`}
+          >
+            <option value="default">{t("မူလစဉ်", "Default")}</option>
+            <option value="newest">{t("အသစ်ဆုံး", "Newest")}</option>
+            <option value="price_asc">{t("ဈေးသက်သာ", "Price: Low → High")}</option>
+            <option value="price_desc">{t("ဈေးကြီး", "Price: High → Low")}</option>
+          </select>
+
+          {/* Count */}
+          <span className={`text-xs ${isDark ? "text-[#7A8F7D]" : "text-[#3D5A45]"}`}>
+            {items.length} {t("ခု", "items")}
+          </span>
+        </motion.div>
+
         {/* Filter tabs — horizontal scroll on mobile */}
         <motion.div
           className="mb-10 -mx-5 px-5 overflow-x-auto no-scrollbar"
@@ -189,7 +249,14 @@ export default function Products() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            {t("ဤ category တွင် ပစ္စည်းမရှိသေးပါ", "No items in this category yet")}
+            {search
+              ? t(`"${search}" အတွက် ပစ္စည်းမတွေ့ပါ`, `No results for "${search}"`)
+              : t("ဤ category တွင် ပစ္စည်းမရှိသေးပါ", "No items in this category yet")}
+            {search && (
+              <button onClick={() => setSearch("")} className="block mx-auto mt-3 text-pink text-xs underline">
+                {t("ရှာဖွေမှု ဖယ်ရှားရန်", "Clear search")}
+              </button>
+            )}
           </motion.div>
         )}
       </div>

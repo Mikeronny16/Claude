@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
-import { Eye, MessageCircle } from "lucide-react"
+import { Eye, MessageCircle, Heart } from "lucide-react"
+import { useState, useEffect } from "react"
 import { FALLBACK_IMG } from "@/lib/products"
 import { messengerUrl } from "@/config"
 import { useLang } from "@/lib/lang"
@@ -14,10 +15,30 @@ interface Props {
   large?: boolean
 }
 
+function useWishlist(productId: string) {
+  const [liked, setLiked] = useState(false)
+  const key = `sinar_wishlist_${productId}`
+
+  useEffect(() => {
+    setLiked(localStorage.getItem(key) === "1")
+  }, [key])
+
+  function toggle(e: React.MouseEvent) {
+    e.stopPropagation()
+    const next = !liked
+    setLiked(next)
+    if (next) localStorage.setItem(key, "1")
+    else localStorage.removeItem(key)
+  }
+
+  return { liked, toggle }
+}
+
 export default function ProductCard({ p, index, onQuickView, large = false }: Props) {
   const dmUrl = messengerUrl(p.name_en)
   const { t, lang } = useLang()
   const { isDark } = useTheme()
+  const { liked, toggle: toggleWishlist } = useWishlist(String(p.id ?? p.name_en))
 
   const bgCard = isDark ? "bg-[#122B19]" : "bg-white"
   const border = isDark ? "border-[rgba(255,255,255,0.06)]" : "border-[rgba(45,90,61,0.10)]"
@@ -73,16 +94,34 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
           </span>
         </div>
 
-        {/* Size chips — top right */}
-        <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end max-w-[80px]">
-          {p.sizes.slice(0, 3).map((s) => (
-            <span
-              key={s}
-              className="bg-black/50 backdrop-blur text-white/90 text-[9px] font-bold w-6 h-6 rounded-full flex items-center justify-center border border-white/20"
-            >
-              {s}
-            </span>
-          ))}
+        {/* Top-right: Wishlist + Size chips */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+          {/* Wishlist button */}
+          <button
+            onClick={toggleWishlist}
+            className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200"
+            style={{
+              background: liked ? "rgba(255,31,110,0.85)" : "rgba(0,0,0,0.45)",
+              border: liked ? "1px solid #FF1F6E" : "1px solid rgba(255,255,255,0.2)",
+            }}
+            aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart
+              className="w-4 h-4 transition-transform duration-200"
+              style={{ color: liked ? "white" : "rgba(255,255,255,0.8)", fill: liked ? "white" : "none", transform: liked ? "scale(1.15)" : "scale(1)" }}
+            />
+          </button>
+          {/* Size chips */}
+          <div className="flex flex-wrap gap-1 justify-end max-w-[80px]">
+            {p.sizes.slice(0, 3).map((s) => (
+              <span
+                key={s}
+                className="bg-black/50 backdrop-blur text-white/90 text-[9px] font-bold w-6 h-6 rounded-full flex items-center justify-center border border-white/20"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Hover action buttons — slide up */}

@@ -1,12 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import supabase from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const period = searchParams.get("period") ?? "all";
+
+  const msgsQuery = supabase.from("whispr_messages").select("recipient_id, sender_mood, created_at");
+  if (period === "week") {
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    msgsQuery.gte("created_at", weekAgo);
+  }
+
   const [usersRes, msgsRes] = await Promise.all([
     supabase.from("whispr_users").select("id, username, display_name, avatar_emoji"),
-    supabase.from("whispr_messages").select("recipient_id, sender_mood"),
+    msgsQuery,
   ]);
 
   const users = usersRes.data ?? [];

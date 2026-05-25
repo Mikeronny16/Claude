@@ -11,21 +11,48 @@ const ACCENT_RGBA = "rgba(255,107,0,"
 
 const PROJECTS = [
   {
-    name: 'TikCheck',
-    tag: 'CREATOR TOOLS · AI',
-    desc: 'The all-in-one viral toolkit for TikTok creators. Score videos, generate hooks, captions, hashtags, and plan 30 days of content.',
-    href: '#',
+    name: 'Ronnix AI',
+    tag: 'AI · MYANMAR · SAAS',
+    desc: '11 AI tools for Myanmar online sellers — captions, live scripts, promo posts, hashtags & more. 5-second content generation in Myanmar & English.',
+    href: 'https://ronnixai.vercel.app',
     dark: true,
     year: '2025',
     live: true,
   },
   {
-    name: 'ReadyPrompts',
-    tag: 'AI · PRODUCTIVITY',
-    desc: '105 AI prompts that actually work — for creators, developers, and marketers. Built for people who ship, not theorize.',
-    href: 'https://readyprompts.vercel.app',
+    name: 'DraftWin',
+    tag: 'AI · FREELANCE · SAAS',
+    desc: 'AI proposal writer that wins jobs. Tailored for Upwork, Fiverr, LinkedIn & Email. Score ring, snippet vault, rewriter — used by 1,200+ freelancers.',
+    href: 'https://claude-hsmg.vercel.app',
     dark: false,
-    year: '2024',
+    year: '2025',
+    live: true,
+  },
+  {
+    name: 'Whispr',
+    tag: 'SOCIAL · ANONYMOUS',
+    desc: 'Anonymous message platform. Share your link, get 100% honest messages with mood tags, reactions, leaderboard & streak system.',
+    href: 'https://whispr-shh.vercel.app',
+    dark: true,
+    year: '2025',
+    live: true,
+  },
+  {
+    name: 'TikCheck',
+    tag: 'CREATOR TOOLS · AI',
+    desc: 'The all-in-one viral toolkit for TikTok creators. Score videos, generate hooks, captions, hashtags, and plan 30 days of content.',
+    href: '#',
+    dark: false,
+    year: '2025',
+    live: true,
+  },
+  {
+    name: 'Sinar Clothing',
+    tag: 'E-COMMERCE · FASHION',
+    desc: 'Editorial-style fashion catalog for a Myanmar boutique brand. Supabase-powered product management, bilingual UI, and cinematic scroll animations.',
+    href: '#',
+    dark: true,
+    year: '2025',
     live: true,
   },
   {
@@ -33,8 +60,26 @@ const PROJECTS = [
     tag: 'FREELANCE · TOOLS',
     desc: '30 copy-paste cold DM scripts. Land clients in 60 seconds. No cringe, no guessing — just messages that actually get replies.',
     href: 'https://colddm.vercel.app',
+    dark: false,
+    year: '2024',
+    live: true,
+  },
+  {
+    name: 'ReadyPrompts',
+    tag: 'AI · PRODUCTIVITY',
+    desc: '105 AI prompts that actually work — for creators, developers, and marketers. Built for people who ship, not theorize.',
+    href: 'https://readyprompts.vercel.app',
     dark: true,
     year: '2024',
+    live: true,
+  },
+  {
+    name: 'Toynar',
+    tag: 'AI · IMAGE · FUN',
+    desc: 'Upload your photo, AI transforms you into a collectible toy figure in seconds. No account needed.',
+    href: '#',
+    dark: false,
+    year: '2025',
     live: true,
   },
   {
@@ -42,13 +87,13 @@ const PROJECTS = [
     tag: 'AI · PET · GAME',
     desc: 'A quiet experiment in caring. Buy an egg, whisper to it, raise a unique AI creature with its own personality.',
     href: '#',
-    dark: false,
+    dark: true,
     year: '2025',
     live: false,
   },
 ]
 
-const SKILLS = ['Next.js', 'TypeScript', 'AI APIs', 'Framer Motion', 'Tailwind CSS', 'Prisma']
+const SKILLS = ['Next.js 16', 'TypeScript', 'Groq AI API', 'Framer Motion', 'Tailwind CSS', 'Supabase', 'React Three Fiber', 'Vite']
 
 // ── Text scramble component ──────────────────────────────
 const SCRAMBLE_CHARS = '!<>_\\/[]{}—=+*^?#▒░'

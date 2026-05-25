@@ -3,30 +3,38 @@ import "./globals.css"
 import { Toaster } from "sonner"
 import ThemeProvider from "@/components/ThemeProvider"
 
-const SITE_URL = "https://claude-plum-eta.vercel.app"
+const SITE_URL = "https://ronnixai.vercel.app"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Ronnix AI — Myanmar Online Sellers AI Platform",
+    default: "Ronnix AI — Myanmar Online Sellers AI Platform | 11 AI Tools",
     template: "%s | Ronnix AI",
   },
-  description: "Caption ရေး၊ Customer reply ပြန်၊ Product description ဖန်တီး — မြန်မာ online ရောင်းချသူများအတွက် AI tools. 3 ကြိမ်/နေ့ အခမဲ့",
-  keywords: ["Myanmar AI", "online seller", "caption generator", "မြန်မာ AI", "Facebook caption", "TikTok caption", "product description Myanmar"],
+  description: "Myanmar online sellers အတွက် AI tools 11 ခု — Caption, Reply, Live Script, Promo, Reel, Hashtags + more. 5 seconds ထဲ content ရ. Free plan available.",
+  keywords: [
+    "Myanmar AI tools", "online seller Myanmar", "caption generator Myanmar",
+    "မြန်မာ AI", "Facebook caption Myanmar", "TikTok caption Myanmar",
+    "product description Myanmar", "live script Myanmar", "hashtag generator Myanmar",
+    "Myanmar Facebook seller", "AI for Myanmar business", "ronnix ai",
+    "social media tools Myanmar", "content creator Myanmar", "e-commerce Myanmar AI"
+  ],
   authors: [{ name: "Mike Ronny" }],
   creator: "Ronnix AI",
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: "Ronnix AI",
-    title: "Ronnix AI — Myanmar Online Sellers AI Platform",
-    description: "Caption ရေး၊ Customer reply ပြန်၊ Product description — AI tools for Myanmar online sellers",
+    title: "Ronnix AI — 11 AI Tools for Myanmar Online Sellers",
+    description: "Caption, Reply, Live Script, Promo, Reel, Hashtags နဲ့ AI Tools 11 ခု. Myanmar online sellers အတွက်. 5 seconds ထဲ content ရ.",
     locale: "my_MM",
+    images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: "Ronnix AI — Myanmar Online Sellers AI Platform" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ronnix AI",
-    description: "AI tools for Myanmar online sellers — Caption, Reply, Description",
+    title: "Ronnix AI — 11 AI Tools for Myanmar Online Sellers",
+    description: "Caption, Reply, Live Script, Reel, Hashtags + 6 more. 5 seconds content. Free to start.",
+    images: [`${SITE_URL}/og-image.png`],
   },
   robots: { index: true, follow: true },
 }
