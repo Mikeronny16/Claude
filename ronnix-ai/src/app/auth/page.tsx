@@ -118,11 +118,14 @@ function AuthForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+                autoComplete="email"
+                inputMode="email"
+                className="w-full px-4 py-3 rounded-xl outline-none transition-colors"
                 style={{
                   background: "var(--bg)",
                   border: "1px solid var(--border)",
                   color: "var(--text)",
+                  fontSize: 16,
                 }}
                 placeholder="you@email.com"
               />
@@ -135,11 +138,13 @@ function AuthForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                className="w-full px-4 py-3 rounded-xl outline-none transition-colors"
                 style={{
                   background: "var(--bg)",
                   border: "1px solid var(--border)",
                   color: "var(--text)",
+                  fontSize: 16,
                 }}
                 placeholder="••••••••"
               />

@@ -45,12 +45,15 @@ export default function ProfileClient({ profile, payments }: { profile: Profile 
       }}>
         <span style={{ fontWeight: 800, fontSize: 16 }}>Profile</span>
         {hasPending && (
-          <div style={{
-            marginLeft: 10, padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700,
-            background: "rgba(254,203,0,0.12)", border: "1px solid rgba(254,203,0,0.3)", color: "var(--yellow)",
-          }}>
+          <motion.div
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              marginLeft: 10, padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700,
+              background: "rgba(254,203,0,0.12)", border: "1px solid rgba(254,203,0,0.3)", color: "var(--yellow)",
+            }}>
             Payment စောင့်ဆိုင်းဆဲ
-          </div>
+          </motion.div>
         )}
       </div>
 

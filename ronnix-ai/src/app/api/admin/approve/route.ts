@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase-server"
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "ronnix_admin_2025"
+const ADMIN_SECRET = process.env.ADMIN_SECRET
 
 export async function POST(req: NextRequest) {
   const { payment_id, secret } = await req.json()
 
-  if (secret !== ADMIN_SECRET) {
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const { payment_id, secret } = await req.json()
 
-  if (secret !== ADMIN_SECRET) {
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

@@ -8,24 +8,33 @@ import { toast } from "sonner"
 import { Check, X, Loader2, LogOut } from "lucide-react"
 import type { PaymentRequest } from "@/lib/supabase"
 
-const ADMIN_SECRET = "ronnix_admin_2025"
 const ADMIN_KEY = "ronnix_admin_auth"
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pwd, setPwd] = useState("")
+  const [storedPwd, setStoredPwd] = useState("")
   const [payments, setPayments] = useState<(PaymentRequest & { email?: string })[]>([])
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState<string | null>(null)
 
   useEffect(() => {
-    if (localStorage.getItem(ADMIN_KEY) === "true") setAuthed(true)
+    const saved = localStorage.getItem(ADMIN_KEY)
+    if (saved) { setStoredPwd(saved); setAuthed(true) }
   }, [])
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    if (pwd === ADMIN_SECRET) {
-      localStorage.setItem(ADMIN_KEY, "true")
+    // Verify against server — never expose secret client-side
+    const res = await fetch("/api/admin/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payment_id: "__ping__", secret: pwd }),
+    })
+    // 404 = secret correct but payment not found; 401 = wrong secret
+    if (res.status !== 401) {
+      localStorage.setItem(ADMIN_KEY, pwd)
+      setStoredPwd(pwd)
       setAuthed(true)
     } else {
       toast.error("Password မှားသည်")
@@ -58,7 +67,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payment_id: id, secret: ADMIN_SECRET }),
+        body: JSON.stringify({ payment_id: id, secret: storedPwd }),
       })
       if (!res.ok) throw new Error("Failed")
       toast.success("Approved! Credits ထည့်ပြီ")
@@ -76,7 +85,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/approve", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payment_id: id, secret: ADMIN_SECRET }),
+        body: JSON.stringify({ payment_id: id, secret: storedPwd }),
       })
       if (!res.ok) throw new Error("Failed")
       toast.success("Rejected")
@@ -120,7 +129,7 @@ export default function AdminPage() {
       <div className="flex items-center justify-between px-5 py-3 border-b"
         style={{ borderColor: "var(--border)" }}>
         <h1 className="font-black gradient-text">RONNIX Admin</h1>
-        <button onClick={() => { localStorage.removeItem(ADMIN_KEY); setAuthed(false) }}
+        <button onClick={() => { localStorage.removeItem(ADMIN_KEY); setStoredPwd(""); setAuthed(false) }}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg"
           style={{ color: "var(--muted)" }}>
           <LogOut className="w-3.5 h-3.5" /> Logout

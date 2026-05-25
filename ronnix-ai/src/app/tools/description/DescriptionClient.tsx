@@ -23,23 +23,23 @@ export default function DescriptionClient({ profile }: { profile: Profile | null
         <>
           <div>
             <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
-              ကုန်ပစ္စည်း အမည်
+              ကုန်ပစ္စည်း အမည် 📦
             </label>
             <input className="inp"
               value={input.product || ""}
               onChange={e => setInput("product", e.target.value)}
-              placeholder="ဥပမာ — Floral Linen Blouse"
+              placeholder="ဥပမာ — Floral Linen Blouse · Summer Collection"
             />
           </div>
 
           <div>
             <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
-              FEATURES / DETAILS
+              Features / Details ✨
             </label>
             <textarea className="inp" rows={3}
               value={input.features || ""}
               onChange={e => setInput("features", e.target.value)}
-              placeholder="ဥပမာ — Size S/M/L, cotton material, 3 colors available..."
+              placeholder={"ဥပမာ —\nSize S/M/L/XL · Cotton ထည်\nအရောင် 3 မျိုး · Machine wash ရ\nDelivery ရ · COD ရ"}
             />
           </div>
 

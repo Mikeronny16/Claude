@@ -11,10 +11,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "ဝင်ရောက်ပါ" }, { status: 401 })
   }
 
-  const { tool, ...input } = await req.json()
+  const body = await req.json()
+  const { tool, ...input } = body
 
   if (!["caption", "reply", "description"].includes(tool)) {
     return NextResponse.json({ error: "Invalid tool" }, { status: 400 })
+  }
+
+  // Input length limits — prevent prompt injection and runaway costs
+  const MAX = 500
+  for (const val of Object.values(input)) {
+    if (typeof val === "string" && val.length > MAX) {
+      return NextResponse.json({ error: "Input too long (max 500 chars)" }, { status: 400 })
+    }
   }
 
   const { data: profile } = await supabase

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { Loader2, Copy, Check, ArrowLeft, Zap, Send, RefreshCw } from "lucide-react"
 import Link from "next/link"
@@ -131,9 +132,11 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, re
 
             {children({ input, setInput, lang, setLang })}
 
-            <button
+            <motion.button
               onClick={handleGenerate}
               disabled={loading || !canGenerate}
+              whileTap={canGenerate && !loading ? { scale: 0.96 } : {}}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
               style={{
                 width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: canGenerate && !loading ? "pointer" : "not-allowed",
                 background: loading ? "rgba(255,255,255,0.06)" : canGenerate ? color : "rgba(255,255,255,0.04)",
@@ -147,7 +150,7 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, re
                 ? <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} />
                 : <Send style={{ width: 15, height: 15 }} />}
               {loading ? "Generating..." : !canGenerate ? "အကြောင်းအရာ ထည့်ပါ" : output ? "ထပ်ရေးမည်" : "Generate လုပ်မည်"}
-            </button>
+            </motion.button>
           </div>
 
           {/* RIGHT — Output */}
@@ -204,31 +207,38 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, re
               )}
 
               {/* Output */}
+              <AnimatePresence mode="wait">
               {output && !loading && (
-                <>
+                <motion.div
+                  key={output.slice(0, 20)}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                >
                   <p className="font-mm" style={{ fontSize: 14, lineHeight: 1.9, color: "var(--text)", whiteSpace: "pre-wrap" }}>
                     {output}
                   </p>
                   <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-                    <button onClick={handleCopy} style={{
+                    <motion.button onClick={handleCopy} whileTap={{ scale: 0.94 }} style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 16px", borderRadius: 10, border: `1px solid ${border}`,
                       background: `${color}12`, color, fontSize: 12, fontWeight: 700, cursor: "pointer",
                     }}>
                       {copied ? <Check style={{ width: 13, height: 13 }} /> : <Copy style={{ width: 13, height: 13 }} />}
                       {copied ? "Copied!" : "Copy"}
-                    </button>
-                    <button onClick={handleGenerate} disabled={loading} style={{
+                    </motion.button>
+                    <motion.button onClick={handleGenerate} disabled={loading} whileTap={{ scale: 0.94 }} style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 16px", borderRadius: 10, border: "1px solid var(--border)",
                       background: "rgba(255,255,255,0.04)", color: "var(--muted)",
                       fontSize: 12, fontWeight: 700, cursor: "pointer",
                     }}>
                       <RefreshCw style={{ width: 13, height: 13 }} /> Regenerate
-                    </button>
+                    </motion.button>
                   </div>
-                </>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
 
             {profile?.plan === "free" && creditsLeft === 0 && (

@@ -131,14 +131,26 @@ body {
   border-radius: 14px;
   padding: 13px 16px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
   font-family: 'Noto Sans Myanmar','Plus Jakarta Sans',sans-serif;
   outline: none;
   transition: border-color 0.2s;
   resize: none;
+  -webkit-appearance: none; /* remove iOS default styling */
 }
 .inp:focus { border-color: var(--border-y); background: rgba(254,203,0,0.04); }
 .inp::placeholder { color: var(--muted2); }
+
+/* ── Mobile touch targets ─────────────── */
+button, a[role="button"] { min-height: 44px; }
+
+/* ── iOS specific ─────────────────────── */
+input, textarea, select {
+  -webkit-text-size-adjust: 100%;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
 
 /* ── Scrollbar ───────────────────────── */
 ::-webkit-scrollbar { width: 3px; }

@@ -13,19 +13,19 @@ const TOOLS = [
   {
     href: "/tools/caption", icon: <Sparkles className="w-6 h-6" />,
     title: "Caption Generator", mm: "Caption ရေးပေးသည်",
-    hint: "Facebook · TikTok · Instagram",
+    hint: "30 မိနစ် → 5 စက္ကန့် · Engagement တက်မည်",
     color: "var(--yellow)", border: "var(--border-y)", glow: "var(--glow-y)",
   },
   {
     href: "/tools/reply", icon: <MessageSquare className="w-6 h-6" />,
     title: "Reply Helper", mm: "Customer Reply အမြန်ရ",
-    hint: "Comment တိုင်းကို professional ဖြေ",
+    hint: "Professional reply → Customer ယုံကြည်မှုတက်မည်",
     color: "var(--green-xl)", border: "var(--border-g)", glow: "var(--glow-g)",
   },
   {
     href: "/tools/description", icon: <FileText className="w-6 h-6" />,
     title: "Product Description", mm: "ကုန်ဖော်ပြချက် Pro",
-    hint: "Shop listing အတွက် perfect",
+    hint: "ဝယ်ချင်စိတ် ဖြစ်အောင် → Orders ပိုများမည်",
     color: "#6EE7B7", border: "rgba(110,231,183,0.25)", glow: "rgba(110,231,183,0.3)",
   },
 ]
@@ -87,8 +87,12 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
 
         {/* Welcome */}
         <motion.div variants={FADE} initial="hidden" animate="show" style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>မင်္ဂလာပါ 👋</p>
-          <p style={{ fontSize: 12, color: "var(--muted2)", marginTop: 4 }}>{profile?.email}</p>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
+            ဘာ generate မလဲ? ⚡
+          </p>
+          <p className="font-mm" style={{ fontSize: 12, color: "var(--muted2)", marginTop: 4 }}>
+            {profile?.email} · AI က 5 စက္ကန့်ပဲ ကြာမည်
+          </p>
         </motion.div>
 
         {/* Credits card */}
@@ -128,13 +132,16 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
             <motion.div key={tool.href}
               variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.1 + i * 0.08 }}>
               <Link href={tool.href} style={{ textDecoration: "none", display: "block" }}>
-                <div style={{
+                <motion.div
+                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  style={{
                   padding: "20px 22px",
                   borderRadius: 18,
                   background: `${tool.color}08`,
                   border: `1px solid ${tool.border}`,
                   display: "flex", alignItems: "center", gap: 16,
-                  transition: "all 0.2s",
                 }}>
                   <div style={{
                     width: 46, height: 46, borderRadius: 14, flexShrink: 0,
@@ -149,7 +156,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
                     <p className="font-mm" style={{ fontSize: 12, color: tool.color, marginTop: 2 }}>{tool.mm}</p>
                   </div>
                   <ArrowRight style={{ width: 18, height: 18, color: tool.color, opacity: 0.7, flexShrink: 0 }} />
-                </div>
+                </motion.div>
               </Link>
             </motion.div>
           ))}
@@ -164,8 +171,8 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
                 <Share2 style={{ width: 16, height: 16 }} />
               </div>
               <div>
-                <p style={{ fontWeight: 700, fontSize: 13, color: "var(--text)" }}>Refer a Friend</p>
-                <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)" }}>နှစ်ဦးစလုံး +10 credits</p>
+                <p style={{ fontWeight: 700, fontSize: 13, color: "var(--text)" }}>Friend ကို ဖိတ်ပါ → Free Credits</p>
+                <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)" }}>Friend တစ်ယောက် join → နှစ်ဦးစလုံး +10 credits ချက်ချင်းရ</p>
               </div>
             </div>
             <button onClick={copyReferral} style={{

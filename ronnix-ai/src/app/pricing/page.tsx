@@ -141,11 +141,13 @@ export default function PricingPage() {
                 </label>
                 <input
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={waveNumber}
                   onChange={(e) => setWaveNumber(e.target.value)}
                   placeholder="09XXXXXXXXX"
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+                  className="w-full px-4 py-3 rounded-xl outline-none mb-4"
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 16 }}
                 />
 
                 <button
