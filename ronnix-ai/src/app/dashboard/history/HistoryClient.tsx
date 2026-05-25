@@ -1,21 +1,24 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Sparkles, MessageSquare, FileText, Clock, Copy, Check } from "lucide-react"
+import { Sparkles, MessageSquare, FileText, Clock, Copy, Check, ChevronDown, Loader2 } from "lucide-react"
 import BottomNav from "@/components/BottomNav"
 import type { Generation } from "@/lib/supabase"
 import { useState } from "react"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
 
 const TOOL_META = {
-  caption:     { label: "Caption", icon: <Sparkles className="w-4 h-4" />, color: "var(--yellow)" },
-  reply:       { label: "Reply",   icon: <MessageSquare className="w-4 h-4" />, color: "var(--green-xl)" },
-  description: { label: "Description", icon: <FileText className="w-4 h-4" />, color: "#6EE7B7" },
+  caption:     { label: "Caption", icon: <Sparkles style={{ width: 14, height: 14 }} />, color: "var(--yellow)" },
+  reply:       { label: "Reply",   icon: <MessageSquare style={{ width: 14, height: 14 }} />, color: "var(--green-xl)" },
+  description: { label: "Description", icon: <FileText style={{ width: 14, height: 14 }} />, color: "#6EE7B7" },
 }
 
 function GenCard({ g }: { g: Generation }) {
   const [copied, setCopied] = useState(false)
-  const meta = TOOL_META[g.tool] ?? TOOL_META.caption
+  const [expanded, setExpanded] = useState(false)
+  const meta = TOOL_META[g.tool as keyof typeof TOOL_META] ?? TOOL_META.caption
+  const isLong = g.output_text.length > 200
 
   function copy() {
     navigator.clipboard.writeText(g.output_text)
@@ -50,13 +53,45 @@ function GenCard({ g }: { g: Generation }) {
         </div>
       </div>
       <p className="font-mm" style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
-        {g.output_text.slice(0, 200)}{g.output_text.length > 200 ? "..." : ""}
+        {expanded || !isLong ? g.output_text : `${g.output_text.slice(0, 200)}...`}
       </p>
+      {isLong && (
+        <button onClick={() => setExpanded(v => !v)} style={{
+          display: "flex", alignItems: "center", gap: 4, marginTop: 8,
+          fontSize: 11, fontWeight: 700, color: meta.color, background: "none", border: "none", cursor: "pointer",
+        }}>
+          <ChevronDown style={{ width: 12, height: 12, transform: expanded ? "rotate(180deg)" : "none", transition: "0.2s" }} />
+          {expanded ? "လျှော့ကြည့်မည်" : "ပိုကြည့်မည်"}
+        </button>
+      )}
     </div>
   )
 }
 
-export default function HistoryClient({ generations }: { generations: Generation[] }) {
+export default function HistoryClient({ generations: initial, userId }: { generations: Generation[], userId: string }) {
+  const [generations, setGenerations] = useState<Generation[]>(initial)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(initial.length === 30)
+
+  async function loadMore() {
+    setLoadingMore(true)
+    try {
+      const { data } = await supabase
+        .from("generations")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .range(generations.length, generations.length + 29)
+
+      if (data) {
+        setGenerations(prev => [...prev, ...data])
+        if (data.length < 30) setHasMore(false)
+      }
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
       <div style={{
@@ -81,18 +116,41 @@ export default function HistoryClient({ generations }: { generations: Generation
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {generations.map((g, i) => (
-              <motion.div key={g.id}
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}>
-                <GenCard g={g} />
-              </motion.div>
-            ))}
-          </div>
+          <>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {generations.map((g, i) => (
+                <motion.div key={g.id}
+                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i, 10) * 0.04 }}>
+                  <GenCard g={g} />
+                </motion.div>
+              ))}
+            </div>
+
+            {hasMore && (
+              <div style={{ textAlign: "center", marginTop: 24 }}>
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "12px 28px", borderRadius: 12, fontSize: 13, fontWeight: 700,
+                    background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-g)",
+                    color: "var(--muted)", cursor: "pointer",
+                  }}
+                >
+                  {loadingMore
+                    ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                    : <ChevronDown style={{ width: 14, height: 14 }} />}
+                  {loadingMore ? "Loading..." : "ပိုကြည့်မည်"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <BottomNav />
     </div>
   )

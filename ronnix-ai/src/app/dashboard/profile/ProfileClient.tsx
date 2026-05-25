@@ -175,6 +175,11 @@ export default function ProfileClient({ profile, payments }: { profile: Profile 
                   <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)" }}>
                     Friend invite → နှစ်ဦး +10 credits
                   </p>
+                  {profile?.referral_code && (
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "var(--yellow)", marginTop: 4, letterSpacing: 1 }}>
+                      {profile.referral_code}
+                    </p>
+                  )}
                 </div>
               </div>
               <button onClick={copyReferral} style={{

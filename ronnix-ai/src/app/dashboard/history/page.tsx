@@ -14,5 +14,5 @@ export default async function HistoryPage() {
     .order("created_at", { ascending: false })
     .limit(30)
 
-  return <HistoryClient generations={generations || []} />
+  return <HistoryClient generations={generations || []} userId={user.id} />
 }

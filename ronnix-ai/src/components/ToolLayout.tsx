@@ -132,6 +132,18 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, re
 
             {children({ input, setInput, lang, setLang })}
 
+            {/* Char counter */}
+            {(input[requiredField] || "").length > 0 && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -8 }}>
+                <span style={{
+                  fontSize: 11, color: (input[requiredField] || "").length > 450 ? "#EF4444" : "var(--muted2)",
+                  fontWeight: 600,
+                }}>
+                  {(input[requiredField] || "").length} / 500
+                </span>
+              </div>
+            )}
+
             <motion.button
               onClick={handleGenerate}
               disabled={loading || !canGenerate}
