@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Star, Quote, Check, X, ChevronDown } from "lucide-react"
+import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Star, Quote, Check, X, ChevronDown, Mic, Megaphone, Heart, Layers, Hash, BarChart2, Film, Calendar } from "lucide-react"
 import { useState } from "react"
 
 const FADE = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }
@@ -11,6 +11,14 @@ const TOOLS = [
   { icon: <Sparkles className="w-5 h-5" />, title: "Caption Generator", mm: "Caption ရေးပေးသည်", desc: "Facebook, TikTok, Instagram, Telegram အတွက် engaging captions", color: "var(--yellow)", border: "var(--border-y)" },
   { icon: <MessageSquare className="w-5 h-5" />, title: "Reply Helper", mm: "Customer Reply အမြန်ရ", desc: "Customer comment တိုင်းကို friendly + professional reply", color: "var(--green-xl)", border: "var(--border-g)" },
   { icon: <FileText className="w-5 h-5" />, title: "Product Description", mm: "ကုန်ဖော်ပြချက် Pro", desc: "ဝယ်ယူချင်စိတ် ဖြစ်အောင် compelling descriptions", color: "#6EE7B7", border: "rgba(110,231,183,0.25)" },
+  { icon: <Mic className="w-5 h-5" />, title: "Live Script", mm: "Live ရောင်းချ Script", desc: "Facebook/TikTok Live အတွက် structured selling script", color: "#FF6B35", border: "rgba(255,107,53,0.25)" },
+  { icon: <Megaphone className="w-5 h-5" />, title: "Promo Writer", mm: "ပရိုမိုး Post ရေးပေး", desc: "Sale, discount, limited offer posts အတွက် promo copy", color: "#FF3B6F", border: "rgba(255,59,111,0.25)" },
+  { icon: <Heart className="w-5 h-5" />, title: "Testimonial", mm: "Review Post ရေးပေး", desc: "Customer reviews ကို compelling post အဖြစ် ပြောင်းပေး", color: "#00D2B8", border: "rgba(0,210,184,0.25)" },
+  { icon: <Layers className="w-5 h-5" />, title: "Caption Variants", mm: "Caption 3 မျိုးထုတ်ပေး", desc: "တစ်ကြိမ်နဲ့ tone ကွဲပြားသော versions 3 ခု", color: "#A3FF47", border: "rgba(163,255,71,0.25)" },
+  { icon: <Hash className="w-5 h-5" />, title: "Hashtag Generator", mm: "Hashtag အမြန်ရ", desc: "Post ကို ပျံ့နှံ့ဖို့ targeted hashtags အသင့်", color: "#47C8FF", border: "rgba(71,200,255,0.25)" },
+  { icon: <BarChart2 className="w-5 h-5" />, title: "Product Comparison", mm: "ကုန်နှိုင်းယှဉ်ချက်", desc: "Competitor နဲ့ ယှဉ်ပြပြီး ဘာကြောင့် မင်းထဲ ဝယ်ရမယ်", color: "#FB923C", border: "rgba(251,146,60,0.25)" },
+  { icon: <Film className="w-5 h-5" />, title: "Reel Script", mm: "Reel/Short Script", desc: "15-60 sec hook-based video scripts အသင့်", color: "#BF5FFF", border: "rgba(191,95,255,0.25)" },
+  { icon: <Calendar className="w-5 h-5" />, title: "Seasonal Post", mm: "ရာသီပွဲ Post ရေးပေး", desc: "Thingyan, Tazaungdaing, Christmas အတွက် themed posts", color: "#FFD166", border: "rgba(255,209,102,0.25)" },
 ]
 
 const TESTIMONIALS = [
@@ -20,7 +28,7 @@ const TESTIMONIALS = [
 ]
 
 const FAQS = [
-  { q: "Free tier မှာ ဘာတွေ ရသလဲ?", a: "Sign up လုပ်တာနဲ့ 10 credits ချက်ချင်းရသည်။ ထိုနောက် တစ်နေ့ 3 ကြိမ် အခမဲ့ Generate လုပ်နိုင်သည်။ Credit card မလိုပါ။" },
+  { q: "Free tier မှာ ဘာတွေ ရသလဲ?", a: "Sign up လုပ်တာနဲ့ Tools 11 ခုလုံး access ရသည်။ တစ်နေ့ 3 ကြိမ် အခမဲ့ Generate လုပ်နိုင်သည်။ Credit card မလိုပါ။" },
   { q: "Wave Money နဲ့ ဘယ်လို ပေးချေရလဲ?", a: "Pricing page မှာ Wave number ထည့်ပြီး screenshot ပို့ပါ။ Admin က 24 နာရီအတွင်း credits ထည့်ပေးမည်။" },
   { q: "Credits expire ဖြစ်သလား?", a: "မဖြစ်ပါ။ ဝယ်ထားတဲ့ credits တွေ expire မဖြစ်ဘဲ သုံးနိုင်သည်။" },
   { q: "Myanmar Unicode text ရေးပေးနိုင်သလား?", a: "ဟုတ်ပါသည်။ Myanmar Unicode နဲ့ English နှစ်မျိုးလုံး choose လုပ်နိုင်ပြီး natural Myanmar text ရေးပေးသည်။" },
@@ -106,8 +114,8 @@ export default function Landing() {
 
           <p className="font-mm" style={{ fontSize: 15, color: "var(--muted)", maxWidth: 480,
             margin: "0 auto 32px", lineHeight: 1.9 }}>
-            AI က 5 စက္ကန့်အတွင်း Caption · Reply · Description ရေးပေးသည်—<br />
-            မင်းရောင်းချရေးကိုပဲ အာရုံစိုက်ပါ
+            AI က 5 စက္ကန့်အတွင်း Caption · Reply · Live Script · Reel · Hashtag<br />
+            နဲ့ Tools 11 ခု — မင်းရောင်းချရေးကိုပဲ အာရုံစိုက်ပါ
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
@@ -128,7 +136,7 @@ export default function Landing() {
           style={{ display: "flex", justifyContent: "center", gap: "clamp(24px,6vw,60px)", marginTop: 52,
             padding: "28px 32px", borderRadius: 20, background: "var(--glass)",
             border: "1px solid var(--border-g)", maxWidth: 480, margin: "52px auto 0" }}>
-          {[["5s", "Generate time"], ["3", "AI Tools included"], ["Free", "To start"]].map(([n, l]) => (
+          {[["5s", "Generate time"], ["11", "AI Tools included"], ["Free", "To start"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 26, fontWeight: 900 }} className="grad-yg">{n}</div>
               <div style={{ fontSize: 11, color: "var(--muted2)", marginTop: 4, fontWeight: 500 }}>{l}</div>
@@ -169,8 +177,8 @@ export default function Landing() {
       <section style={{ position: "relative", zIndex: 10, padding: "60px 24px", maxWidth: 1100, margin: "0 auto" }}>
         <motion.div style={{ textAlign: "center", marginBottom: 40 }}
           variants={FADE} initial="hidden" whileInView="show" viewport={{ once: true }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "var(--yellow)", marginBottom: 10 }}>TOOLS 3 ခု</p>
-          <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>Daily သုံးမည့် tools</h2>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "var(--yellow)", marginBottom: 10 }}>TOOLS 11 ခု</p>
+          <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>Daily သုံးမည့် AI Tools 11 ခု</h2>
         </motion.div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 16 }}>
           {TOOLS.map((t, i) => (
@@ -270,11 +278,12 @@ export default function Landing() {
           <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>Wave Money နဲ့ ပေးချေ</h2>
           <p className="font-mm" style={{ fontSize: 13, color: "var(--muted2)", marginTop: 8 }}>Credit expire မဖြစ်ပါ · Admin ကိုယ်တိုင် စစ်ဆေးပြီး ထည့်ပေးသည်</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14, maxWidth: 740, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14, maxWidth: 900, margin: "0 auto" }}>
           {[
-            { name: "Free", price: "0", unit: "MMK", features: ["3 ကြိမ်/နေ့", "Tools 3 ခုလုံး", "10 signup credits", "Myanmar + English"], cta: "အခမဲ့ စတင်", href: "/auth", highlight: false },
-            { name: "500 Credits", price: "3,900", oldPrice: "5,000", unit: "MMK", features: ["500 generations", "Tools 3 ခုလုံး", "Expire မဖြစ်", "Wave Money pay"], cta: "ယခုဝယ်ပါ", href: "/pricing", highlight: true },
-            { name: "1,500 Credits", price: "9,900", oldPrice: "15,000", unit: "MMK", features: ["1,500 generations", "Tools 3 ခုလုံး", "Expire မဖြစ်", "Best value 34% off"], cta: "ယခုဝယ်ပါ", href: "/pricing", highlight: false },
+            { name: "Free", price: "0", unit: "MMK", credits: "", features: ["3 ကြိမ်/နေ့", "Tools 11 ခုလုံး", "Myanmar + English", "Credit card မလို"], cta: "အခမဲ့ စတင်", href: "/auth", highlight: false },
+            { name: "Starter", price: "10,000", unit: "MMK", credits: "200 Credits", features: ["200 credits", "Tools 11 ခုလုံး", "Expire မဖြစ်", "Wave Money pay"], cta: "ယခုဝယ်ပါ", href: "/pricing", highlight: false },
+            { name: "Pro", price: "30,000", unit: "MMK", credits: "500 Credits", features: ["500 credits", "Tools 11 ခုလုံး", "Expire မဖြစ်", "Best value"], cta: "ယခုဝယ်ပါ", href: "/pricing", highlight: true },
+            { name: "Max", price: "50,000", unit: "MMK", credits: "1,000 Credits", features: ["1,000 credits", "Tools 11 ခုလုံး", "Expire မဖြစ်", "Heavy sellers"], cta: "ယခုဝယ်ပါ", href: "/pricing", highlight: false },
           ].map(p => (
             <div key={p.name} style={{ padding: 24, borderRadius: 20, position: "relative",
               background: p.highlight ? "rgba(254,203,0,0.07)" : "var(--glass)",
@@ -290,9 +299,9 @@ export default function Landing() {
                 <span style={{ fontSize: 26, fontWeight: 900 }}>{p.price}</span>
                 <span style={{ fontSize: 12, color: "var(--muted)" }}>{p.unit}</span>
               </div>
-              {"oldPrice" in p && p.oldPrice && (
-                <p style={{ fontSize: 11, color: "var(--muted2)", textDecoration: "line-through", marginBottom: 12 }}>
-                  {p.oldPrice} {p.unit}
+              {p.credits && (
+                <p style={{ fontSize: 12, color: "var(--green-xl)", fontWeight: 700, marginBottom: 12 }}>
+                  {p.credits}
                 </p>
               )}
               <div style={{ margin: "14px 0", display: "flex", flexDirection: "column", gap: 7 }}>
