@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     "fun AI tool", "photo to toy", "AI avatar generator"
   ],
   authors: [{ name: "Mike Ronny" }],
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "Toynar — Turn Yourself into a Toy 🧸",
     description: "Upload your photo, AI transforms you into a collectible toy in seconds. Free. No signup. Share with friends!",

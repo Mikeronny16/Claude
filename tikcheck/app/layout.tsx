@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     "viral score checker", "TikTok growth tools"
   ],
   authors: [{ name: "Mike Ronny" }],
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "TikCheck — 7 AI Tools for TikTok & Instagram Creators",
     description: "Hook generator, caption writer, hashtag finder, timing advisor, content calendar & more. Level up your content before you post.",

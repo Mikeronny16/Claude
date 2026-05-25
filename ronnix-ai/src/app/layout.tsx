@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     "social media tools Myanmar", "content creator Myanmar", "e-commerce Myanmar AI"
   ],
   authors: [{ name: "Mike Ronny" }],
+  alternates: { canonical: SITE_URL },
   creator: "Ronnix AI",
   openGraph: {
     type: "website",

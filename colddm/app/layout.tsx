@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     "cold message freelancer", "DM scripts", "client outreach templates"
   ],
   authors: [{ name: "Mike Ronny" }],
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "ColdDM Scripts — 30 Scripts to Land Your Next Client",
     description: "Copy-paste cold DM and email scripts for freelancers. Land clients in 60 seconds. 30 proven scripts across 6 categories.",
