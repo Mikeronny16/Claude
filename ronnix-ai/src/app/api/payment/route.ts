@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     user_id: user.id,
     amount_mmk: pack.price_mmk,
     credits_to_add: pack.credits,
-    plan_to_set: null,
+    plan_to_set: "plan_to_set" in pack ? pack.plan_to_set : null,
     wave_number,
     wave_screenshot_url: wave_screenshot_url ?? null,
     status: "pending",
