@@ -7,7 +7,8 @@ import { Check, Loader2, ArrowLeft, Zap } from "lucide-react"
 import Link from "next/link"
 import { CREDIT_PACKS } from "@/lib/credits"
 
-const WAVE_NUMBER = "09798XXXXXX" // Replace with actual Wave number
+const WAVE_NUMBER = "09969279092"
+const WAVE_NAME = "Mg Min Ma Haw"
 
 export default function PricingPage() {
   const [selectedPack, setSelectedPack] = useState<string | null>(null)
@@ -41,72 +42,90 @@ export default function PricingPage() {
   const pack = CREDIT_PACKS.find(p => p.id === selectedPack)
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <div className="sticky top-0 z-50 flex items-center gap-3 px-5 py-3 border-b"
-        style={{ background: "rgba(13,13,20,0.95)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}>
-        <Link href="/dashboard" className="p-1.5 rounded-lg" style={{ color: "var(--muted)" }}>
-          <ArrowLeft className="w-4 h-4" />
+    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+      {/* Header */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(2,7,4,0.90)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--border-g)", padding: "16px 20px",
+        display: "flex", alignItems: "center", gap: 12,
+      }}>
+        <Link href="/dashboard" style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 32, height: 32, borderRadius: 8,
+          background: "rgba(255,255,255,0.05)", color: "var(--muted)",
+        }}>
+          <ArrowLeft style={{ width: 16, height: 16 }} />
         </Link>
-        <h1 className="font-bold text-sm" style={{ color: "var(--text)" }}>Credits ဝယ်ရန်</h1>
+        <span style={{ fontWeight: 800, fontSize: 16 }}>Credits ဝယ်ရန်</span>
       </div>
 
-      <div className="max-w-lg mx-auto px-5 py-10">
+      <div style={{ maxWidth: 500, margin: "0 auto", padding: "24px 16px 60px" }}>
         {submitted ? (
           <motion.div
-            className="text-center py-16"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
+            style={{ textAlign: "center", paddingTop: 60 }}
           >
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-              style={{ background: "rgba(16,185,129,0.2)" }}>
-              <Check className="w-8 h-8 text-emerald-400" />
+            <div style={{
+              width: 64, height: 64, borderRadius: "50%", margin: "0 auto 16px",
+              background: "rgba(109,201,58,0.15)", border: "1px solid rgba(109,201,58,0.3)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Check style={{ width: 28, height: 28, color: "var(--green-xl)" }} />
             </div>
-            <h2 className="text-xl font-black mb-2" style={{ color: "var(--text)" }}>Request ပို့ပြီ!</h2>
-            <p className="text-sm font-mm mb-6" style={{ color: "var(--muted)" }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 8 }}>Request ပို့ပြီ!</h2>
+            <p className="font-mm" style={{ fontSize: 13, color: "var(--muted2)", lineHeight: 1.7, marginBottom: 24 }}>
               24 နာရီအတွင်း admin confirm လုပ်ပြီး credits ထည့်ပေးမည်
             </p>
-            <Link href="/dashboard" className="text-sm font-semibold px-6 py-3 rounded-xl text-white inline-block"
-              style={{ background: "var(--purple)" }}>
+            <Link href="/dashboard" style={{
+              display: "inline-block", padding: "12px 28px", borderRadius: 12,
+              background: "var(--yellow)", color: "#020704", fontWeight: 700, fontSize: 14,
+              textDecoration: "none",
+            }}>
               Dashboard ပြန်သွားရန်
             </Link>
           </motion.div>
         ) : (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-xl font-black mb-1" style={{ color: "var(--text)" }}>Credit Pack ရွေးပါ</h2>
-              <p className="text-sm font-mm mb-6" style={{ color: "var(--muted)" }}>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 4 }}>Credit Pack ရွေးပါ</h2>
+              <p className="font-mm" style={{ fontSize: 12, color: "var(--muted2)", marginBottom: 20 }}>
                 Expire မဖြစ်ပါ · Wave Money နဲ့ ပေးချေနိုင်သည်
               </p>
 
-              <div className="space-y-3 mb-8">
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
                 {CREDIT_PACKS.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedPack(p.id)}
-                    className="w-full p-4 rounded-2xl text-left transition-all relative"
                     style={{
+                      width: "100%", padding: "16px 18px", borderRadius: 16, textAlign: "left",
+                      cursor: "pointer", position: "relative",
                       background: selectedPack === p.id
-                        ? "rgba(139,92,246,0.15)"
-                        : "var(--surface)",
+                        ? "rgba(254,203,0,0.08)" : "rgba(255,255,255,0.03)",
                       border: selectedPack === p.id
-                        ? "2px solid #8B5CF6"
-                        : "1px solid var(--border)",
+                        ? "2px solid var(--yellow)" : "1px solid var(--border-g)",
                     }}
                   >
                     {p.popular && (
-                      <span className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: "var(--amber)", color: "#000" }}>Popular</span>
+                      <span style={{
+                        position: "absolute", top: 12, right: 12,
+                        fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 100,
+                        background: "var(--yellow)", color: "#020704",
+                      }}>Popular</span>
                     )}
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "rgba(139,92,246,0.15)" }}>
-                        <Zap className="w-5 h-5" style={{ color: "#8B5CF6" }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                        background: "rgba(254,203,0,0.10)", border: "1px solid var(--border-y)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <Zap style={{ width: 18, height: 18, color: "var(--yellow)" }} />
                       </div>
                       <div>
-                        <p className="font-bold text-sm" style={{ color: "var(--text)" }}>
-                          {p.label}
-                        </p>
-                        <p className="text-lg font-black" style={{ color: "var(--purple)" }}>
+                        <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.label}</p>
+                        <p style={{ fontSize: 18, fontWeight: 900 }} className="grad-yg">
                           {p.price_mmk.toLocaleString()} MMK
                         </p>
                       </div>
@@ -118,25 +137,31 @@ export default function PricingPage() {
 
             {selectedPack && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
               >
-                <div className="p-4 rounded-2xl mb-4"
-                  style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)" }}>
-                  <p className="text-xs font-semibold mb-2" style={{ color: "#F59E0B" }}>Payment Instructions</p>
-                  <p className="text-sm font-mm" style={{ color: "var(--text)" }}>
-                    1. Wave Money မှ <strong>{WAVE_NUMBER}</strong> သို့ {pack?.price_mmk.toLocaleString()} MMK ပို့ပါ
+                {/* Payment instructions */}
+                <div style={{
+                  padding: "16px 18px", borderRadius: 14, marginBottom: 16,
+                  background: "rgba(254,203,0,0.06)", border: "1px solid var(--border-y)",
+                }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--yellow)", marginBottom: 10, letterSpacing: 0.5 }}>
+                    PAYMENT INSTRUCTIONS
                   </p>
-                  <p className="text-sm font-mm mt-1" style={{ color: "var(--text)" }}>
+                  <p className="font-mm" style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8 }}>
+                    1. Wave Money မှ <strong style={{ color: "var(--yellow)" }}>{WAVE_NUMBER}</strong>{" "}
+                    <span style={{ color: "var(--muted2)", fontSize: 12 }}>({WAVE_NAME})</span>{" "}
+                    သို့ <strong>{pack?.price_mmk.toLocaleString()} MMK</strong> ပို့ပါ
+                  </p>
+                  <p className="font-mm" style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8 }}>
                     2. သင့် Wave number ကို အောက်တွင် ထည့်ပါ
                   </p>
-                  <p className="text-sm font-mm mt-1" style={{ color: "var(--text)" }}>
+                  <p className="font-mm" style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8 }}>
                     3. Submit လုပ်ပါ — 24 နာရီအတွင်း credits ရပါမည်
                   </p>
                 </div>
 
-                <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "var(--muted2)", display: "block", marginBottom: 6 }}>
                   သင့် Wave Phone Number
                 </label>
                 <input
@@ -146,19 +171,31 @@ export default function PricingPage() {
                   value={waveNumber}
                   onChange={(e) => setWaveNumber(e.target.value)}
                   placeholder="09XXXXXXXXX"
-                  className="w-full px-4 py-3 rounded-xl outline-none mb-4"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 16 }}
+                  className="inp"
+                  style={{
+                    width: "100%", padding: "12px 16px", borderRadius: 12, outline: "none",
+                    marginBottom: 14, boxSizing: "border-box", fontSize: 16,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-g)",
+                    color: "var(--text)",
+                  }}
                 />
 
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
                   onClick={handlePayment}
                   disabled={loading || !waveNumber}
-                  className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "var(--purple)" }}
+                  style={{
+                    width: "100%", padding: "14px", borderRadius: 14,
+                    fontSize: 14, fontWeight: 700, cursor: loading || !waveNumber ? "not-allowed" : "pointer",
+                    background: loading || !waveNumber ? "rgba(254,203,0,0.3)" : "var(--yellow)",
+                    color: "#020704",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    border: "none", opacity: loading || !waveNumber ? 0.6 : 1,
+                  }}
                 >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {loading && <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />}
                   Payment Request ပို့မည်
-                </button>
+                </motion.button>
               </motion.div>
             )}
           </>
