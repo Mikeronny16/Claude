@@ -156,7 +156,7 @@ export default function SendPage() {
           {/* Mood */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-widest block" style={{ color: a }}>Your vibe</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {MOODS.map(m => (
                 <button key={m.value} type="button" onClick={() => setMood(m.value)}
                   className="py-2 rounded-xl text-center cursor-pointer transition-all"
