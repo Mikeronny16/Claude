@@ -14,6 +14,7 @@ export default function ReplyClient({ profile }: { profile: Profile | null }) {
       border="var(--border-g)"
       profile={profile}
       tool="reply"
+      requiredField="comment"
       buildPayload={(input) => ({
         comment: input.comment,
         context: input.context,

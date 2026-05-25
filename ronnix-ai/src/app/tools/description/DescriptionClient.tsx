@@ -12,6 +12,7 @@ export default function DescriptionClient({ profile }: { profile: Profile | null
       border="rgba(110,231,183,0.25)"
       profile={profile}
       tool="description"
+      requiredField="product"
       buildPayload={(input) => ({
         product: input.product,
         features: input.features,

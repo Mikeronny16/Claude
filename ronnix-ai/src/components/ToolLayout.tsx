@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Loader2, Copy, Check, ArrowLeft, Zap, Send } from "lucide-react"
+import { Loader2, Copy, Check, ArrowLeft, Zap, Send, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/lib/supabase"
 import BottomNav from "./BottomNav"
@@ -14,6 +14,7 @@ type Props = {
   border: string
   profile: Profile | null
   tool: "caption" | "reply" | "description"
+  requiredField: string
   children: (props: {
     input: Record<string, string>
     setInput: (k: string, v: string) => void
@@ -23,19 +24,24 @@ type Props = {
   buildPayload: (input: Record<string, string>, lang: "mm" | "en") => Record<string, unknown>
 }
 
-export default function ToolLayout({ title, mm, color, border, profile, tool, children, buildPayload }: Props) {
+export default function ToolLayout({ title, mm, color, border, profile, tool, requiredField, children, buildPayload }: Props) {
   const [input, setInputState] = useState<Record<string, string>>({})
   const [lang, setLang] = useState<"mm" | "en">("mm")
   const [output, setOutput] = useState("")
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState("")
 
   function setInput(k: string, v: string) {
     setInputState(p => ({ ...p, [k]: v }))
   }
 
+  const canGenerate = (input[requiredField] || "").trim().length > 0
+
   async function handleGenerate() {
+    if (!canGenerate) return
     setLoading(true)
+    setError("")
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -46,7 +52,9 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
       if (!res.ok) throw new Error(data.error)
       setOutput(data.output)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error ဖြစ်သွားသည်")
+      const msg = err instanceof Error ? err.message : "Error ဖြစ်သွားသည်"
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -95,9 +103,7 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
       </div>
 
       {/* Split layout */}
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr", maxWidth: 1000, margin: "0 auto", width: "100%", padding: "20px 16px 100px" }}>
-
-        {/* On desktop: side by side. On mobile: stacked */}
+      <div style={{ flex: 1, maxWidth: 1000, margin: "0 auto", width: "100%", padding: "20px 16px 100px" }}>
         <style>{`
           @media (min-width: 640px) {
             .tool-split { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
@@ -109,7 +115,6 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--muted2)", textTransform: "uppercase" }}>Input</p>
-              {/* Language toggle */}
               <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)" }}>
                 {(["mm", "en"] as const).map(l => (
                   <button key={l} onClick={() => setLang(l)} style={{
@@ -126,17 +131,22 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
 
             {children({ input, setInput, lang, setLang })}
 
-            <button onClick={handleGenerate} disabled={loading} style={{
-              width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: "pointer",
-              background: loading ? "rgba(255,255,255,0.06)" : color,
-              color: loading ? "var(--muted)" : "#020704",
-              fontWeight: 800, fontSize: 14,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              transition: "all 0.2s",
-              boxShadow: loading ? "none" : `0 0 30px ${border}`,
-            }}>
-              {loading ? <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> : <Send style={{ width: 15, height: 15 }} />}
-              {loading ? "Generating..." : "Generate လုပ်မည်"}
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !canGenerate}
+              style={{
+                width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: canGenerate && !loading ? "pointer" : "not-allowed",
+                background: loading ? "rgba(255,255,255,0.06)" : canGenerate ? color : "rgba(255,255,255,0.04)",
+                color: loading ? "var(--muted)" : canGenerate ? "#020704" : "var(--muted2)",
+                fontWeight: 800, fontSize: 14,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                transition: "all 0.2s",
+                boxShadow: canGenerate && !loading ? `0 0 30px ${border}` : "none",
+              }}>
+              {loading
+                ? <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} />
+                : <Send style={{ width: 15, height: 15 }} />}
+              {loading ? "Generating..." : !canGenerate ? "အကြောင်းအရာ ထည့်ပါ" : output ? "ထပ်ရေးမည်" : "Generate လုပ်မည်"}
             </button>
           </div>
 
@@ -146,12 +156,13 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
 
             <div style={{
               flex: 1, minHeight: 200, borderRadius: 16,
-              background: output ? `${color}08` : "var(--glass)",
-              border: `1px solid ${output ? border : "var(--border)"}`,
+              background: error ? "rgba(239,68,68,0.05)" : output ? `${color}08` : "var(--glass)",
+              border: `1px solid ${error ? "rgba(239,68,68,0.3)" : output ? border : "var(--border)"}`,
               padding: 20, position: "relative",
               transition: "all 0.3s",
             }}>
-              {!output && !loading && (
+              {/* Empty state */}
+              {!output && !loading && !error && (
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column",
                   alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}15`,
@@ -164,6 +175,7 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
                 </div>
               )}
 
+              {/* Loading */}
               {loading && (
                 <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ display: "flex", gap: 6 }}>
@@ -175,19 +187,46 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, ch
                 </div>
               )}
 
-              {output && (
+              {/* Error state */}
+              {error && !loading && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  minHeight: 160, gap: 12, textAlign: "center" }}>
+                  <p className="font-mm" style={{ fontSize: 13, color: "#EF4444", lineHeight: 1.7 }}>{error}</p>
+                  <button onClick={handleGenerate} style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "9px 20px", borderRadius: 10, border: "1px solid rgba(239,68,68,0.3)",
+                    background: "rgba(239,68,68,0.08)", color: "#EF4444",
+                    fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  }}>
+                    <RefreshCw style={{ width: 13, height: 13 }} /> ထပ်ကြိုးစားမည်
+                  </button>
+                </div>
+              )}
+
+              {/* Output */}
+              {output && !loading && (
                 <>
                   <p className="font-mm" style={{ fontSize: 14, lineHeight: 1.9, color: "var(--text)", whiteSpace: "pre-wrap" }}>
                     {output}
                   </p>
-                  <button onClick={handleCopy} style={{
-                    marginTop: 16, display: "flex", alignItems: "center", gap: 6,
-                    padding: "8px 16px", borderRadius: 10, border: `1px solid ${border}`,
-                    background: `${color}12`, color, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                  }}>
-                    {copied ? <Check style={{ width: 13, height: 13 }} /> : <Copy style={{ width: 13, height: 13 }} />}
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
+                  <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
+                    <button onClick={handleCopy} style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "8px 16px", borderRadius: 10, border: `1px solid ${border}`,
+                      background: `${color}12`, color, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                    }}>
+                      {copied ? <Check style={{ width: 13, height: 13 }} /> : <Copy style={{ width: 13, height: 13 }} />}
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                    <button onClick={handleGenerate} disabled={loading} style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "8px 16px", borderRadius: 10, border: "1px solid var(--border)",
+                      background: "rgba(255,255,255,0.04)", color: "var(--muted)",
+                      fontSize: 12, fontWeight: 700, cursor: "pointer",
+                    }}>
+                      <RefreshCw style={{ width: 13, height: 13 }} /> Regenerate
+                    </button>
+                  </div>
                 </>
               )}
             </div>

@@ -15,6 +15,7 @@ export default function CaptionClient({ profile }: { profile: Profile | null }) 
       border="var(--border-y)"
       profile={profile}
       tool="caption"
+      requiredField="product"
       buildPayload={(input) => ({
         product: input.product,
         tone: input.tone || "Friendly",
