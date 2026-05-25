@@ -78,7 +78,7 @@ export default function ToolLayout({ title, mm, color, border, profile, tool, re
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(2,7,4,0.90)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        background: "var(--header-bg)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid var(--border-g)",
         padding: "14px 20px",
         display: "flex", alignItems: "center", gap: 12,

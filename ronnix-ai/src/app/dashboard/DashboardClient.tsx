@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion"
 import Link from "next/link"
 import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, ChevronRight } from "lucide-react"
 import BottomNav from "@/components/BottomNav"
+import ThemeToggle from "@/components/ThemeToggle"
 import type { Profile } from "@/lib/supabase"
 import { toast } from "sonner"
 import { useEffect, useRef } from "react"
@@ -92,7 +93,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(2,7,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        background: "var(--header-bg)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid var(--border-g)",
         padding: "14px 20px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -105,6 +106,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
         <motion.div
           initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
           style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <ThemeToggle />
           <motion.div
             animate={{ boxShadow: ["0 0 0px rgba(254,203,0,0)", "0 0 12px rgba(254,203,0,0.25)", "0 0 0px rgba(254,203,0,0)"] }}
             transition={{ duration: 3, repeat: Infinity }}

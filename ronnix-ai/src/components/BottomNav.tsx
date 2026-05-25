@@ -18,7 +18,7 @@ export default function BottomNav() {
       position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
       height: "calc(64px + env(safe-area-inset-bottom))",
       paddingBottom: "env(safe-area-inset-bottom)",
-      background: "rgba(2,7,4,0.85)",
+      background: "var(--header-bg)",
       backdropFilter: "blur(24px)",
       WebkitBackdropFilter: "blur(24px)",
       borderTop: "1px solid var(--border-g)",

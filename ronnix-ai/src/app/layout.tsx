@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import { Toaster } from "sonner"
+import ThemeProvider from "@/components/ThemeProvider"
 
 const SITE_URL = "https://claude-plum-eta.vercel.app"
 
@@ -34,13 +35,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="my" className="h-full">
       <body className="min-h-full flex flex-col">
-        <Toaster
-          position="bottom-center"
-          toastOptions={{
-            style: { background: "#071009", border: "1px solid rgba(61,122,31,0.4)", color: "#EFF2EC" },
-          }}
-        />
-        {children}
+        <ThemeProvider>
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              style: { background: "var(--bg2,#071009)", border: "1px solid var(--border-g)", color: "var(--text,#EFF2EC)" },
+            }}
+          />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

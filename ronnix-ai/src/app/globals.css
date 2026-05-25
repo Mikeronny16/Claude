@@ -24,7 +24,72 @@
   --glow-g:    rgba(61,122,31,0.40);
   --glow-y:    rgba(254,203,0,0.35);
   --tab-h:     64px;
+  --header-bg: rgba(2,7,4,0.88);
 }
+
+html.light {
+  --header-bg: rgba(240,247,240,0.92);
+}
+
+/* ── Light mode overrides ──────────────── */
+html.light {
+  --bg:        #F0F7F0;
+  --bg2:       #E5F0E5;
+  --bg3:       #D8EAD8;
+  --text:      #0C1A08;
+  --muted:     rgba(12,26,8,0.55);
+  --muted2:    rgba(12,26,8,0.38);
+  --border:    rgba(0,0,0,0.09);
+  --border-g:  rgba(61,122,31,0.25);
+  --border-y:  rgba(180,140,0,0.30);
+  --glass:     rgba(255,255,255,0.70);
+  --glass-y:   rgba(254,203,0,0.12);
+  --glow-g:    rgba(61,122,31,0.20);
+  --glow-y:    rgba(254,203,0,0.25);
+}
+
+html.light body { background: var(--bg); color: var(--text); }
+
+html.light .glass {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(61,122,31,0.18);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+}
+
+html.light .glass-y {
+  background: rgba(255,248,200,0.60);
+  border: 1px solid rgba(180,140,0,0.22);
+}
+
+html.light .glass-flat {
+  background: rgba(255,255,255,0.60);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+html.light .inp {
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(61,122,31,0.22);
+  color: var(--text);
+}
+html.light .inp:focus {
+  border-color: rgba(180,140,0,0.45);
+  background: rgba(255,255,255,0.95);
+}
+html.light .inp::placeholder { color: rgba(12,26,8,0.35); }
+
+html.light .btn-ghost {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.10);
+  color: var(--text);
+}
+html.light .btn-ghost:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(61,122,31,0.25);
+}
+
+html.light ::-webkit-scrollbar-thumb { background: rgba(61,122,31,0.20); }
 
 *, *::before, *::after { box-sizing: border-box; }
 
