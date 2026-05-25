@@ -30,5 +30,21 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "sinar-clothing", "spawn-ai"]
+  "exclude": [
+    "node_modules",
+    "app_spawn_backup",
+    "ronnix-ai",
+    "spawn-ai",
+    "spawn-ai-mobile",
+    "sinar-clothing",
+    "colddm",
+    "draftwin",
+    "tikcheck",
+    "toynar",
+    "whispr",
+    "portfolio",
+    "readyprompts",
+    "prisma",
+    "prisma.config.ts"
+  ]
 }
