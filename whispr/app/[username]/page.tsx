@@ -9,6 +9,8 @@ const MOODS = [
   { value: "❤️", label: "Appreciating" },
   { value: "🔥", label: "Being real" },
   { value: "🤔", label: "Curious" },
+  { value: "😂", label: "Funny" },
+  { value: "🥳", label: "Celebrating" },
 ];
 
 const PROMPTS = [
