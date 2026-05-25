@@ -21,6 +21,10 @@ export default function Home() {
   const { t } = useLang();
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const textMain = isDark ? "#ffffff" : "#0A0A0A";
+  const textSub = isDark ? "#888" : "#444";
+  const textFaint = isDark ? "#555" : "#777";
+  const cardBg = "rgba(255,255,255,0.03)";
 
   return (
     <main style={{ minHeight: "100vh", background: isDark ? "#000" : "#f5f5f7" }}>
@@ -34,7 +38,7 @@ export default function Home() {
           }}>
             TikCheck
           </div>
-          <div style={{ fontSize: 9, color: "#333", fontWeight: 700, letterSpacing: "2.5px", marginTop: 1 }}>CREATOR TOOLKIT</div>
+          <div style={{ fontSize: 9, color: textSub, fontWeight: 700, letterSpacing: "2.5px", marginTop: 1 }}>CREATOR TOOLKIT</div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <ThemeToggle />
@@ -58,7 +62,7 @@ export default function Home() {
             {t.home.creators}
           </div>
         </motion.div>
-        <div style={{ fontSize: 11, letterSpacing: "1px", color: "#555", marginBottom: 6 }}>{t.home.flags}</div>
+        <div style={{ fontSize: 11, letterSpacing: "1px", color: textFaint, marginBottom: 6 }}>{t.home.flags}</div>
 
         <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}
           style={{ fontSize: 28, fontWeight: 800, lineHeight: 1.2, letterSpacing: "-0.5px" }}>
@@ -66,7 +70,7 @@ export default function Home() {
           <span style={{ color: "#FF0050" }}>{t.home.taglineAccent}</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
-          style={{ color: "#444", fontSize: 13, marginTop: 6 }}>
+          style={{ color: textSub, fontSize: 13, marginTop: 6 }}>
           {t.home.subtitle}
         </motion.p>
       </div>
@@ -112,8 +116,8 @@ export default function Home() {
                   {/* Text */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 9, fontWeight: 700, color, letterSpacing: "1.5px", marginBottom: 2 }}>{tool.sub}</p>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: "white" }}>{tool.title}</p>
-                    <p style={{ fontSize: 12, color: "#444", marginTop: 1 }}>{tool.desc}</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: textMain }}>{tool.title}</p>
+                    <p style={{ fontSize: 12, color: textSub, marginTop: 1 }}>{tool.desc}</p>
                   </div>
                   <span style={{ color, fontSize: 16, flexShrink: 0, opacity: 0.8 }}>›</span>
                 </motion.div>
@@ -125,7 +129,7 @@ export default function Home() {
 
       {/* Extra tools */}
       <div style={{ padding: "0 20px", marginBottom: 4 }}>
-        <p style={{ fontSize: 9, fontWeight: 700, color: "#333", letterSpacing: "2px", marginBottom: 10 }}>MORE TOOLS</p>
+        <p style={{ fontSize: 9, fontWeight: 700, color: textSub, letterSpacing: "2px", marginBottom: 10 }}>MORE TOOLS</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {EXTRA_TOOLS.map(tool => (
             <motion.div key={tool.href} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
@@ -143,8 +147,8 @@ export default function Home() {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 9, fontWeight: 700, color: tool.color, letterSpacing: "1.5px", marginBottom: 2 }}>{tool.sub}</p>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "white" }}>{tool.title}</p>
-                    <p style={{ fontSize: 12, color: "#444", marginTop: 1 }}>{tool.desc}</p>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: textMain }}>{tool.title}</p>
+                    <p style={{ fontSize: 12, color: textSub, marginTop: 1 }}>{tool.desc}</p>
                   </div>
                   <span style={{ color: tool.color, fontSize: 16, flexShrink: 0, opacity: 0.8 }}>›</span>
                 </motion.div>
@@ -168,8 +172,8 @@ export default function Home() {
           }}>
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#FF0050", letterSpacing: "1px" }}>⚡ PRO</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "white", marginTop: 1 }}>Unlock unlimited access</p>
-              <p style={{ fontSize: 11, color: "#555", marginTop: 1 }}>One-time payment · No subscription</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: textMain, marginTop: 1 }}>Unlock unlimited access</p>
+              <p style={{ fontSize: 11, color: textFaint, marginTop: 1 }}>One-time payment · No subscription</p>
             </div>
             <div style={{
               background: "linear-gradient(135deg, #FF0050, #00F2EA)",
@@ -202,9 +206,9 @@ export default function Home() {
               fontSize: 18, fontWeight: 800, color: "white",
             }}>M</div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 9, fontWeight: 700, color: "#444", letterSpacing: "1.5px" }}>{t.home.founder.label}</p>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "white" }}>{t.home.founder.name}</p>
-              <p style={{ fontSize: 11, color: "#555", marginTop: 1 }}>{t.home.founder.role}</p>
+              <p style={{ fontSize: 9, fontWeight: 700, color: textSub, letterSpacing: "1.5px" }}>{t.home.founder.label}</p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: textMain }}>{t.home.founder.name}</p>
+              <p style={{ fontSize: 11, color: textFaint, marginTop: 1 }}>{t.home.founder.role}</p>
             </div>
             <span style={{ fontSize: 12, color: "#FF0050", fontWeight: 600 }}>{t.home.founder.cta}</span>
           </div>

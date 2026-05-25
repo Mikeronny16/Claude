@@ -11,6 +11,7 @@ import TemplatesModal from "@/components/TemplatesModal";
 import SnippetVaultModal from "@/components/SnippetVaultModal";
 import PricingCalcModal from "@/components/PricingCalcModal";
 import RewriterModal from "@/components/RewriterModal";
+import FollowUpModal from "@/components/FollowUpModal";
 import LiveCounter from "@/components/LiveCounter";
 
 const HERO_LINE1 = "Write Winning";
@@ -138,6 +139,7 @@ export default function Home() {
   const [snippetInitialText, setSnippetInitialText] = useState("");
   const [showPricingCalc, setShowPricingCalc] = useState(false);
   const [showRewriter, setShowRewriter] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
@@ -292,9 +294,10 @@ export default function Home() {
                 style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
                 {[
                   { icon: "📋", label: "Templates", action: () => { setShowTemplates(true); setShowToolsMenu(false); } },
+                  { icon: "💬", label: "Follow-Up", action: () => { setShowFollowUp(true); setShowToolsMenu(false); } },
+                  { icon: "🔄", label: "Rewriter", action: () => { setShowRewriter(true); setShowToolsMenu(false); } },
                   { icon: "✂️", label: "Snippet Vault", action: () => { setSnippetInitialText(""); setShowSnippetVault(true); setShowToolsMenu(false); } },
                   { icon: "💰", label: "Rate Calculator", action: () => { setShowPricingCalc(true); setShowToolsMenu(false); } },
-                  { icon: "🔄", label: "Proposal Rewriter", action: () => { setShowRewriter(true); setShowToolsMenu(false); } },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium cursor-pointer transition-all text-left"
@@ -626,6 +629,18 @@ export default function Home() {
           onCreditsUpdate={(n) => setCredits(n)}
           onBuy={() => { setShowRewriter(false); setShowPricing(true); }}
           creditsLeft={credits ?? 0}
+        />
+      )}
+      {showFollowUp && userId && (
+        <FollowUpModal
+          onClose={() => setShowFollowUp(false)}
+          userId={userId}
+          onCreditsUpdate={(n) => setCredits(n)}
+          onBuy={() => { setShowFollowUp(false); setShowPricing(true); }}
+          creditsLeft={credits ?? 0}
+          defaultProposal={proposal ?? ""}
+          defaultClientName={lastForm?.clientName ?? ""}
+          defaultYourName={lastForm?.yourName ?? ""}
         />
       )}
     </main>
