@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Mike Ronny" }],
   creator: "Mike Ronny",
+  alternates: { canonical: SITE_URL },
   openGraph: {
     type: "website",
     url: SITE_URL,

@@ -4,20 +4,34 @@ import "./globals.css";
 
 const font = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400","500","600","700","800"] });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://whispr.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://whispr-shh.vercel.app";
 
 export const metadata: Metadata = {
-  title: "Whispr — Anonymous Messages from Anyone",
-  description: "Create your Whispr link. Share it. Get 100% honest anonymous messages from friends, followers, and anyone who knows you.",
-  keywords: ["anonymous messages", "whispr", "anonymous questions", "NGL", "ask me anything"],
+  metadataBase: new URL(SITE_URL),
+  title: "Whispr — What do people really think of you?",
+  description: "Create your anonymous message link in 30 seconds. Share it on TikTok, Instagram, or Twitter. Get brutally honest — and sometimes surprisingly sweet — anonymous messages.",
+  keywords: [
+    "anonymous messages", "whispr", "anonymous questions", "NGL alternative",
+    "ask me anything", "honest feedback", "anonymous confessions", "anonymous message app",
+    "what do people think of me", "anonymous link", "truth app",
+  ],
+  authors: [{ name: "Mike Ronny" }],
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "Whispr — What do people REALLY think of you?",
-    description: "Get honest anonymous messages from anyone. Create your free link in 30 seconds.",
-    url: APP_URL,
+    description: "100% anonymous. Free forever. Create your link in 30 seconds. Get honest messages with mood tags.",
+    type: "website",
+    url: SITE_URL,
     siteName: "Whispr",
-    images: [{ url: `${APP_URL}/og-image.png`, width: 1200, height: 630 }],
+    images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: "Whispr — Anonymous Messages" }],
   },
-  twitter: { card: "summary_large_image", title: "Whispr — Anonymous Messages", description: "Create your free anonymous message link." },
+  twitter: {
+    card: "summary_large_image",
+    title: "Whispr — 100% Anonymous Messages",
+    description: "Get brutally honest — and sometimes surprisingly sweet — anonymous messages. Free, no email needed.",
+    images: [`${SITE_URL}/og-image.png`],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
