@@ -7,8 +7,9 @@ export default function DescriptionClient({ profile }: { profile: Profile | null
   return (
     <ToolLayout
       title="Product Description"
-      mm="ကုန်ပစ္စည်းဖော်ပြချက် ရေးပေးသည်"
-      color="#10B981"
+      mm="ကုန်ဖော်ပြချက် Pro ဆန်ဆန်"
+      color="#6EE7B7"
+      border="rgba(110,231,183,0.25)"
       profile={profile}
       tool="description"
       buildPayload={(input) => ({
@@ -20,43 +21,35 @@ export default function DescriptionClient({ profile }: { profile: Profile | null
       {({ input, setInput }) => (
         <>
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
               ကုန်ပစ္စည်း အမည်
             </label>
-            <input
+            <input className="inp"
               value={input.product || ""}
-              onChange={(e) => setInput("product", e.target.value)}
-              placeholder="ဥပမာ - Floral Linen Blouse"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+              onChange={e => setInput("product", e.target.value)}
+              placeholder="ဥပမာ — Floral Linen Blouse"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
-              Feature / Details
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
+              FEATURES / DETAILS
             </label>
-            <textarea
+            <textarea className="inp" rows={3}
               value={input.features || ""}
-              onChange={(e) => setInput("features", e.target.value)}
-              rows={3}
-              placeholder="ဥပမာ - Size S/M/L, cotton material, handwash, 3 colors available..."
-              className="w-full px-4 py-3 rounded-xl text-sm font-mm outline-none resize-none"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+              onChange={e => setInput("features", e.target.value)}
+              placeholder="ဥပမာ — Size S/M/L, cotton material, 3 colors available..."
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
-              ဈေးနှုန်း (MMK) — Optional
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
+              ဈေးနှုန်း MMK (Optional)
             </label>
-            <input
-              type="number"
+            <input className="inp" type="number"
               value={input.price || ""}
-              onChange={(e) => setInput("price", e.target.value)}
-              placeholder="ဥပမာ - 18000"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+              onChange={e => setInput("price", e.target.value)}
+              placeholder="18000"
             />
           </div>
         </>

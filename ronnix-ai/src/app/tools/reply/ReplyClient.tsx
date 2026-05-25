@@ -9,8 +9,9 @@ export default function ReplyClient({ profile }: { profile: Profile | null }) {
   return (
     <ToolLayout
       title="Reply Helper"
-      mm="Comment Reply လုပ်ပေးသည်"
-      color="#F59E0B"
+      mm="Customer Reply အမြန်ရ"
+      color="var(--green-xl)"
+      border="var(--border-g)"
       profile={profile}
       tool="reply"
       buildPayload={(input) => ({
@@ -22,48 +23,37 @@ export default function ReplyClient({ profile }: { profile: Profile | null }) {
       {({ input, setInput }) => (
         <>
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
-              Customer Comment
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
+              CUSTOMER COMMENT
             </label>
-            <textarea
+            <textarea className="inp" rows={3}
               value={input.comment || ""}
-              onChange={(e) => setInput("comment", e.target.value)}
-              rows={3}
-              placeholder="ဥပမာ - ဒီဝတ်စုံ size S ရှိသေးသလား? ဈေးလျော့ပေးနိုင်မလား?"
-              className="w-full px-4 py-3 rounded-xl text-sm font-mm outline-none resize-none"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+              onChange={e => setInput("comment", e.target.value)}
+              placeholder="ဥပမာ — size S ရှိသေးသလား? ဈေးလျော့နိုင်မလား?"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>
-              Shop Context (optional)
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>
+              SHOP CONTEXT (Optional)
             </label>
-            <input
+            <input className="inp"
               value={input.context || ""}
-              onChange={(e) => setInput("context", e.target.value)}
-              placeholder="ဥပမာ - Clothing shop, 3-5 days delivery, no refund"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
+              onChange={e => setInput("context", e.target.value)}
+              placeholder="ဥပမာ — Clothing shop, 3-5 days delivery, no refund"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: "var(--muted)" }}>Tone</label>
-            <div className="flex flex-wrap gap-2">
-              {TONES.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setInput("tone", t)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background: input.tone === t ? "#F59E0B" : "var(--surface)",
-                    color: input.tone === t ? "#000" : "var(--muted)",
-                    border: "1px solid var(--border)",
-                  }}
-                >
-                  {t}
-                </button>
+            <label style={{ fontSize:11, fontWeight:700, color:"var(--muted)", display:"block", marginBottom:8, letterSpacing:1 }}>TONE</label>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+              {TONES.map(t => (
+                <button key={t} onClick={() => setInput("tone", t)} style={{
+                  padding:"7px 16px", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer", border:"none",
+                  background: input.tone === t ? "var(--green)" : "rgba(255,255,255,0.05)",
+                  color: input.tone === t ? "#fff" : "var(--muted)",
+                  transition:"all 0.15s",
+                }}>{t}</button>
               ))}
             </div>
           </div>

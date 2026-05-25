@@ -2,39 +2,40 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Loader2, Copy, Check, ArrowLeft, Zap } from "lucide-react"
+import { Loader2, Copy, Check, ArrowLeft, Zap, Send } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/lib/supabase"
+import BottomNav from "./BottomNav"
 
 type Props = {
   title: string
   mm: string
   color: string
+  border: string
   profile: Profile | null
   tool: "caption" | "reply" | "description"
   children: (props: {
     input: Record<string, string>
-    setInput: (key: string, val: string) => void
+    setInput: (k: string, v: string) => void
     lang: "mm" | "en"
     setLang: (l: "mm" | "en") => void
   }) => React.ReactNode
   buildPayload: (input: Record<string, string>, lang: "mm" | "en") => Record<string, unknown>
 }
 
-export default function ToolLayout({ title, mm, color, profile, tool, children, buildPayload }: Props) {
+export default function ToolLayout({ title, mm, color, border, profile, tool, children, buildPayload }: Props) {
   const [input, setInputState] = useState<Record<string, string>>({})
   const [lang, setLang] = useState<"mm" | "en">("mm")
   const [output, setOutput] = useState("")
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  function setInput(key: string, val: string) {
-    setInputState((prev) => ({ ...prev, [key]: val }))
+  function setInput(k: string, v: string) {
+    setInputState(p => ({ ...p, [k]: v }))
   }
 
   async function handleGenerate() {
     setLoading(true)
-    setOutput("")
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -63,103 +64,153 @@ export default function ToolLayout({ title, mm, color, profile, tool, children, 
     : profile?.credits ?? 0
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+    <div style={{ background: "var(--bg)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+
       {/* Header */}
-      <div className="sticky top-0 z-50 flex items-center gap-4 px-5 py-3 border-b"
-        style={{ background: "rgba(13,13,20,0.95)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}>
-        <Link href="/dashboard" className="p-1.5 rounded-lg transition-colors hover:text-[var(--text)]"
-          style={{ color: "var(--muted)" }}>
-          <ArrowLeft className="w-4 h-4" />
+      <div style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(2,7,4,0.90)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--border-g)",
+        padding: "14px 20px",
+        display: "flex", alignItems: "center", gap: 12,
+      }}>
+        <Link href="/dashboard" style={{
+          width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "var(--glass)", border: "1px solid var(--border)", color: "var(--muted)", textDecoration: "none",
+        }}>
+          <ArrowLeft style={{ width: 16, height: 16 }} />
         </Link>
-        <div>
-          <h1 className="font-bold text-sm" style={{ color: "var(--text)" }}>{title}</h1>
-          <p className="text-xs font-mm" style={{ color: "var(--muted)" }}>{mm}</p>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontWeight: 800, fontSize: 15, color: "var(--text)" }}>{title}</p>
+          <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)" }}>{mm}</p>
         </div>
-        <div className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full"
-          style={{ background: "rgba(139,92,246,0.1)", color: "#A78BFA" }}>
-          <Zap className="w-3 h-3" />
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 100,
+          background: "rgba(254,203,0,0.08)", border: "1px solid var(--border-y)", color: "var(--yellow)",
+          fontSize: 11, fontWeight: 700,
+        }}>
+          <Zap style={{ width: 11, height: 11 }} />
           {profile?.plan === "free" ? `${creditsLeft}/day` : `${creditsLeft} cr`}
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-5 py-8">
-        {/* Language toggle */}
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-xs" style={{ color: "var(--muted)" }}>Output:</span>
-          <div className="flex rounded-lg p-0.5" style={{ background: "var(--surface)" }}>
-            {(["mm", "en"] as const).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className="px-3 py-1.5 text-xs rounded-md font-medium transition-all"
-                style={{
-                  background: lang === l ? color : "transparent",
-                  color: lang === l ? "white" : "var(--muted)",
-                }}
-              >
-                {l === "mm" ? "မြန်မာ" : "English"}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Split layout */}
+      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr", maxWidth: 1000, margin: "0 auto", width: "100%", padding: "20px 16px 100px" }}>
 
-        {/* Inputs */}
-        <div className="space-y-4 mb-6">
-          {children({ input, setInput, lang, setLang })}
-        </div>
+        {/* On desktop: side by side. On mobile: stacked */}
+        <style>{`
+          @media (min-width: 640px) {
+            .tool-split { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+          }
+        `}</style>
+        <div className="tool-split" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
 
-        {/* Generate button */}
-        <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 mb-6"
-          style={{ background: `linear-gradient(135deg, ${color}, ${color}CC)` }}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate လုပ်မည် →"
-          )}
-        </button>
-
-        {/* Output */}
-        {output && (
-          <div className="p-4 rounded-2xl relative"
-            style={{ background: "var(--surface)", border: `1px solid ${color}40` }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold" style={{ color }}>Result</span>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors"
-                style={{ background: `${color}20`, color }}
-              >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? "Copied!" : "Copy"}
-              </button>
+          {/* LEFT — Input */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--muted2)", textTransform: "uppercase" }}>Input</p>
+              {/* Language toggle */}
+              <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)" }}>
+                {(["mm", "en"] as const).map(l => (
+                  <button key={l} onClick={() => setLang(l)} style={{
+                    padding: "5px 14px", fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
+                    background: lang === l ? color : "transparent",
+                    color: lang === l ? "#020704" : "var(--muted)",
+                    transition: "all 0.15s",
+                  }}>
+                    {l === "mm" ? "မြန်မာ" : "English"}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="text-sm font-mm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--text)" }}>
-              {output}
-            </p>
-          </div>
-        )}
 
-        {/* Upgrade notice for free users at limit */}
-        {profile?.plan === "free" && creditsLeft === 0 && (
-          <div className="mt-4 p-4 rounded-xl text-center"
-            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)" }}>
-            <p className="text-sm font-mm mb-2" style={{ color: "#F59E0B" }}>
-              ယနေ့ limit ပြည့်သွားပြီ
-            </p>
-            <Link href="/pricing" className="text-xs font-semibold text-white px-4 py-2 rounded-lg inline-block"
-              style={{ background: "#F59E0B" }}>
-              Credits ဝယ်ရန်
-            </Link>
+            {children({ input, setInput, lang, setLang })}
+
+            <button onClick={handleGenerate} disabled={loading} style={{
+              width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: "pointer",
+              background: loading ? "rgba(255,255,255,0.06)" : color,
+              color: loading ? "var(--muted)" : "#020704",
+              fontWeight: 800, fontSize: 14,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "all 0.2s",
+              boxShadow: loading ? "none" : `0 0 30px ${border}`,
+            }}>
+              {loading ? <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> : <Send style={{ width: 15, height: 15 }} />}
+              {loading ? "Generating..." : "Generate လုပ်မည်"}
+            </button>
           </div>
-        )}
+
+          {/* RIGHT — Output */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--muted2)", textTransform: "uppercase", marginBottom: 14 }}>Output</p>
+
+            <div style={{
+              flex: 1, minHeight: 200, borderRadius: 16,
+              background: output ? `${color}08` : "var(--glass)",
+              border: `1px solid ${output ? border : "var(--border)"}`,
+              padding: 20, position: "relative",
+              transition: "all 0.3s",
+            }}>
+              {!output && !loading && (
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}15`,
+                    display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Zap style={{ width: 20, height: 20, color }} />
+                  </div>
+                  <p className="font-mm" style={{ fontSize: 12, color: "var(--muted2)", textAlign: "center" }}>
+                    Generate နှိပ်ပါ<br />AI က ဒီမှာ ရေးပေးမည်
+                  </p>
+                </div>
+              )}
+
+              {loading && (
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[0,1,2].map(i=>(
+                      <div key={i} style={{ width:8, height:8, borderRadius:"50%", background:color,
+                        animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite` }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {output && (
+                <>
+                  <p className="font-mm" style={{ fontSize: 14, lineHeight: 1.9, color: "var(--text)", whiteSpace: "pre-wrap" }}>
+                    {output}
+                  </p>
+                  <button onClick={handleCopy} style={{
+                    marginTop: 16, display: "flex", alignItems: "center", gap: 6,
+                    padding: "8px 16px", borderRadius: 10, border: `1px solid ${border}`,
+                    background: `${color}12`, color, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  }}>
+                    {copied ? <Check style={{ width: 13, height: 13 }} /> : <Copy style={{ width: 13, height: 13 }} />}
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {profile?.plan === "free" && creditsLeft === 0 && (
+              <div style={{ marginTop: 12, padding: "14px 18px", borderRadius: 14,
+                background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
+                <p className="font-mm" style={{ fontSize: 12, color: "#EF4444", marginBottom: 8 }}>ယနေ့ limit ပြည့်သွားပြီ</p>
+                <Link href="/pricing" style={{ fontSize: 12, fontWeight: 700, color: "var(--yellow)",
+                  background: "rgba(254,203,0,0.1)", padding: "6px 14px", borderRadius: 8,
+                  textDecoration: "none", display: "inline-block" }}>Credits ဝယ်ရန်</Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes bounce { 0%,80%,100% { transform:translateY(0); } 40% { transform:translateY(-10px); } }
+      `}</style>
+
+      <BottomNav />
     </div>
   )
 }

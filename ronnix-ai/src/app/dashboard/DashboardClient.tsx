@@ -2,149 +2,153 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Sparkles, MessageSquare, FileText, Share2, Copy, Zap, ArrowRight } from "lucide-react"
-import Navbar from "@/components/Navbar"
+import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, TrendingUp } from "lucide-react"
+import BottomNav from "@/components/BottomNav"
 import type { Profile } from "@/lib/supabase"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
 
 const TOOLS = [
   {
-    href: "/tools/caption",
-    icon: <Sparkles className="w-7 h-7" />,
-    title: "Caption Generator",
-    mm: "Caption ရေးပေးသည်",
-    desc: "Facebook · TikTok · Instagram",
-    color: "#8B5CF6",
-    bg: "rgba(139,92,246,0.12)",
-    border: "rgba(139,92,246,0.25)",
-    glow: "rgba(139,92,246,0.3)",
+    href: "/tools/caption", icon: <Sparkles className="w-6 h-6" />,
+    title: "Caption Generator", mm: "Caption ရေးပေးသည်",
+    hint: "Facebook · TikTok · Instagram",
+    color: "var(--yellow)", border: "var(--border-y)", glow: "var(--glow-y)",
   },
   {
-    href: "/tools/reply",
-    icon: <MessageSquare className="w-7 h-7" />,
-    title: "Reply Helper",
-    mm: "Customer Reply အမြန်ရ",
-    desc: "Comment တိုင်းကို professional ဖြေ",
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.12)",
-    border: "rgba(245,158,11,0.25)",
-    glow: "rgba(245,158,11,0.3)",
+    href: "/tools/reply", icon: <MessageSquare className="w-6 h-6" />,
+    title: "Reply Helper", mm: "Customer Reply အမြန်ရ",
+    hint: "Comment တိုင်းကို professional ဖြေ",
+    color: "var(--green-xl)", border: "var(--border-g)", glow: "var(--glow-g)",
   },
   {
-    href: "/tools/description",
-    icon: <FileText className="w-7 h-7" />,
-    title: "Product Description",
-    mm: "ကုန်ဖော်ပြချက် Pro ဆန်ဆန်",
-    desc: "Shop listing အတွက် perfect",
-    color: "#10B981",
-    bg: "rgba(16,185,129,0.12)",
-    border: "rgba(16,185,129,0.25)",
-    glow: "rgba(16,185,129,0.3)",
+    href: "/tools/description", icon: <FileText className="w-6 h-6" />,
+    title: "Product Description", mm: "ကုန်ဖော်ပြချက် Pro",
+    hint: "Shop listing အတွက် perfect",
+    color: "#6EE7B7", border: "rgba(110,231,183,0.25)", glow: "rgba(110,231,183,0.3)",
   },
 ]
 
+const FADE = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }
+
 export default function DashboardClient({ profile }: { profile: Profile | null }) {
+  const router = useRouter()
   const dailyLeft = profile?.plan === "free" ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
-  const referralLink = profile
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/auth?ref=${profile.referral_code}`
-    : ""
+  const origin = typeof window !== "undefined" ? window.location.origin : ""
+  const referralLink = profile ? `${origin}/auth?ref=${profile.referral_code}` : ""
 
   function copyReferral() {
     navigator.clipboard.writeText(referralLink)
-    toast.success("Referral link copy လုပ်ပြီ!")
+    toast.success("Referral link copied!")
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push("/")
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#08080F" }}>
+    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
 
       {/* Ambient */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full opacity-15"
-          style={{ background: "radial-gradient(ellipse, #8B5CF6, transparent 70%)", filter: "blur(80px)" }} />
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+          width: 500, height: 300, borderRadius: "50%", opacity: 0.12,
+          background: "radial-gradient(ellipse, var(--green), transparent 70%)", filter: "blur(80px)" }} />
       </div>
 
-      <Navbar profile={profile} />
+      {/* Top header */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(2,7,4,0.85)", backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--border-g)",
+        padding: "14px 20px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <span style={{ fontSize: 18, fontWeight: 900 }} className="grad-yg">RONNIX</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "7px 14px", borderRadius: 100, fontSize: 12, fontWeight: 700,
+            background: "rgba(254,203,0,0.08)", border: "1px solid var(--border-y)", color: "var(--yellow)"
+          }}>
+            <Zap style={{ width: 12, height: 12 }} />
+            {profile?.plan === "free" ? `${dailyLeft}/day` : `${profile?.credits} cr`}
+          </div>
+          <button onClick={handleLogout} style={{
+            fontSize: 12, color: "var(--muted2)", background: "none", border: "none", cursor: "pointer"
+          }}>Logout</button>
+        </div>
+      </div>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-5 py-8">
+      <main style={{ maxWidth: 700, margin: "0 auto", padding: "24px 20px", paddingBottom: 100 }}>
 
-        {/* Credits banner */}
-        <motion.div
-          className="rounded-2xl p-5 mb-8 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(245,158,11,0.08))",
-            border: "1px solid rgba(139,92,246,0.25)"
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20"
-            style={{ background: "radial-gradient(#8B5CF6, transparent 70%)", filter: "blur(40px)", transform: "translate(30%, -30%)" }} />
+        {/* Welcome */}
+        <motion.div variants={FADE} initial="hidden" animate="show" style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>မင်္ဂလာပါ 👋</p>
+          <p style={{ fontSize: 12, color: "var(--muted2)", marginTop: 4 }}>{profile?.email}</p>
+        </motion.div>
 
-          <div className="flex items-center justify-between relative z-10">
+        {/* Credits card */}
+        <motion.div variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.05 }}
+          style={{ marginBottom: 28 }}>
+          <div className="glass" style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
             <div>
-              <p className="text-xs font-semibold mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-                {profile?.plan === "free" ? "Free Plan" : `${profile?.plan} Plan`}
-              </p>
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5" style={{ color: "#A78BFA" }} />
-                <span className="text-xl font-black" style={{ color: "rgba(255,255,255,0.9)" }}>
-                  {profile?.plan === "free"
-                    ? `${dailyLeft} / 3 ကြိမ် ကျန်သည်`
-                    : `${profile?.credits || 0} Credits`}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <TrendingUp style={{ width: 16, height: 16, color: "var(--yellow)" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 1 }}>
+                  {profile?.plan === "free" ? "Free Plan" : `${profile?.plan} Plan`}
                 </span>
               </div>
+              <div style={{ fontSize: 24, fontWeight: 900 }} className="grad-yg">
+                {profile?.plan === "free"
+                  ? `${dailyLeft} / 3 ကြိမ် ကျန်သည်`
+                  : `${profile?.credits || 0} Credits`}
+              </div>
               {profile?.plan === "free" && (
-                <p className="text-xs font-mm mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  ယနေ့ limit · Credits ဝယ်ရင် unlimited ဖြစ်မည်
+                <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)", marginTop: 4 }}>
+                  ယနေ့ limit · Credits ဝယ်ရင် unlimited
                 </p>
               )}
             </div>
-
             {profile?.plan === "free" && (
-              <Link href="/pricing"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #8B5CF6, #7C3AED)", boxShadow: "0 0 20px rgba(139,92,246,0.4)" }}>
+              <Link href="/pricing" className="btn-yellow" style={{ padding: "10px 18px", fontSize: 13, borderRadius: 12, flexShrink: 0 }}>
                 Credits ဝယ်
-                <ArrowRight className="w-4 h-4" />
               </Link>
             )}
           </div>
         </motion.div>
 
         {/* Tools */}
-        <p className="text-xs font-semibold tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.25)" }}>
-          TOOLS
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--muted2)", marginBottom: 14, textTransform: "uppercase" }}>Tools</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
           {TOOLS.map((tool, i) => (
-            <motion.div
-              key={tool.href}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 + 0.1 }}
-            >
-              <Link href={tool.href}
-                className="block p-6 rounded-2xl relative overflow-hidden group transition-all hover:scale-[1.02]"
-                style={{
-                  background: tool.bg,
+            <motion.div key={tool.href}
+              variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.1 + i * 0.08 }}>
+              <Link href={tool.href} style={{ textDecoration: "none", display: "block" }}>
+                <div style={{
+                  padding: "20px 22px",
+                  borderRadius: 18,
+                  background: `${tool.color}08`,
                   border: `1px solid ${tool.border}`,
+                  display: "flex", alignItems: "center", gap: 16,
+                  transition: "all 0.2s",
                 }}>
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-0 group-hover:opacity-30 transition-opacity"
-                  style={{ background: tool.glow, filter: "blur(30px)", transform: "translate(30%,-30%)" }} />
-
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-                  style={{ background: `${tool.color}20`, color: tool.color, border: `1px solid ${tool.color}25` }}>
-                  {tool.icon}
-                </div>
-
-                <h3 className="font-bold text-base mb-1" style={{ color: "rgba(255,255,255,0.9)" }}>{tool.title}</h3>
-                <p className="text-xs font-mm mb-1" style={{ color: tool.color }}>{tool.mm}</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{tool.desc}</p>
-
-                <div className="flex items-center gap-1 mt-4 text-xs font-semibold"
-                  style={{ color: tool.color }}>
-                  Use now <ArrowRight className="w-3 h-3" />
+                  <div style={{
+                    width: 46, height: 46, borderRadius: 14, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: `${tool.color}18`, color: tool.color,
+                    border: `1px solid ${tool.border}`,
+                  }}>
+                    {tool.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: 800, fontSize: 15, color: "var(--text)" }}>{tool.title}</p>
+                    <p className="font-mm" style={{ fontSize: 12, color: tool.color, marginTop: 2 }}>{tool.mm}</p>
+                  </div>
+                  <ArrowRight style={{ width: 18, height: 18, color: tool.color, opacity: 0.7, flexShrink: 0 }} />
                 </div>
               </Link>
             </motion.div>
@@ -152,40 +156,31 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
         </div>
 
         {/* Referral */}
-        <motion.div
-          className="p-5 rounded-2xl"
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.07)"
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6" }}>
-                <Share2 className="w-4 h-4" />
+        <motion.div variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.4 }}>
+          <div className="glass" style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: "rgba(254,203,0,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center", color: "var(--yellow)", flexShrink: 0 }}>
+                <Share2 style={{ width: 16, height: 16 }} />
               </div>
               <div>
-                <h3 className="font-semibold text-sm mb-0.5" style={{ color: "rgba(255,255,255,0.85)" }}>
-                  Refer a Friend
-                </h3>
-                <p className="text-xs font-mm" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  Friend invite လုပ်ရင် နှစ်ဦးစလုံး +10 credits ရသည်
-                </p>
+                <p style={{ fontWeight: 700, fontSize: 13, color: "var(--text)" }}>Refer a Friend</p>
+                <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)" }}>နှစ်ဦးစလုံး +10 credits</p>
               </div>
             </div>
-            <button onClick={copyReferral}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold flex-shrink-0 transition-all hover:opacity-80"
-              style={{ background: "rgba(139,92,246,0.15)", color: "#A78BFA", border: "1px solid rgba(139,92,246,0.25)" }}>
-              <Copy className="w-3.5 h-3.5" />
-              Copy Link
+            <button onClick={copyReferral} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "8px 14px",
+              borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer",
+              background: "rgba(254,203,0,0.1)", color: "var(--yellow)",
+              border: "1px solid var(--border-y)", flexShrink: 0,
+            }}>
+              <Copy style={{ width: 13, height: 13 }} /> Copy
             </button>
           </div>
         </motion.div>
       </main>
+
+      <BottomNav />
     </div>
   )
 }
