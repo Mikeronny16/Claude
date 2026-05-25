@@ -13,6 +13,7 @@ function AuthForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const searchParams = useSearchParams()
   const ref = searchParams.get("ref")
 
@@ -29,7 +30,7 @@ function AuthForm() {
           },
         })
         if (error) throw error
-        toast.success("Email စစ်ဆေးပါ! Verification link ပို့ထားပြီ")
+        setEmailSent(true)
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
@@ -40,6 +41,38 @@ function AuthForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (emailSent) {
+    return (
+      <div style={{
+        background: "var(--bg)", minHeight: "100vh",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px",
+      }}>
+        <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 20, margin: "0 auto 20px",
+            background: "rgba(254,203,0,0.1)", border: "1px solid var(--border-y)",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32,
+          }}>📧</div>
+          <p style={{ fontWeight: 900, fontSize: 20, marginBottom: 10 }}>Email စစ်ဆေးပါ</p>
+          <p className="font-mm" style={{ color: "var(--muted2)", fontSize: 13, lineHeight: 1.8, marginBottom: 8 }}>
+            <span style={{ color: "var(--yellow)", fontWeight: 700 }}>{email}</span><br />
+            သို့ verification link ပို့ပြီးပြီ
+          </p>
+          <p className="font-mm" style={{ color: "var(--muted2)", fontSize: 12, lineHeight: 1.7, marginBottom: 28 }}>
+            Link ကို နှိပ်ပြီး account confirm လုပ်ပါ<br />
+            Spam folder ပါ စစ်ကြည့်ပါ
+          </p>
+          <button onClick={() => setEmailSent(false)} style={{
+            padding: "11px 24px", borderRadius: 12, fontWeight: 700, fontSize: 13, cursor: "pointer",
+            background: "var(--glass)", color: "var(--muted)", border: "1px solid var(--border)",
+          }}>
+            ← ပြန်သွားရန်
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

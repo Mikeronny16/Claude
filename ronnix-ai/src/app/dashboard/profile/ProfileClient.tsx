@@ -2,16 +2,22 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Zap, Share2, Copy, LogOut, Crown, ChevronRight } from "lucide-react"
+import { Zap, Share2, Copy, LogOut, Crown, ChevronRight, Clock, CheckCircle, XCircle, Receipt } from "lucide-react"
 import BottomNav from "@/components/BottomNav"
-import type { Profile } from "@/lib/supabase"
+import type { Profile, PaymentRequest } from "@/lib/supabase"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 const FADE = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 
-export default function ProfileClient({ profile }: { profile: Profile | null }) {
+const STATUS_META = {
+  pending:  { icon: Clock,        color: "var(--yellow)",       bg: "rgba(254,203,0,0.08)",   border: "rgba(254,203,0,0.25)",   label: "စောင့်ဆိုင်းဆဲ" },
+  approved: { icon: CheckCircle,  color: "var(--green-xl)",     bg: "rgba(109,201,58,0.08)",  border: "rgba(109,201,58,0.25)",  label: "Approve ဖြစ်ပြီ" },
+  rejected: { icon: XCircle,      color: "#EF4444",             bg: "rgba(239,68,68,0.07)",   border: "rgba(239,68,68,0.25)",   label: "ငြင်းပယ်ခံရ" },
+}
+
+export default function ProfileClient({ profile, payments }: { profile: Profile | null; payments: PaymentRequest[] }) {
   const router = useRouter()
   const origin = typeof window !== "undefined" ? window.location.origin : ""
   const referralLink = profile ? `${origin}/auth?ref=${profile.referral_code}` : ""
@@ -27,6 +33,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
   }
 
   const dailyLeft = profile?.plan === "free" ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
+  const hasPending = payments.some(p => p.status === "pending")
 
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -37,6 +44,14 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
         display: "flex", alignItems: "center",
       }}>
         <span style={{ fontWeight: 800, fontSize: 16 }}>Profile</span>
+        {hasPending && (
+          <div style={{
+            marginLeft: 10, padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700,
+            background: "rgba(254,203,0,0.12)", border: "1px solid rgba(254,203,0,0.3)", color: "var(--yellow)",
+          }}>
+            Payment စောင့်ဆိုင်းဆဲ
+          </div>
+        )}
       </div>
 
       <main style={{ maxWidth: 500, margin: "0 auto", padding: "24px 16px 100px" }}>
@@ -88,6 +103,57 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
             </div>
           </div>
         </motion.div>
+
+        {/* Payment history */}
+        {payments.length > 0 && (
+          <motion.div variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.11 }}
+            style={{ marginBottom: 14 }}>
+            <div className="glass" style={{ overflow: "hidden" }}>
+              <div style={{ padding: "14px 20px 10px", display: "flex", alignItems: "center", gap: 8,
+                borderBottom: "1px solid var(--border)" }}>
+                <Receipt style={{ width: 14, height: 14, color: "var(--muted2)" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--muted2)", letterSpacing: 1 }}>PAYMENT HISTORY</span>
+              </div>
+              {payments.map((p, i) => {
+                const meta = STATUS_META[p.status as keyof typeof STATUS_META] ?? STATUS_META.pending
+                const Icon = meta.icon
+                return (
+                  <div key={p.id} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "14px 20px",
+                    borderBottom: i < payments.length - 1 ? "1px solid var(--border)" : "none",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center",
+                        justifyContent: "center", background: meta.bg, border: `1px solid ${meta.border}` }}>
+                        <Icon style={{ width: 14, height: 14, color: meta.color }} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 700 }}>{p.amount_mmk?.toLocaleString()} MMK</p>
+                        <p style={{ fontSize: 11, color: "var(--muted2)" }}>
+                          +{p.credits_to_add} credits · {new Date(p.created_at).toLocaleDateString("my-MM")}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: "4px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700,
+                      background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color,
+                    }}>
+                      {meta.label}
+                    </div>
+                  </div>
+                )
+              })}
+              {hasPending && (
+                <div style={{ padding: "10px 20px 14px" }}>
+                  <p className="font-mm" style={{ fontSize: 11, color: "var(--muted2)", lineHeight: 1.6 }}>
+                    Admin က စစ်ဆေးပြီး 24 နာရီအတွင်း credits ထည့်ပေးပါမည်
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Referral */}
         <motion.div variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.12 }}
