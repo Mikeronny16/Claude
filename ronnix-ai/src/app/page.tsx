@@ -251,7 +251,7 @@ export default function Landing() {
               ["Myanmar + English", "တစ်ခုချင်း", "Toggle တစ်ချက်"],
               ["Platform-specific", "Manual adjust", "Auto style"],
               ["တစ်နေ့ post နိုင်တာ", "2-3 posts", "20+ posts"],
-              ["Cost", "အချိန် + effort", "3,900 MMK ပဲ"],
+              ["Cost", "အချိန် + effort", "10,000 MMK မှ"],
             ].map(([f, bad, good], i) => (
               <div key={f} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
                 borderBottom: i < 5 ? "1px solid var(--border)" : "none" }}>
