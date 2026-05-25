@@ -59,7 +59,7 @@ Structure:
 3. Key selling points (3-4 points)
 4. Urgency/scarcity line
 5. Order CTA (how to order, DM/comment)
-Rules: energetic Myanmar live seller voice, natural, conversational. Output script only.`, 900)
+Rules: energetic Myanmar live seller voice, natural, conversational. Output script only.`, 1500)
 }
 
 export async function generatePromo(input: {
