@@ -14,5 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/tools/hashtags`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/tools/reel`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/tools/seasonal`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/tools/testimonial`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/tools/variants`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/tools/comparison`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
   ];
 }
