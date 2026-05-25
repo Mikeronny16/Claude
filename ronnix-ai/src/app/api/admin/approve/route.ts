@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("credits")
+    .select("credits, plan")
     .eq("id", payment.user_id)
     .single()
 
@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     .from("profiles")
     .update({
       credits: profile.credits + payment.credits_to_add,
-      ...(payment.plan_to_set ? { plan: payment.plan_to_set } : {}),
+      // Always upgrade from free when credits are purchased
+      plan: payment.plan_to_set ?? (profile.plan === "free" ? "starter" : profile.plan),
     })
     .eq("id", payment.user_id)
 

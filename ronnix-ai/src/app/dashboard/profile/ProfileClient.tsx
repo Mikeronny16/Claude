@@ -95,6 +95,11 @@ export default function ProfileClient({ profile, payments }: { profile: Profile 
                   <p style={{ fontSize: 22, fontWeight: 900 }} className="grad-yg">
                     {profile?.plan === "free" ? `${dailyLeft} / 3` : profile?.credits ?? 0}
                   </p>
+                  {profile?.plan !== "free" && (
+                    <p className="font-mm" style={{ fontSize: 11, color: "var(--green-xl)", marginTop: 2 }}>
+                      ✓ Credits plan — unlimited generate
+                    </p>
+                  )}
                 </div>
               </div>
               <Link href="/pricing" style={{
