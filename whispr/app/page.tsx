@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 const DEMO_MESSAGES = [
@@ -18,6 +21,47 @@ const STATS = [
   { value: "Free", label: "Forever" },
   { value: "30s", label: "Setup time" },
 ];
+
+const FAQ = [
+  {
+    q: "Can people see who sent the message?",
+    a: "No. Messages are 100% anonymous. The sender is never stored or shown — not even to admins.",
+  },
+  {
+    q: "Is Whispr really free?",
+    a: "Yes, completely free. Create a link, share it, receive unlimited messages. No credit card, no paywall.",
+  },
+  {
+    q: "Do I need an account to send a message?",
+    a: "Senders don't need an account at all. Only the person receiving messages needs to sign up for a link.",
+  },
+  {
+    q: "What are mood tags?",
+    a: "Senders pick an emoji mood (💬 ❤️ 🔥 🤔 😂 🥳) to give context to their message. It makes replies more expressive.",
+  },
+  {
+    q: "What is the leaderboard?",
+    a: "A public ranking of who gets the most messages. It resets weekly so new people can reach the top.",
+  },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl overflow-hidden glass card-hover">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 text-left gap-4"
+      >
+        <span className="font-semibold text-sm" style={{ color: "var(--text)" }}>{q}</span>
+        <span style={{ color: "var(--text-dim)", flexShrink: 0, fontSize: 18 }}>{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 text-sm leading-relaxed" style={{ color: "var(--text-dim)" }}>{a}</div>
+      )}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const a = "#06b6d4";
@@ -148,6 +192,16 @@ export default function LandingPage() {
             style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", color: "#f59e0b" }}>
             View Leaderboard →
           </Link>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="px-4 py-14 max-w-lg mx-auto">
+        <h2 className="text-xl font-extrabold mb-8 text-center" style={{ color: "var(--text)" }}>Frequently asked</h2>
+        <div className="space-y-2">
+          {FAQ.map((item, i) => (
+            <FaqItem key={i} q={item.q} a={item.a} />
+          ))}
         </div>
       </section>
 
