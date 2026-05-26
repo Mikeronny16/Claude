@@ -87,18 +87,21 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
 const BASE_URL = "https://readyprompts.vercel.app";
 
 const CATEGORIES_META = [
-  { icon: "🎬", key: "TikTok & Short Video",  count: 20, color: "orange" as const, examples: ["Viral hook generator", "POV story scripts", "Trending caption maker"] },
-  { icon: "📸", key: "Instagram Content",      count: 18, color: "blue"   as const, examples: ["Carousel slide writer", "Reel script builder", "Bio optimizer"] },
-  { icon: "💰", key: "Marketing & Sales",      count: 20, color: "orange" as const, examples: ["AIDA copywriter", "Ad headline maker", "Sales page builder"] },
-  { icon: "🏢", key: "Business & Money",       count: 18, color: "blue"   as const, examples: ["Business idea generator", "Freelance pitch writer", "Income stream finder"] },
-  { icon: "📧", key: "Email Marketing",        count: 12, color: "orange" as const, examples: ["Welcome sequence writer", "Re-engagement campaign", "Subject line generator"] },
-  { icon: "🌟", key: "Personal Brand",         count: 17, color: "blue"   as const, examples: ["Origin story creator", "LinkedIn authority posts", "Viral thread writer"] },
+  { icon: "🎬", key: "TikTok & Short Video",     count: 20, color: "orange" as const, examples: ["Viral hook generator", "POV story scripts", "Trending caption maker"] },
+  { icon: "📸", key: "Instagram Content",         count: 18, color: "blue"   as const, examples: ["Carousel slide writer", "Reel script builder", "Bio optimizer"] },
+  { icon: "💰", key: "Marketing & Sales",         count: 20, color: "orange" as const, examples: ["AIDA copywriter", "Ad headline maker", "Sales page builder"] },
+  { icon: "🏢", key: "Business & Money",          count: 18, color: "blue"   as const, examples: ["Business idea generator", "Freelance pitch writer", "Income stream finder"] },
+  { icon: "📧", key: "Email Marketing",           count: 12, color: "orange" as const, examples: ["Welcome sequence writer", "Re-engagement campaign", "Subject line generator"] },
+  { icon: "🌟", key: "Personal Brand",            count: 17, color: "blue"   as const, examples: ["Origin story creator", "LinkedIn authority posts", "Viral thread writer"] },
+  { icon: "▶️", key: "YouTube & Long Form",       count:  5, color: "orange" as const, examples: ["Viral title generator", "Faceless video script", "Long-form hook sequence"] },
+  { icon: "🤖", key: "AI Tools & Productivity",   count:  5, color: "blue"   as const, examples: ["Custom system prompt", "Batch content factory", "AI workflow builder"] },
+  { icon: "💸", key: "Affiliate & Side Hustle",   count:  5, color: "orange" as const, examples: ["Affiliate review script", "Digital product sales page", "Newsletter monetization"] },
 ];
 
 const TESTIMONIALS = [
   { name: "Aisha R.",    country: "🇮🇩 Indonesia", stars: 5, text: "Used the TikTok hooks — my next video got 3x more views. Worth every cent." },
   { name: "Kevin T.",   country: "🇵🇭 Philippines", stars: 5, text: "The cold email prompts helped me land my first freelance client in a week." },
-  { name: "Nattaya S.", country: "🇹🇭 Thailand",    stars: 5, text: "I saved at least 2 hours per week on content. $2 is a joke for this value." },
+  { name: "Nattaya S.", country: "🇹🇭 Thailand",    stars: 5, text: "I saved at least 2 hours per week on content. $7 is honestly a steal for this value." },
   { name: "Yuna K.",    country: "🇯🇵 Japan",        stars: 5, text: "The marketing prompts are genuinely different from what I find for free online." },
   { name: "Ravi M.",    country: "🇮🇳 India",        stars: 5, text: "ChatGPT results were always mid. These prompts changed everything." },
 ];
@@ -123,6 +126,8 @@ export default function HomePage() {
   const [incomingRef, setIncomingRef] = useState("");
   const [copied, setCopied]           = useState(false);
   const [refDismissed, setRefDismissed] = useState(false);
+  const [payModal, setPayModal]       = useState(false);
+  const [payStep, setPayStep]         = useState<"pick" | "wave" | "kbz">("pick");
 
   // sticky bar on scroll
   useEffect(() => {
@@ -165,17 +170,22 @@ export default function HomePage() {
 
   const freeSamples = PROMPTS.slice(0, freeCount);
 
-  const handleBuy = useCallback(() => {
-    const subject = encodeURIComponent("ReadyPrompts Purchase — $2");
+  const handleEmailBuy = useCallback(() => {
+    const subject = encodeURIComponent("ReadyPrompts Purchase — $7");
     const body = encodeURIComponent(
-      "Hi Mike,\n\nI want to buy ReadyPrompts (105 AI Prompt Kit) for $2.\n\nPlease send me your payment details and the access code after payment.\n\nThank you!"
+      "Hi Mike,\n\nI want to buy ReadyPrompts (120 AI Prompt Kit) for $7.\n\nPlease send me your payment details and the access code after payment.\n\nThank you!"
     );
     window.open(`mailto:mikeronny18@gmail.com?subject=${subject}&body=${body}`);
   }, []);
 
+  const handleBuy = useCallback(() => {
+    setPayStep("pick");
+    setPayModal(true);
+  }, []);
+
   // stats section
   const statsRef = useInView();
-  const count105 = useCountUp(105, statsRef.visible);
+  const count120 = useCountUp(120, statsRef.visible);
   const count6   = useCountUp(6,   statsRef.visible);
   const count47  = useCountUp(47,  statsRef.visible);
 
@@ -218,11 +228,11 @@ export default function HomePage() {
         <div style={{ flex: 1 }}>
           <p className="text-sm font-black text-white">ReadyPrompts</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <p className="text-xs" style={{ color: "#f97316" }}>105 prompts · $2</p>
+            <p className="text-xs" style={{ color: "#f97316" }}>120 prompts · $7</p>
           </div>
         </div>
         <button onClick={handleBuy} className="btn-orange px-5 py-3 text-sm font-black rounded-xl">
-          ✉️ Get for $2
+          ⚡ Get for $7
         </button>
       </div>
 
@@ -299,9 +309,9 @@ export default function HomePage() {
         style={{ background: "rgba(10,15,26,0.8)", borderTop: "1px solid rgba(30,41,59,0.5)", borderBottom: "1px solid rgba(30,41,59,0.5)" }}>
         <div className="max-w-3xl mx-auto grid grid-cols-3 gap-4 text-center">
           {[
-            { num: `${count105}+`, label: t.stats.prompts },
+            { num: `${count120}+`, label: t.stats.prompts },
             { num: count6,          label: t.stats.categories },
-            { num: `$${count47 === 47 ? 2 : "2"}`, label: t.stats.price },
+            { num: "$7",            label: t.stats.price },
           ].map(({ num, label }) => (
             <div key={String(label)}>
               <div className="text-2xl sm:text-3xl font-black"
@@ -428,11 +438,11 @@ export default function HomePage() {
             <div className="mt-4 p-4 rounded-xl text-center"
               style={{ background: "rgba(249,115,22,0.06)", border: "1px dashed rgba(249,115,22,0.25)" }}>
               <p className="text-sm font-semibold mb-3" style={{ color: "#cbd5e1" }}>
-                Want all 105? The other {105 - freeCount} are waiting. 👇
+                Want all 120? The other {120 - freeCount} are waiting. 👇
               </p>
               <button onClick={handleBuy}
                 className="btn-orange px-6 py-3 text-sm font-black rounded-xl">
-                ✉️ Get All 105 — $2 Only
+                ⚡ Get All 120 — $7 Only
               </button>
             </div>
           </FadeUp>
@@ -717,6 +727,129 @@ export default function HomePage() {
 
       {/* bottom padding for sticky bar */}
       <div style={{ height: 80 }} />
+
+      {/* ── PAYMENT MODAL ─────────────────────────────── */}
+      {payModal && (
+        <div
+          onClick={() => setPayModal(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 400,
+            background: "rgba(0,0,0,0.72)", backdropFilter: "blur(6px)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: 480,
+              background: "rgba(8,12,22,0.98)", borderRadius: "24px 24px 0 0",
+              border: "1px solid rgba(249,115,22,0.2)", borderBottom: "none",
+              padding: "24px 20px 40px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <div>
+                <p style={{ fontWeight: 900, fontSize: 18, color: "#fff" }}>
+                  {payStep === "pick" ? "Choose Payment" : payStep === "wave" ? "📱 Wave Money" : "💳 KBZPay"}
+                </p>
+                <p style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>120 AI Prompts · $7 one-time</p>
+              </div>
+              {payStep !== "pick" ? (
+                <button onClick={() => setPayStep("pick")} style={{ color: "#64748b", fontSize: 13, padding: "4px 10px", borderRadius: 8, border: "1px solid rgba(30,41,59,0.8)", background: "rgba(15,20,30,0.9)", cursor: "pointer" }}>← Back</button>
+              ) : (
+                <button onClick={() => setPayModal(false)} style={{ color: "#64748b", fontSize: 20, background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+              )}
+            </div>
+
+            {payStep === "pick" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Wave Money */}
+                <button onClick={() => setPayStep("wave")} style={{
+                  display: "flex", alignItems: "center", gap: 14, padding: "16px 18px",
+                  borderRadius: 14, border: "1px solid rgba(249,115,22,0.2)",
+                  background: "rgba(249,115,22,0.05)", cursor: "pointer", textAlign: "left",
+                }}>
+                  <span style={{ fontSize: 26 }}>📱</span>
+                  <div>
+                    <p style={{ fontWeight: 800, fontSize: 15, color: "#fff" }}>Wave Money</p>
+                    <p style={{ fontSize: 12, color: "#94a3b8" }}>Myanmar · ~14,000 MMK</p>
+                  </div>
+                  <span style={{ marginLeft: "auto", color: "#f97316" }}>→</span>
+                </button>
+
+                {/* KBZPay */}
+                <button onClick={() => setPayStep("kbz")} style={{
+                  display: "flex", alignItems: "center", gap: 14, padding: "16px 18px",
+                  borderRadius: 14, border: "1px solid rgba(59,130,246,0.2)",
+                  background: "rgba(59,130,246,0.05)", cursor: "pointer", textAlign: "left",
+                }}>
+                  <span style={{ fontSize: 26 }}>💳</span>
+                  <div>
+                    <p style={{ fontWeight: 800, fontSize: 15, color: "#fff" }}>KBZPay</p>
+                    <p style={{ fontSize: 12, color: "#94a3b8" }}>Myanmar · ~14,000 MMK</p>
+                  </div>
+                  <span style={{ marginLeft: "auto", color: "#60a5fa" }}>→</span>
+                </button>
+
+                {/* Email */}
+                <button onClick={handleEmailBuy} style={{
+                  display: "flex", alignItems: "center", gap: 14, padding: "16px 18px",
+                  borderRadius: 14, border: "1px solid rgba(34,197,94,0.2)",
+                  background: "rgba(34,197,94,0.05)", cursor: "pointer", textAlign: "left",
+                }}>
+                  <span style={{ fontSize: 26 }}>✉️</span>
+                  <div>
+                    <p style={{ fontWeight: 800, fontSize: 15, color: "#fff" }}>Email (International)</p>
+                    <p style={{ fontSize: 12, color: "#94a3b8" }}>USD · Mike sends payment details</p>
+                  </div>
+                  <span style={{ marginLeft: "auto", color: "#4ade80" }}>→</span>
+                </button>
+              </div>
+            )}
+
+            {(payStep === "wave" || payStep === "kbz") && (() => {
+              const isWave = payStep === "wave";
+              const phone = isWave ? "09969279092" : "09967965497";
+              const name = isWave ? "Mg Min Ma Haw" : "Daw San San Myint";
+              const accent = isWave ? "#f97316" : "#60a5fa";
+              const bg = isWave ? "rgba(249,115,22,0.08)" : "rgba(59,130,246,0.08)";
+              const border = isWave ? "rgba(249,115,22,0.25)" : "rgba(59,130,246,0.25)";
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: "18px 20px" }}>
+                    <p style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Transfer to</p>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                      <p style={{ fontSize: 22, fontWeight: 900, color: accent, letterSpacing: 1 }}>{phone}</p>
+                      <button
+                        onClick={() => navigator.clipboard?.writeText(phone)}
+                        style={{ fontSize: 11, padding: "4px 10px", borderRadius: 8, border: `1px solid ${border}`, background: bg, color: accent, cursor: "pointer", fontWeight: 700 }}>
+                        Copy
+                      </button>
+                    </div>
+                    <p style={{ fontSize: 13, color: "#cbd5e1", fontWeight: 700 }}>{name}</p>
+                    <p style={{ fontSize: 13, color: "#f97316", fontWeight: 800, marginTop: 8 }}>Amount: ~14,000 MMK</p>
+                  </div>
+                  <div style={{ background: "rgba(30,41,59,0.4)", borderRadius: 14, padding: "14px 18px" }}>
+                    <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>
+                      After transfer, email your payment screenshot to{" "}
+                      <span style={{ color: "#f97316", fontWeight: 700 }}>mikeronny18@gmail.com</span>
+                      {" "}with your name. Mike will send your access code within a few hours.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleEmailBuy}
+                    style={{
+                      padding: "14px", borderRadius: 14, fontWeight: 900, fontSize: 15, cursor: "pointer",
+                      background: "linear-gradient(135deg, #f97316, #fb923c)", color: "#fff", border: "none",
+                    }}>
+                    ✉️ Email Proof to Mike
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

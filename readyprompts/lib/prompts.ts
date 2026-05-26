@@ -129,6 +129,33 @@ export const PROMPTS: Prompt[] = [
   { id: 103, category: "Personal Brand", title: "YouTube Description", prompt: "Write a YouTube video description for a video about [TOPIC]. Include: hook, what viewers will learn, timestamps, links, and SEO keywords naturally." },
   { id: 104, category: "Personal Brand", title: "Guest Blog Pitch", prompt: "Write a guest blog post pitch to [WEBSITE/PUBLICATION] about [TOPIC]. Show familiarity with their audience, propose 3 title options, include your credentials." },
   { id: 105, category: "Personal Brand", title: "Community Post", prompt: "Write a Facebook/Discord community post introducing [TOPIC] that sparks discussion. Ask an engaging question at the end. Position yourself as a helpful expert." },
+
+  // ═══════════════════════════════════════
+  // YOUTUBE & LONG FORM (106-110)
+  // ═══════════════════════════════════════
+  { id: 106, category: "YouTube & Long Form", title: "Viral Title Generator", prompt: "Write 15 YouTube video title options for a video about [TOPIC]. Mix formulas: numbers, questions, curiosity gaps, 'How I...', and 'Why...' structures. Each must be under 70 characters and optimized for clicks." },
+  { id: 107, category: "YouTube & Long Form", title: "Video SEO Description", prompt: "Write a YouTube video description for [VIDEO TITLE/TOPIC]. Include: a strong first 2 lines for the fold, key timestamps, 3 relevant keywords used naturally, links section, and subscribe CTA. Under 500 words." },
+  { id: 108, category: "YouTube & Long Form", title: "Faceless Script", prompt: "Write a faceless YouTube/TikTok script for [NICHE TOPIC] that requires no face on camera. Include: voiceover text, B-roll directions, text overlay cues, and background music mood. 3-5 minutes." },
+  { id: 109, category: "YouTube & Long Form", title: "Long-Form Hook Sequence", prompt: "Write the first 60 seconds of a YouTube video about [TOPIC]. Include: pattern interrupt, curiosity hook, credibility line, and preview of what's coming. Make it impossible to click away." },
+  { id: 110, category: "YouTube & Long Form", title: "End Screen CTA Script", prompt: "Write 5 different YouTube end screen CTA scripts for a channel about [NICHE]. Each must encourage subscribe, watch next, and engagement — under 20 seconds each." },
+
+  // ═══════════════════════════════════════
+  // AI TOOLS & PRODUCTIVITY (111-115)
+  // ═══════════════════════════════════════
+  { id: 111, category: "AI Tools & Productivity", title: "Custom System Prompt", prompt: "Create a custom ChatGPT/Claude system prompt that makes it act as a specialist in [YOUR NICHE]. Include: role definition, tone, what to always do, what to never do, and output format." },
+  { id: 112, category: "AI Tools & Productivity", title: "Batch Content Factory", prompt: "I have 1 core idea about [TOPIC]. Repurpose it into: 1 TikTok script, 1 Twitter thread, 1 LinkedIn post, 1 newsletter section, and 3 Instagram captions. Keep the core message, adapt the format." },
+  { id: 113, category: "AI Tools & Productivity", title: "AI Workflow Builder", prompt: "Design an AI-powered content workflow for a [TYPE] creator posting [FREQUENCY] times per week. Map out: which tasks to AI-automate, which to keep human, tools needed, and time saved per week." },
+  { id: 114, category: "AI Tools & Productivity", title: "Competitor Gap Analyzer", prompt: "I create content about [NICHE]. My top 3 competitors are [LIST THEM]. Analyze content gaps they're missing. Find 10 content ideas no one in my niche is doing well. Back each idea with WHY it could win." },
+  { id: 115, category: "AI Tools & Productivity", title: "Content Repurpose Chain", prompt: "Take this long-form content: [PASTE YOUR CONTENT]. Create: 5 short-form clips (with timestamps), 3 carousels, 10 quote graphics, 1 newsletter edition, and 20 micro-captions. All from one source." },
+
+  // ═══════════════════════════════════════
+  // AFFILIATE & SIDE HUSTLE (116-120)
+  // ═══════════════════════════════════════
+  { id: 116, category: "Affiliate & Side Hustle", title: "Affiliate Review Script", prompt: "Write an honest affiliate product review video script for [PRODUCT NAME]. Include: what it is, who it's for, real pros and cons, who should NOT buy it, and your affiliate CTA. Authentic, not salesy." },
+  { id: 117, category: "Affiliate & Side Hustle", title: "Pinterest SEO Pins", prompt: "Write 10 Pinterest pin titles and descriptions for [TOPIC/NICHE]. Each pin must include target keywords naturally, a curiosity hook, and a CTA. Optimized for Pinterest search, not just aesthetics." },
+  { id: 118, category: "Affiliate & Side Hustle", title: "Digital Product Sales Page", prompt: "Write a complete mini sales page for a [DIGITAL PRODUCT TYPE] priced at [PRICE]. Include: headline, 3 bullet benefits, who it's for, what's included, testimonial placeholder, and buy button copy. Mobile-first." },
+  { id: 119, category: "Affiliate & Side Hustle", title: "Black Friday Campaign", prompt: "Write a complete Black Friday promotional campaign for [PRODUCT] at [DISCOUNT]% off. Include: teaser email, announcement post, SMS text, 3 social media posts, and a final-hour urgency email." },
+  { id: 120, category: "Affiliate & Side Hustle", title: "Newsletter Monetization", prompt: "I have a newsletter about [TOPIC] with [SUBSCRIBER COUNT] subscribers. Create 5 monetization strategies specifically for this audience. For each: implementation steps, realistic earning estimate, and first action to take this week." },
 ];
 
 export const CATEGORIES = [...new Set(PROMPTS.map(p => p.category))];

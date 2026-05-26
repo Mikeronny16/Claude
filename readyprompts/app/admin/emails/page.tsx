@@ -12,7 +12,7 @@ const EMAILS = [
 
 Thank you so much for your purchase! 🎉
 
-Your 105 AI prompts are ready. Here's your download link:
+Your 120 AI prompts are ready. Here's your download link:
 
 👉 https://readyprompts.vercel.app/thank-you
 

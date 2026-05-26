@@ -62,7 +62,7 @@ function DirectDownload() {
       <div className="text-5xl mb-4">🎉</div>
       <h1 className="text-2xl font-black text-white mb-2">Payment Confirmed!</h1>
       <p className="text-sm mb-6" style={{ color: "#94a3b8" }}>
-        Your 105 AI prompts are ready to download.
+        Your 120 AI prompts are ready to download.
       </p>
       <button
         onClick={handleDownload}
@@ -73,7 +73,7 @@ function DirectDownload() {
             <SpinnerIcon /> Preparing download...
           </span>
         ) : (
-          "⬇️ Download 105 AI Prompts"
+          "⬇️ Download 120 AI Prompts"
         )}
       </button>
       <div className="text-xs space-y-1" style={{ color: "#475569" }}>
@@ -147,7 +147,7 @@ function PaymentPoller({ paymentId }: { paymentId: string }) {
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-black text-white mb-2">Payment Confirmed!</h1>
         <p className="text-sm mb-6" style={{ color: "#94a3b8" }}>
-          Your 105 AI prompts are ready to download.
+          Your 120 AI prompts are ready to download.
         </p>
         <button
           onClick={handleDownload}
@@ -158,7 +158,7 @@ function PaymentPoller({ paymentId }: { paymentId: string }) {
               <SpinnerIcon /> Preparing download...
             </span>
           ) : (
-            "⬇️ Download 105 AI Prompts"
+            "⬇️ Download 120 AI Prompts"
           )}
         </button>
         <div className="text-xs space-y-1" style={{ color: "#475569" }}>

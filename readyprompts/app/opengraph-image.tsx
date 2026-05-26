@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "ReadyPrompts — 105 AI Prompt Kit for $2";
+export const alt = "ReadyPrompts — 120 AI Prompt Kit for $7";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -107,7 +107,7 @@ export default function OgImage() {
             maxWidth: 900,
           }}
         >
-          105 AI Prompts.{" "}
+          120 AI Prompts.{" "}
           <span
             style={{
               background: "linear-gradient(135deg, #f97316, #fb923c)",
@@ -115,7 +115,7 @@ export default function OgImage() {
               color: "transparent",
             }}
           >
-            $2 only.
+            $7 only.
           </span>
         </div>
 

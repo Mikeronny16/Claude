@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import Logo3D from "@/components/Logo3D"
+import CinematicHero from "@/components/CinematicHero"
 import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Star, Quote, Check, X, ChevronDown, Mic, Megaphone, Heart, Layers, Hash, BarChart2, Film, Calendar } from "lucide-react"
 import { useState } from "react"
 
@@ -75,8 +75,8 @@ export default function Landing() {
       </div>
 
       {/* Nav */}
-      <nav style={{ position: "relative", zIndex: 10, display: "flex", alignItems: "center",
-        justifyContent: "space-between", padding: "18px 24px", maxWidth: 1100, margin: "0 auto" }}>
+      <nav style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", alignItems: "center",
+        justifyContent: "space-between", padding: "20px 28px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src="/IMG_1808.png" alt="Ronnix AI" style={{ width: 36, height: 36, objectFit: "contain",
             filter: "drop-shadow(0 0 8px rgba(254,203,0,0.4))" }} />
@@ -91,60 +91,8 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section style={{ position: "relative", zIndex: 10, padding: "52px 24px 64px", maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
-        <motion.div variants={FADE} initial="hidden" animate="show" transition={{ duration: 0.6 }}>
-
-          <Logo3D />
-
-          {/* Social proof pill */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "7px 16px",
-            borderRadius: 100, fontSize: 12, fontWeight: 700, marginBottom: 28,
-            background: "rgba(109,201,58,0.08)", border: "1px solid var(--border-g)", color: "var(--green-xl)" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green-xl)",
-              display: "inline-block", animation: "pulse 2s infinite" }} />
-            Myanmar Online Sellers အတွက် AI Tools
-          </div>
-
-          {/* Pain-first headline */}
-          <h1 style={{ fontSize: "clamp(38px,7vw,72px)", fontWeight: 900, lineHeight: 1.08,
-            letterSpacing: -2, marginBottom: 20 }}>
-            <span className="grad-yg">Caption ရေး</span>ဖို့<br />
-            <span style={{ color: "var(--text)" }}>အချိန်ဆုံးရှုံးနေတယ်မဟုတ်လား?</span>
-          </h1>
-
-          <p className="font-mm" style={{ fontSize: 15, color: "var(--muted)", maxWidth: 480,
-            margin: "0 auto 32px", lineHeight: 1.9 }}>
-            AI က 5 စက္ကန့်အတွင်း Caption · Reply · Live Script · Reel · Hashtag<br />
-            နဲ့ Tools 11 ခု — မင်းရောင်းချရေးကိုပဲ အာရုံစိုက်ပါ
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-            <Link href="/auth" className="btn-yellow" style={{
-              padding: "16px 36px", fontSize: 16, borderRadius: 14, display: "inline-flex",
-              alignItems: "center", gap: 8, fontWeight: 900,
-            }}>
-              <Zap style={{ width: 18, height: 18 }} /> အခမဲ့ Register လုပ်ပါ
-            </Link>
-            <p className="font-mm" style={{ fontSize: 12, color: "var(--muted2)" }}>
-              Credit card မလိုပါ · Sign up မှာ 10 credits ချက်ချင်းရသည်
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Stats bar */}
-        <motion.div variants={FADE} initial="hidden" animate="show" transition={{ delay: 0.3 }}
-          style={{ display: "flex", justifyContent: "center", gap: "clamp(24px,6vw,60px)", marginTop: 52,
-            padding: "28px 32px", borderRadius: 20, background: "var(--glass)",
-            border: "1px solid var(--border-g)", maxWidth: 480, margin: "52px auto 0" }}>
-          {[["5s", "Generate time"], ["11", "AI Tools included"], ["Free", "To start"]].map(([n, l]) => (
-            <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 26, fontWeight: 900 }} className="grad-yg">{n}</div>
-              <div style={{ fontSize: 11, color: "var(--muted2)", marginTop: 4, fontWeight: 500 }}>{l}</div>
-            </div>
-          ))}
-        </motion.div>
-      </section>
+      {/* ── CINEMATIC HERO ── */}
+      <CinematicHero />
 
       {/* ── PAIN SECTION ── */}
       <section style={{ position: "relative", zIndex: 10, padding: "60px 24px", maxWidth: 860, margin: "0 auto" }}>

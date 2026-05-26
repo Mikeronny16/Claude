@@ -18,10 +18,10 @@ export async function POST() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        price_amount: 2,
+        price_amount: 7,
         price_currency: "usd",
         order_id: `rp_${Date.now()}`,
-        order_description: "ReadyPrompts — 105 Ultimate AI Prompt Kit",
+        order_description: "ReadyPrompts — 120 Ultimate AI Prompt Kit",
         success_url: `${appUrl}/thank-you`,
         cancel_url: `${appUrl}/?cancelled=1`,
         is_fixed_rate: false,

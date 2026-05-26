@@ -103,7 +103,7 @@ export default function AccessPage() {
             <div className="text-4xl mb-3">🎉</div>
             <h1 className="text-xl font-black text-white mb-2">Download Started!</h1>
             <p className="text-sm mb-4" style={{ color: "#94a3b8" }}>
-              Your 105 AI prompts are downloading now.
+              Your 120 AI prompts are downloading now.
             </p>
             <a href="/" className="text-xs" style={{ color: "#f97316" }}>← Back to ReadyPrompts</a>
           </div>

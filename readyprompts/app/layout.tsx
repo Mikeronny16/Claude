@@ -15,9 +15,9 @@ const BASE_URL = "https://readyprompts.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  title: "ReadyPrompts — 105 AI Prompt Kit | Only $2",
+  title: "ReadyPrompts — 120 AI Prompt Kit | Only $7",
   description:
-    "Stop wasting hours getting bad AI results. 105 copy-paste prompts for TikTok, Instagram, Marketing, Business & more. One $2 payment. Download instantly.",
+    "Stop wasting hours getting bad AI results. 120 copy-paste prompts for TikTok, Instagram, Marketing, Business & more. One $7 payment. Download instantly.",
   keywords: [
     "AI prompts",
     "ChatGPT prompts",
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     canonical: BASE_URL,
   },
   openGraph: {
-    title: "ReadyPrompts — 105 AI Prompt Kit | Only $2",
+    title: "ReadyPrompts — 120 AI Prompt Kit | Only $7",
     description:
-      "105 copy-paste AI prompts. TikTok, Instagram, Marketing, Business. $2 one-time. Works with ChatGPT, Claude, Gemini & any AI.",
+      "120 copy-paste AI prompts. TikTok, Instagram, Marketing, Business. $7 one-time. Works with ChatGPT, Claude, Gemini & any AI.",
     type: "website",
     url: BASE_URL,
     locale: "en_US",
@@ -47,14 +47,14 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ReadyPrompts — 105 AI Prompt Kit for $2",
+        alt: "ReadyPrompts — 120 AI Prompt Kit for $7",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ReadyPrompts — 105 AI Prompt Kit | Only $2",
-    description: "Stop getting bad AI results. 105 proven prompts for TikTok, marketing, business & more. Download for $2.",
+    title: "ReadyPrompts — 120 AI Prompt Kit | Only $7",
+    description: "Stop getting bad AI results. 120 proven prompts for TikTok, marketing, business & more. Download for $7.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -70,9 +70,9 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
-  name: "ReadyPrompts — 105 AI Prompt Kit",
+  name: "ReadyPrompts — 120 AI Prompt Kit",
   description:
-    "105 copy-paste AI prompts for TikTok, Instagram, Marketing, Business, Email Marketing, and Personal Brand. Works with ChatGPT, Claude, Gemini, and any AI model.",
+    "120 copy-paste AI prompts for TikTok, Instagram, Marketing, Business, Email Marketing, and Personal Brand. Works with ChatGPT, Claude, Gemini, and any AI model.",
   url: BASE_URL,
   image: `${BASE_URL}/og-image.png`,
   brand: {
