@@ -77,7 +77,7 @@ export default function Landing() {
       <nav style={{ position: "relative", zIndex: 10, display: "flex", alignItems: "center",
         justifyContent: "space-between", padding: "18px 24px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/logo.png" alt="Ronnix AI" style={{ width: 36, height: 36, objectFit: "contain",
+          <img src="/ronnix_ai_logo.png" alt="Ronnix AI" style={{ width: 36, height: 36, objectFit: "contain",
             filter: "drop-shadow(0 0 8px rgba(254,203,0,0.4))" }} />
           <span style={{ fontSize: 19, fontWeight: 900, letterSpacing: -0.5 }} className="grad-yg">RONNIX</span>
         </div>
@@ -113,7 +113,7 @@ export default function Landing() {
                 filter: "blur(20px)", borderRadius: "50%", zIndex: 0,
               }} />
               <motion.img
-                src="/logo.png"
+                src="/ronnix_ai_logo.png"
                 alt="Ronnix AI"
                 whileHover={{ scale: 1.08, rotateY: 8, rotateX: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
