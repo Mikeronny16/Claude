@@ -5,10 +5,13 @@ export const PLANS = {
   max:     { name: "Max",     daily: Infinity, credits: 1000 },
 } as const
 
+// Launch offer ends 48 hours from deploy — update this date when deploying
+export const LAUNCH_OFFER_ENDS = new Date("2026-05-28T20:00:00+06:30") // Myanmar time
+
 export const CREDIT_PACKS = [
-  { id: "starter", credits: 200,  price_mmk: 10000, label: "Starter — 200 Credits",  popular: false, plan_to_set: "starter" },
-  { id: "pro",     credits: 500,  price_mmk: 30000, label: "Pro — 500 Credits",       popular: true,  plan_to_set: "pro"     },
-  { id: "max",     credits: 1000, price_mmk: 50000, label: "Max — 1,000 Credits",     popular: false, plan_to_set: "max"     },
+  { id: "starter", credits: 200,  price_mmk: 10000, label: "Starter — 200 Credits",             popular: false, plan_to_set: "starter", bonus: 0   },
+  { id: "pro",     credits: 500,  price_mmk: 30000, label: "Pro — 500 Credits",                  popular: true,  plan_to_set: "pro",     bonus: 200 },
+  { id: "max",     credits: 1000, price_mmk: 50000, label: "Max — 1,000 Credits",                popular: false, plan_to_set: "max",     bonus: 0   },
 ] as const
 
 export const TOOL_COST = {
@@ -30,5 +33,5 @@ export const FREE_TOOLS = ["caption", "reply", "hashtags", "reel", "promo"] as c
 export type FreeTool = typeof FREE_TOOLS[number]
 
 export const FREE_DAILY_LIMIT = 3
-export const SIGNUP_BONUS = 10
+export const SIGNUP_BONUS = 20
 export const REFERRAL_BONUS = 10
