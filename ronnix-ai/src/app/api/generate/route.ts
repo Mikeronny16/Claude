@@ -47,14 +47,14 @@ export async function POST(req: NextRequest) {
       .eq("id", user.id)
   }
 
-  if (profile.plan === "free" && !FREE_TOOLS.includes(tool as FreeTool)) {
+  if ((!profile.plan || profile.plan === "free") && !FREE_TOOLS.includes(tool as FreeTool)) {
     return NextResponse.json(
       { error: "ဤ tool သည် Paid plan တွင်သာ သုံးနိုင်သည်။ Credits ဝယ်ပါ။" },
       { status: 403 }
     )
   }
 
-  if (profile.plan === "free" && dailyCount >= FREE_DAILY_LIMIT) {
+  if ((!profile.plan || profile.plan === "free") && dailyCount >= FREE_DAILY_LIMIT) {
     return NextResponse.json(
       { error: "Daily limit ပြည့်သွားပြီ။ Credits ဝယ်ပါ သို့မဟုတ် မနက်ပြန်လာပါ။" },
       { status: 429 }
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const cost = TOOL_COST[tool as keyof typeof TOOL_COST]
 
-  if (profile.plan !== "free" && profile.credits < cost) {
+  if ((profile.plan && profile.plan !== "free") && profile.credits < cost) {
     return NextResponse.json({ error: "Credits မလုံလောက်ပါ" }, { status: 402 })
   }
 
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     else if (tool === "reel")        output = await generateReel(input)
     else if (tool === "seasonal")    output = await generateSeasonal(input)
 
-    if (profile.plan === "free") {
+    if ((!profile.plan || profile.plan === "free")) {
       await supabase.from("profiles")
         .update({ daily_count: dailyCount + 1 }).eq("id", user.id)
     } else {
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       user_id: user.id, tool,
       input_text: JSON.stringify(input),
       output_text: output,
-      credits_used: profile.plan === "free" ? 0 : cost,
+      credits_used: (!profile.plan || profile.plan === "free") ? 0 : cost,
     })
 
     return NextResponse.json({ output })

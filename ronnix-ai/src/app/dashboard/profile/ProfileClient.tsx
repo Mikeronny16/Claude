@@ -32,7 +32,7 @@ export default function ProfileClient({ profile, payments }: { profile: Profile 
     toast.success("Referral link copied!")
   }
 
-  const dailyLeft = profile?.plan === "free" ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
+  const dailyLeft = (!profile?.plan || profile?.plan === "free") ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
   const hasPending = payments.some(p => p.status === "pending")
 
   return (
@@ -90,12 +90,12 @@ export default function ProfileClient({ profile, payments }: { profile: Profile 
                 <Zap style={{ width: 20, height: 20, color: "var(--yellow)" }} />
                 <div>
                   <p style={{ fontSize: 11, color: "var(--muted2)", fontWeight: 600 }}>
-                    {profile?.plan === "free" ? "Daily Remaining" : "Credits"}
+                    {(!profile?.plan || profile?.plan === "free") ? "Daily Remaining" : "Credits"}
                   </p>
                   <p style={{ fontSize: 22, fontWeight: 900 }} className="grad-yg">
-                    {profile?.plan === "free" ? `${dailyLeft} / 3` : profile?.credits ?? 0}
+                    {(!profile?.plan || profile?.plan === "free") ? `${dailyLeft} / 3` : profile?.credits ?? 0}
                   </p>
-                  {profile?.plan !== "free" && (
+                  {(profile?.plan && profile?.plan !== "free") && (
                     <p className="font-mm" style={{ fontSize: 11, color: "var(--green-xl)", marginTop: 2 }}>
                       ✓ Credits plan — unlimited generate
                     </p>

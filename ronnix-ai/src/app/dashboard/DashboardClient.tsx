@@ -38,7 +38,8 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 export default function DashboardClient({ profile }: { profile: Profile | null }) {
-  const dailyLeft = profile?.plan === "free" ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
+  const isFreeUser = !profile?.plan || profile.plan === "free"
+  const dailyLeft = isFreeUser ? Math.max(0, 3 - (profile?.daily_count || 0)) : null
   const origin = typeof window !== "undefined" ? window.location.origin : ""
   const referralLink = profile ? `${origin}/auth?ref=${profile.referral_code}` : ""
 
@@ -110,7 +111,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
               background: "rgba(254,203,0,0.08)", border: "1px solid var(--border-y)", color: "var(--yellow)",
             }}>
             <Zap style={{ width: 12, height: 12 }} />
-            {profile?.plan === "free"
+            {isFreeUser
               ? `${dailyLeft}/day`
               : <><AnimatedNumber value={profile?.credits ?? 0} /> cr</>}
           </motion.div>
@@ -137,7 +138,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08, duration: 0.5 }}
           style={{ marginBottom: 28 }}>
-          {profile?.plan === "free" ? (
+          {isFreeUser ? (
             <motion.div
               animate={{ borderColor: ["rgba(254,203,0,0.15)", "rgba(254,203,0,0.35)", "rgba(254,203,0,0.15)"] }}
               transition={{ duration: 3, repeat: Infinity }}
@@ -198,7 +199,7 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
             const Icon = tool.icon
             const toolSlug = tool.href.split("/").pop() as string
             const isFree = (FREE_TOOLS as readonly string[]).includes(toolSlug)
-            const isLocked = profile?.plan === "free" && !isFree
+            const isLocked = isFreeUser && !isFree
             const cost = TOOL_COST[toolSlug as keyof typeof TOOL_COST]
             return (
               <motion.div key={tool.href}
