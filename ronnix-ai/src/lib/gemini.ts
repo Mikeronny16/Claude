@@ -1,17 +1,22 @@
-import Anthropic from "@anthropic-ai/sdk"
+import OpenAI from "openai"
 
-const MODEL = "claude-haiku-4-5"
+const MODEL = "gpt-4o-mini"
 
 async function ask(system: string, user: string, maxTokens = 600): Promise<string> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const res = await client.messages.create({
+  const client = new OpenAI({
+    baseURL: "https://models.inference.ai.azure.com",
+    apiKey: process.env.GITHUB_TOKEN,
+  })
+  const res = await client.chat.completions.create({
     model: MODEL,
     max_tokens: maxTokens,
-    system,
-    messages: [{ role: "user", content: user }],
+    temperature: 0.8,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
   })
-  const block = res.content[0]
-  return block.type === "text" ? block.text.trim() : ""
+  return res.choices[0]?.message?.content?.trim() ?? ""
 }
 
 const L = (lang: "mm" | "en") => lang === "mm" ? "Myanmar Unicode (Burmese)" : "English"
