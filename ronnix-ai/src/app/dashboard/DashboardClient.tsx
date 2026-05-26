@@ -2,25 +2,26 @@
 
 import { motion, useMotionValue, useTransform, animate } from "framer-motion"
 import Link from "next/link"
-import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, ChevronRight, Video, Flame, Layers, Star, Hash, TrendingUp, Play, Calendar } from "lucide-react"
+import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Share2, Copy, ChevronRight, Video, Flame, Layers, Star, Hash, TrendingUp, Play, Calendar, Lock } from "lucide-react"
 import BottomNav from "@/components/BottomNav"
 import ThemeToggle from "@/components/ThemeToggle"
 import type { Profile } from "@/lib/supabase"
+import { FREE_TOOLS, TOOL_COST } from "@/lib/credits"
 import { toast } from "sonner"
 import { useEffect, useRef } from "react"
 
 const TOOLS = [
-  { href: "/tools/caption",     icon: Sparkles,      title: "Caption Generator",   mm: "Post caption AI ရေးပေးသည်",        hint: "30 မိနစ် → 5 စက္ကန့်",          color: "var(--yellow)",  border: "rgba(254,203,0,0.3)",    glow: "rgba(254,203,0,0.12)"    },
-  { href: "/tools/reply",       icon: MessageSquare, title: "Reply Helper",         mm: "Customer reply အမြန်ရ",             hint: "Professional · Trust တက်မည်",   color: "var(--green-xl)",border: "rgba(109,201,58,0.3)",   glow: "rgba(109,201,58,0.10)"   },
-  { href: "/tools/description", icon: FileText,      title: "Product Description",  mm: "ကုန်ဖော်ပြချက် Pro level",          hint: "Conversion rate မြင့်တက်မည်",  color: "#6EE7B7",        border: "rgba(110,231,183,0.3)", glow: "rgba(110,231,183,0.08)"  },
-  { href: "/tools/live",        icon: Video,         title: "FB Live Script",        mm: "Live ရောင်းချ script အပြည့်အစုံ",   hint: "2 credits · Script ပြည့်",       color: "#FF6B35",        border: "rgba(255,107,53,0.30)", glow: "rgba(255,107,53,0.08)"   },
-  { href: "/tools/promo",       icon: Flame,         title: "Promo Post",            mm: "Flash sale / ပရိုမိုး post",        hint: "Urgency-driven · Viral",         color: "#FF3B6F",        border: "rgba(255,59,111,0.30)", glow: "rgba(255,59,111,0.08)"   },
-  { href: "/tools/variants",    icon: Layers,        title: "Caption Variants",      mm: "Caption 3 မျိုး တစ်ချက်တည်းရ",     hint: "A/B test ဖို့ · 2 credits",      color: "#A3FF47",        border: "rgba(163,255,71,0.30)", glow: "rgba(163,255,71,0.07)"   },
-  { href: "/tools/testimonial", icon: Star,          title: "Testimonial",           mm: "Customer review ကို post ဖြစ်အောင်", hint: "Trust building · Shareable",    color: "#00D2B8",        border: "rgba(0,210,184,0.30)",  glow: "rgba(0,210,184,0.08)"    },
-  { href: "/tools/hashtags",    icon: Hash,          title: "Hashtag Generator",     mm: "Myanmar seller hashtag pack",        hint: "15-20 targeted hashtags",        color: "#47C8FF",        border: "rgba(71,200,255,0.30)", glow: "rgba(71,200,255,0.07)"   },
-  { href: "/tools/comparison",  icon: TrendingUp,    title: "Comparison Post",       mm: "ဘာကြောင့် ငါ့ဆိုင်ကိုရွေးသင့်လဲ", hint: "Persuasive · Converts",          color: "#FB923C",        border: "rgba(251,146,60,0.30)", glow: "rgba(251,146,60,0.08)"   },
-  { href: "/tools/reel",        icon: Play,          title: "Reel Caption",          mm: "Short video punchy caption",         hint: "TikTok · Reels · Viral",         color: "#BF5FFF",        border: "rgba(191,95,255,0.30)", glow: "rgba(191,95,255,0.08)"   },
-  { href: "/tools/seasonal",    icon: Calendar,      title: "Seasonal Campaign",     mm: "ပွဲတော် special post",               hint: "Thingyan · Eid · Xmas",          color: "#FFD166",        border: "rgba(255,209,102,0.35)",glow: "rgba(255,209,102,0.08)"  },
+  { href: "/tools/caption",     icon: Sparkles,      title: "Caption Generator",   mm: "Post caption AI ရေးပေးသည်",        hint: "30 မိနစ် → 5 စက္ကန့်",         color: "var(--yellow)",  border: "rgba(254,203,0,0.3)",    glow: "rgba(254,203,0,0.12)"    },
+  { href: "/tools/reply",       icon: MessageSquare, title: "Reply Helper",         mm: "Customer reply အမြန်ရ",             hint: "Professional · Trust တက်မည်",  color: "var(--green-xl)",border: "rgba(109,201,58,0.3)",   glow: "rgba(109,201,58,0.10)"   },
+  { href: "/tools/hashtags",    icon: Hash,          title: "Hashtag Generator",    mm: "Myanmar seller hashtag pack",        hint: "15-20 targeted hashtags",       color: "#47C8FF",        border: "rgba(71,200,255,0.30)", glow: "rgba(71,200,255,0.07)"   },
+  { href: "/tools/reel",        icon: Play,          title: "Reel Caption",         mm: "Short video punchy caption",         hint: "TikTok · Reels · Viral",        color: "#BF5FFF",        border: "rgba(191,95,255,0.30)", glow: "rgba(191,95,255,0.08)"   },
+  { href: "/tools/promo",       icon: Flame,         title: "Promo Post",           mm: "Flash sale / ပရိုမိုး post",        hint: "Urgency-driven · Viral",        color: "#FF3B6F",        border: "rgba(255,59,111,0.30)", glow: "rgba(255,59,111,0.08)"   },
+  { href: "/tools/testimonial", icon: Star,          title: "Testimonial",          mm: "Customer review ကို post ဖြစ်အောင်", hint: "Trust building · Shareable",   color: "#00D2B8",        border: "rgba(0,210,184,0.30)",  glow: "rgba(0,210,184,0.08)"    },
+  { href: "/tools/description", icon: FileText,      title: "Product Description",  mm: "ကုန်ဖော်ပြချက် Pro level",          hint: "Conversion rate မြင့်တက်မည်", color: "#6EE7B7",        border: "rgba(110,231,183,0.3)", glow: "rgba(110,231,183,0.08)"  },
+  { href: "/tools/comparison",  icon: TrendingUp,    title: "Comparison Post",      mm: "ဘာကြောင့် ငါ့ဆိုင်ကိုရွေးသင့်လဲ", hint: "Persuasive · Converts",         color: "#FB923C",        border: "rgba(251,146,60,0.30)", glow: "rgba(251,146,60,0.08)"   },
+  { href: "/tools/seasonal",    icon: Calendar,      title: "Seasonal Campaign",    mm: "ပွဲတော် special post",               hint: "Thingyan · Eid · Xmas",         color: "#FFD166",        border: "rgba(255,209,102,0.35)",glow: "rgba(255,209,102,0.08)"  },
+  { href: "/tools/variants",    icon: Layers,        title: "Caption Variants",     mm: "Caption 3 မျိုး တစ်ချက်တည်းရ",     hint: "A/B test ဖို့ · 3 versions",   color: "#A3FF47",        border: "rgba(163,255,71,0.30)", glow: "rgba(163,255,71,0.07)"   },
+  { href: "/tools/live",        icon: Video,         title: "FB Live Script",       mm: "Live ရောင်းချ script အပြည့်အစုံ",   hint: "Full script · Most powerful",   color: "#FF6B35",        border: "rgba(255,107,53,0.30)", glow: "rgba(255,107,53,0.08)"   },
 ]
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -195,11 +196,15 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
           {TOOLS.map((tool, i) => {
             const Icon = tool.icon
+            const toolSlug = tool.href.split("/").pop() as string
+            const isFree = (FREE_TOOLS as readonly string[]).includes(toolSlug)
+            const isLocked = profile?.plan === "free" && !isFree
+            const cost = TOOL_COST[toolSlug as keyof typeof TOOL_COST]
             return (
               <motion.div key={tool.href}
                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.12 + i * 0.1, type: "spring", stiffness: 300, damping: 28 }}>
-                <Link href={tool.href} style={{ textDecoration: "none", display: "block" }}>
+                <Link href={isLocked ? "/pricing" : tool.href} style={{ textDecoration: "none", display: "block" }}>
                   <motion.div
                     whileTap={{ scale: 0.975 }}
                     whileHover={{ scale: 1.015 }}
@@ -207,36 +212,54 @@ export default function DashboardClient({ profile }: { profile: Profile | null }
                     style={{
                       padding: "20px 20px",
                       borderRadius: 18,
-                      background: tool.glow,
-                      border: `1px solid ${tool.border}`,
+                      background: isLocked ? "rgba(255,255,255,0.02)" : tool.glow,
+                      border: isLocked ? "1px solid rgba(255,255,255,0.07)" : `1px solid ${tool.border}`,
                       display: "flex", alignItems: "center", gap: 16,
                       position: "relative", overflow: "hidden",
+                      opacity: isLocked ? 0.6 : 1,
                     }}>
-                    {/* Sweep shimmer */}
-                    <motion.div
-                      initial={{ x: "-100%", opacity: 0 }}
-                      animate={{ x: "200%", opacity: [0, 0.08, 0] }}
-                      transition={{ delay: 0.5 + i * 0.3, duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 5 }}
-                      style={{
-                        position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
-                        background: `linear-gradient(90deg, transparent, ${tool.color}, transparent)`,
-                        pointerEvents: "none",
-                      }}
-                    />
+                    {/* Sweep shimmer — only for unlocked */}
+                    {!isLocked && (
+                      <motion.div
+                        initial={{ x: "-100%", opacity: 0 }}
+                        animate={{ x: "200%", opacity: [0, 0.08, 0] }}
+                        transition={{ delay: 0.5 + i * 0.3, duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 5 }}
+                        style={{
+                          position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+                          background: `linear-gradient(90deg, transparent, ${tool.color}, transparent)`,
+                          pointerEvents: "none",
+                        }}
+                      />
+                    )}
                     <div style={{
                       width: 48, height: 48, borderRadius: 14, flexShrink: 0,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      background: `${tool.glow}`, border: `1px solid ${tool.border}`,
-                      color: tool.color,
+                      background: isLocked ? "rgba(255,255,255,0.04)" : tool.glow,
+                      border: isLocked ? "1px solid rgba(255,255,255,0.08)" : `1px solid ${tool.border}`,
+                      color: isLocked ? "var(--muted2)" : tool.color,
                     }}>
                       <Icon style={{ width: 22, height: 22 }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontWeight: 800, fontSize: 15, color: "var(--text)", marginBottom: 3 }}>{tool.title}</p>
-                      <p className="font-mm" style={{ fontSize: 12, color: tool.color, opacity: 0.85 }}>{tool.mm}</p>
-                      <p style={{ fontSize: 11, color: "var(--muted2)", marginTop: 3 }}>{tool.hint}</p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                        <p style={{ fontWeight: 800, fontSize: 15, color: isLocked ? "var(--muted)" : "var(--text)" }}>{tool.title}</p>
+                        {isLocked && (
+                          <span style={{
+                            fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 6,
+                            background: "rgba(254,203,0,0.12)", border: "1px solid rgba(254,203,0,0.25)",
+                            color: "var(--yellow)", letterSpacing: 0.5,
+                          }}>PRO</span>
+                        )}
+                      </div>
+                      <p className="font-mm" style={{ fontSize: 12, color: isLocked ? "var(--muted2)" : tool.color, opacity: 0.85 }}>{tool.mm}</p>
+                      <p style={{ fontSize: 11, color: "var(--muted2)", marginTop: 3 }}>
+                        {isLocked ? `${cost} credits · Unlock လုပ်ရန်` : tool.hint}
+                      </p>
                     </div>
-                    <ArrowRight style={{ width: 18, height: 18, color: tool.color, opacity: 0.6, flexShrink: 0 }} />
+                    {isLocked
+                      ? <Lock style={{ width: 16, height: 16, color: "var(--yellow)", opacity: 0.7, flexShrink: 0 }} />
+                      : <ArrowRight style={{ width: 18, height: 18, color: tool.color, opacity: 0.6, flexShrink: 0 }} />
+                    }
                   </motion.div>
                 </Link>
               </motion.div>

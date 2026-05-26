@@ -12,18 +12,22 @@ export const CREDIT_PACKS = [
 ] as const
 
 export const TOOL_COST = {
-  caption:     1,
-  reply:       1,
-  description: 1,
-  live:        2,
-  promo:       1,
-  testimonial: 1,
-  variants:    2,
-  hashtags:    1,
-  comparison:  1,
-  reel:        1,
-  seasonal:    1,
+  caption:     2,
+  reply:       2,
+  hashtags:    2,
+  reel:        3,
+  promo:       5,
+  testimonial: 4,
+  comparison:  5,
+  seasonal:    5,
+  description: 8,
+  variants:    12,
+  live:        20,
 } as const
+
+// Tools free users can access
+export const FREE_TOOLS = ["caption", "reply", "hashtags", "reel", "promo"] as const
+export type FreeTool = typeof FREE_TOOLS[number]
 
 export const FREE_DAILY_LIMIT = 3
 export const SIGNUP_BONUS = 10

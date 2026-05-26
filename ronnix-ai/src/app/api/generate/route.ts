@@ -6,7 +6,7 @@ import {
   generateVariants, generateHashtags, generateComparison,
   generateReel, generateSeasonal,
 } from "@/lib/gemini"
-import { TOOL_COST, FREE_DAILY_LIMIT } from "@/lib/credits"
+import { TOOL_COST, FREE_TOOLS, FREE_DAILY_LIMIT, type FreeTool } from "@/lib/credits"
 
 const VALID_TOOLS = ["caption","reply","description","live","promo","testimonial","variants","hashtags","comparison","reel","seasonal"]
 
@@ -45,6 +45,13 @@ export async function POST(req: NextRequest) {
     await supabase.from("profiles")
       .update({ daily_count: 0, daily_reset: new Date().toISOString() })
       .eq("id", user.id)
+  }
+
+  if (profile.plan === "free" && !FREE_TOOLS.includes(tool as FreeTool)) {
+    return NextResponse.json(
+      { error: "ဤ tool သည် Paid plan တွင်သာ သုံးနိုင်သည်။ Credits ဝယ်ပါ။" },
+      { status: 403 }
+    )
   }
 
   if (profile.plan === "free" && dailyCount >= FREE_DAILY_LIMIT) {

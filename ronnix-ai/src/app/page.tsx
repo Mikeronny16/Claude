@@ -28,7 +28,7 @@ const TESTIMONIALS = [
 ]
 
 const FAQS = [
-  { q: "Free tier မှာ ဘာတွေ ရသလဲ?", a: "Sign up လုပ်တာနဲ့ Tools 11 ခုလုံး access ရသည်။ တစ်နေ့ 3 ကြိမ် အခမဲ့ Generate လုပ်နိုင်သည်။ Credit card မလိုပါ။" },
+  { q: "Free tier မှာ ဘာတွေ ရသလဲ?", a: "Sign up လုပ်တာနဲ့ Caption, Reply, Hashtag, Reel, Promo — Tools 5 ခု အခမဲ့ သုံးနိုင်သည်။ တစ်နေ့ 3 ကြိမ် Generate လုပ်နိုင်သည်။ Description, Live Script, Variants စသော advanced tools များအတွက် Credits လိုသည်။" },
   { q: "Wave Money နဲ့ ဘယ်လို ပေးချေရလဲ?", a: "Pricing page မှာ Wave number ထည့်ပြီး screenshot ပို့ပါ။ Admin က 24 နာရီအတွင်း credits ထည့်ပေးမည်။" },
   { q: "Credits expire ဖြစ်သလား?", a: "မဖြစ်ပါ။ ဝယ်ထားတဲ့ credits တွေ expire မဖြစ်ဘဲ သုံးနိုင်သည်။" },
   { q: "Myanmar Unicode text ရေးပေးနိုင်သလား?", a: "ဟုတ်ပါသည်။ Myanmar Unicode နဲ့ English နှစ်မျိုးလုံး choose လုပ်နိုင်ပြီး natural Myanmar text ရေးပေးသည်။" },
