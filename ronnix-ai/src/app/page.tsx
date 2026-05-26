@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import Logo3D from "@/components/Logo3D"
 import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Star, Quote, Check, X, ChevronDown, Mic, Megaphone, Heart, Layers, Hash, BarChart2, Film, Calendar } from "lucide-react"
 import { useState } from "react"
 
@@ -94,38 +95,7 @@ export default function Landing() {
       <section style={{ position: "relative", zIndex: 10, padding: "52px 24px 64px", maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
         <motion.div variants={FADE} initial="hidden" animate="show" transition={{ duration: 0.6 }}>
 
-          {/* 3D Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.85 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 200, damping: 18 }}
-            style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-              style={{ position: "relative", display: "inline-block" }}
-            >
-              {/* Gold glow behind logo */}
-              <div style={{
-                position: "absolute", inset: -20,
-                background: "radial-gradient(ellipse, rgba(254,203,0,0.35) 0%, transparent 70%)",
-                filter: "blur(20px)", borderRadius: "50%", zIndex: 0,
-              }} />
-              <motion.img
-                src="/IMG_1808.png"
-                alt="Ronnix AI"
-                whileHover={{ scale: 1.08, rotateY: 8, rotateX: -4 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                style={{
-                  width: 160, height: 160, objectFit: "contain",
-                  position: "relative", zIndex: 1,
-                  filter: "drop-shadow(0 0 24px rgba(254,203,0,0.5)) drop-shadow(0 8px 32px rgba(254,203,0,0.25))",
-                  transformStyle: "preserve-3d",
-                }}
-              />
-            </motion.div>
-          </motion.div>
+          <Logo3D />
 
           {/* Social proof pill */}
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "7px 16px",
