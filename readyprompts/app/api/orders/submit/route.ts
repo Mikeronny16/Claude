@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     await put(`orders/${id}.json`, JSON.stringify(order), {
       access: "public",
       contentType: "application/json",
+      addRandomSuffix: false,
     });
 
     return NextResponse.json({ ok: true, order_id: id });
