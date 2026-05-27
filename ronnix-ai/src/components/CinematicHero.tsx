@@ -22,7 +22,7 @@ export default function CinematicHero() {
   return (
     <section style={{
       position: "relative",
-      minHeight: "100vh",
+      minHeight: "calc(100vh - 60px)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",

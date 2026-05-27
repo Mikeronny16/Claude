@@ -75,8 +75,8 @@ export default function Landing() {
       </div>
 
       {/* Nav */}
-      <nav style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", alignItems: "center",
-        justifyContent: "space-between", padding: "20px 28px", maxWidth: 1100, margin: "0 auto" }}>
+      <nav style={{ position: "relative", zIndex: 20, display: "flex", alignItems: "center",
+        justifyContent: "space-between", padding: "18px 24px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 19, fontWeight: 900, letterSpacing: -0.5 }} className="grad-yg">RONNIX</span>
         </div>
