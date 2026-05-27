@@ -20,7 +20,7 @@
 
 ---
 
-## What to Replace in All 3 Workflow Files
+## What to Replace in Workflow Files
 
 | Placeholder | Replace With |
 |-------------|-------------|
@@ -31,6 +31,12 @@
 | `YOUR_TELEGRAM_BOT_TOKEN` | Telegram bot token (for Mike's notifications) |
 | `YOUR_TELEGRAM_CHAT_ID` | Mike's Telegram chat ID |
 | `YOUR_GOOGLE_REVIEW_LINK_HERE` | Clinic's Google Maps review URL |
+
+### For `1-booking-bot-telegram.json` specifically:
+- Credential name must be exactly: **"Telegram account"** (telegramApi)
+- Credential name must be exactly: **"Google Sheets account"** (googleSheetsOAuth2Api)
+- Sheet ID already set: `1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og`
+- Sheet tabs must be named exactly: **"Sessions"** and **"Appointments"**
 
 ---
 
@@ -57,14 +63,24 @@
 
 ---
 
+## Telegram Bot Setup (5 minutes)
+
+1. Message @BotFather on Telegram: `/newbot`
+2. Follow prompts → copy bot token
+3. In n8n: Credentials → New → Telegram API → paste token
+4. Name the credential exactly: **"Telegram account"**
+5. Import `1-booking-bot-telegram.json` → assign credentials → Activate
+6. Test: send any message to your bot
+
+---
+
 ## n8n Import Steps
 
-1. Open n8n
-2. New Workflow → Import → paste JSON
-3. Add Google Sheets credential (OAuth2)
-4. Replace all placeholder values
-5. Activate workflow
-6. Test: send "မင်္ဂလာပါ" to your Viber bot
+1. Open n8n (mikeronny.app.n8n.cloud)
+2. New Workflow → ⋮ menu → Import from JSON → paste JSON
+3. Assign credentials to each node that has a warning icon
+4. Click **Publish** → green dot = active
+5. Test: send "မင်္ဂလာပါ" to your bot
 
 ---
 
