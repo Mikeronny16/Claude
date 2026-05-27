@@ -1,0 +1,85 @@
+{
+  "name": "Readyuse — Telegram AI Bot (Make.com)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "telegram-bot-sdk:TriggerNewMessage",
+      "version": 1,
+      "parameters": {
+        "token": "YOUR_TELEGRAM_BOT_TOKEN"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": { "parameters": { "token": { "label": "Your Telegram Bot Token from @BotFather" } } },
+        "parameters": [{ "name": "token", "type": "text", "label": "Bot Token", "required": true }],
+        "interface": [
+          { "name": "message.message_id", "type": "uinteger" },
+          { "name": "message.text", "type": "text" },
+          { "name": "message.chat.id", "type": "uinteger" },
+          { "name": "message.from.first_name", "type": "text" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": {
+        "select": "chat",
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a helpful assistant. Keep answers concise and friendly."
+          },
+          {
+            "role": "user",
+            "content": "{{1.message.text}}"
+          }
+        ],
+        "max_tokens": 500,
+        "temperature": 0.7
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": { "parameters": { "select": { "label": "Chat (GPT-4o-mini)" } } },
+        "parameters": [{ "name": "apiKey", "type": "text", "label": "OpenAI API Key", "required": true }]
+      }
+    },
+    {
+      "id": 3,
+      "module": "telegram-bot-sdk:ActionSendMessage",
+      "version": 1,
+      "parameters": {
+        "token": "YOUR_TELEGRAM_BOT_TOKEN",
+        "chat_id": "{{1.message.chat.id}}",
+        "text": "{{2.choices[].message.content}}",
+        "parse_mode": "Markdown"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 600, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "eu1.make.com"
+  },
+  "_readme": "READYUSE TEMPLATE — Telegram AI Bot (Make.com version). In Make.com: Scenarios → New → Import Blueprint → upload this file. Connect Telegram (Bot Token from @BotFather) and OpenAI (API key from platform.openai.com). See included setup guide."
+}

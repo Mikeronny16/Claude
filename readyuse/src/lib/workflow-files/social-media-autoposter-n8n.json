@@ -1,0 +1,113 @@
+{
+  "name": "Readyuse — Social Media Auto-Poster",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24, "triggerAtHour": 9 }]
+        }
+      },
+      "id": "b1c2d3e4-0001-0001-0001-000000000001",
+      "name": "Schedule — Daily 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Sheet1" },
+        "filtersUI": {
+          "values": [{ "lookupColumn": "Status", "lookupValue": "" }]
+        },
+        "options": { "returnFirstMatch": true }
+      },
+      "id": "b1c2d3e4-0002-0002-0002-000000000002",
+      "name": "Get Next Post from Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [460, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_CREDENTIAL_ID",
+          "name": "Google Sheets — Sign in with your Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [{ "leftValue": "={{ $json['Post Text'] }}", "rightValue": "", "operator": { "type": "string", "operation": "notEquals" } }]
+        }
+      },
+      "id": "b1c2d3e4-0003-0003-0003-000000000003",
+      "name": "Has Post to Publish?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "pageId": "YOUR_FACEBOOK_PAGE_ID",
+        "message": "={{ $json['Post Text'] }}",
+        "additionalFields": {
+          "link": "={{ $json['Image URL'] }}"
+        }
+      },
+      "id": "b1c2d3e4-0004-0004-0004-000000000004",
+      "name": "Post to Facebook Page",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [900, 200],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "FACEBOOK_CREDENTIAL_ID",
+          "name": "Facebook — Enter Page Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Sheet1" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": { "Status": "Posted ✅", "Posted At": "={{ new Date().toISOString() }}" }
+        },
+        "matchingColumns": ["row_number"]
+      },
+      "id": "b1c2d3e4-0005-0005-0005-000000000005",
+      "name": "Mark as Posted",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1120, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_CREDENTIAL_ID",
+          "name": "Google Sheets — Sign in with your Google account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule — Daily 9AM": {
+      "main": [[{ "node": "Get Next Post from Sheet", "type": "main", "index": 0 }]]
+    },
+    "Get Next Post from Sheet": {
+      "main": [[{ "node": "Has Post to Publish?", "type": "main", "index": 0 }]]
+    },
+    "Has Post to Publish?": {
+      "main": [[{ "node": "Post to Facebook Page", "type": "main", "index": 0 }], []]
+    },
+    "Post to Facebook Page": {
+      "main": [[{ "node": "Mark as Posted", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "readyuse-template-v1" },
+  "_readme": "READYUSE TEMPLATE — Social Media Auto-Poster (n8n). Replace YOUR_GOOGLE_SHEET_ID with your Sheet ID (from URL) and YOUR_FACEBOOK_PAGE_ID with your Page ID. Connect Google Sheets OAuth2 and Facebook Page Access Token credentials."
+}
