@@ -7,7 +7,7 @@ function generatePromptsText(): string {
   const lines: string[] = [];
 
   lines.push("═══════════════════════════════════════════════════════════");
-  lines.push("      READYPROMPTS — 105 ULTIMATE AI PROMPT KIT");
+  lines.push("      READYPROMPTS — 120 ULTIMATE AI PROMPT KIT");
   lines.push("═══════════════════════════════════════════════════════════");
   lines.push("");
   lines.push("Thank you for your purchase! These prompts work with:");
@@ -68,24 +68,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid token" }, { status: 403 });
   }
 
-  // Verify payment is actually paid
-  const apiKey = process.env.NOWPAYMENTS_API_KEY;
-  if (apiKey && apiKey !== "placeholder_key") {
-    try {
-      const res = await fetch(
-        `https://api.nowpayments.io/v1/payment/${paymentId}`,
-        { headers: { "x-api-key": apiKey }, cache: "no-store" }
-      );
-      const payment = await res.json();
-      const validStatuses = ["finished", "confirmed", "partially_paid"];
-      if (!validStatuses.includes(payment.payment_status)) {
-        return NextResponse.json({ error: "Payment not confirmed" }, { status: 402 });
-      }
-    } catch {
-      // If API check fails, allow download if token is valid (don't block legit users)
-    }
-  }
-
   const content = generatePromptsText();
   const bytes = new TextEncoder().encode(content);
 
@@ -93,7 +75,7 @@ export async function GET(request: Request) {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="ReadyPrompts-105-AI-Prompts.txt"',
+      "Content-Disposition": 'attachment; filename="ReadyPrompts-120-AI-Prompts.txt"',
       "Content-Length": bytes.length.toString(),
       "Cache-Control": "no-store",
     },
