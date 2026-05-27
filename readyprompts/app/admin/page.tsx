@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [blobError, setBlobError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"payments" | "traffic" | "prompts">("payments");
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
@@ -54,8 +55,13 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/orders/list?pass=${encodeURIComponent(password)}`);
       const data = await res.json();
-      if (res.status !== 401) setOrders(data.orders || []);
-    } catch { /* ignore */ } finally {
+      if (res.status !== 401) {
+        setOrders(data.orders || []);
+        setBlobError(data.error || null);
+      }
+    } catch (e) {
+      setBlobError(e instanceof Error ? e.message : "fetch failed");
+    } finally {
       setOrdersLoading(false);
     }
   }, []);
@@ -214,15 +220,23 @@ export default function AdminPage() {
                 <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                 <p className="text-sm" style={{ color: "#64748b" }}>Loading orders...</p>
               </div>
+            ) : blobError ? (
+              <div className="rounded-2xl p-6"
+                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(239,68,68,0.3)" }}>
+                <p className="text-2xl mb-2">⚠️</p>
+                <p className="text-sm font-bold mb-1" style={{ color: "#ef4444" }}>Blob Error</p>
+                <p className="text-xs font-mono p-2 rounded" style={{ color: "#94a3b8", background: "rgba(239,68,68,0.08)", wordBreak: "break-all" }}>
+                  {blobError}
+                </p>
+                <p className="text-xs mt-3" style={{ color: "#64748b" }}>
+                  Check that BLOB_READ_WRITE_TOKEN is set in Vercel env → redeploy.
+                </p>
+              </div>
             ) : orders.length === 0 ? (
               <div className="rounded-2xl p-8 text-center"
                 style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
                 <p className="text-4xl mb-3">📭</p>
-                <p className="text-sm mb-2" style={{ color: "#64748b" }}>No orders yet.</p>
-                <p className="text-xs" style={{ color: "#334155" }}>
-                  Orders appear here when buyers enter their email in the payment modal.
-                  Make sure BLOB_READ_WRITE_TOKEN is set in Vercel env vars.
-                </p>
+                <p className="text-sm" style={{ color: "#64748b" }}>No orders yet.</p>
               </div>
             ) : (
               <div className="space-y-2">

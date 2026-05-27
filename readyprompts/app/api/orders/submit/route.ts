@@ -8,14 +8,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, name, method } = body as { email?: string; name?: string; method?: string };
 
-    if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "Valid email required" }, { status: 400 });
-    }
-
     const id = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
     const order = {
       id,
-      email: email.trim().toLowerCase(),
+      email: (email || "unknown").trim().toLowerCase(),
       name: (name || "").trim(),
       method: method || "unknown",
       status: "pending",

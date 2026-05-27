@@ -193,13 +193,13 @@ export default function HomePage() {
   }, []);
 
   const handleSubmitAndEmail = useCallback(async (method: "wave" | "kbz") => {
-    if (buyerEmail && buyerEmail.includes("@") && !orderSent) {
+    if (!orderSent) {
       setOrderSent(true);
       try {
         await fetch("/api/orders/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: buyerEmail, method }),
+          body: JSON.stringify({ email: buyerEmail || "unknown", method }),
         });
       } catch { /* fire and forget */ }
     }
