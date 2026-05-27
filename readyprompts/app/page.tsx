@@ -196,11 +196,15 @@ export default function HomePage() {
     if (!orderSent) {
       setOrderSent(true);
       try {
-        await fetch("/api/orders/submit", {
+        const res = await fetch("/api/orders/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: buyerEmail || "unknown", method }),
         });
+        const data = await res.json().catch(() => ({}));
+        if (data.blob_error) {
+          console.warn("[ReadyPrompts] Order blob save failed:", data.blob_error);
+        }
       } catch { /* fire and forget */ }
     }
     const subject = encodeURIComponent("ReadyPrompts Payment Screenshot");
