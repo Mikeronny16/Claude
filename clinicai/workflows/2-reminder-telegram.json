@@ -14,7 +14,7 @@
     {
       "parameters": {
         "operation": "read",
-        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Appointments" },
         "filtersUI": { "values": [{ "lookupColumn": "status", "lookupValue": "confirmed" }] },
         "options": {}
@@ -75,7 +75,7 @@
     {
       "parameters": {
         "operation": "update",
-        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Appointments" },
         "columns": {
           "mappingMode": "defineBelow",

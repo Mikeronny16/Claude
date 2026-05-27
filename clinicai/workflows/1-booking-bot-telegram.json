@@ -40,7 +40,7 @@
     {
       "parameters": {
         "operation": "read",
-        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Sessions" },
         "filtersUI": {
           "values": [{ "lookupColumn": "sender_id", "lookupValue": "={{ $('Parse Message').first().json.senderId }}" }]
@@ -125,7 +125,7 @@
     {
       "parameters": {
         "operation": "appendOrUpdate",
-        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Sessions" },
         "columns": {
           "mappingMode": "defineBelow",
@@ -155,7 +155,7 @@
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Appointments" },
         "columns": {
           "mappingMode": "defineBelow",
@@ -226,7 +226,7 @@
     "setup": [
       "1. Telegram မှာ @BotFather ကို message ပို့ → /newbot → token ယူ",
       "2. n8n မှာ Telegram credential add (token paste)",
-      "3. YOUR_GOOGLE_SHEET_ID_HERE → Mike ရဲ့ Sheet ID",
+      "3. 1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og → Mike ရဲ့ Sheet ID",
       "4. Google Sheets credential connect (OAuth2)",
       "5. Workflow activate → bot ကို /start ပို့ပြီး test"
     ]
