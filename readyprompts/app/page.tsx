@@ -128,6 +128,8 @@ export default function HomePage() {
   const [refDismissed, setRefDismissed] = useState(false);
   const [payModal, setPayModal]       = useState(false);
   const [payStep, setPayStep]         = useState<"pick" | "wave" | "kbz">("pick");
+  const [buyerEmail, setBuyerEmail]   = useState("");
+  const [orderSent, setOrderSent]     = useState(false);
 
   // sticky bar on scroll
   useEffect(() => {
@@ -180,8 +182,33 @@ export default function HomePage() {
 
   const handleBuy = useCallback(() => {
     setPayStep("pick");
+    setBuyerEmail("");
+    setOrderSent(false);
     setPayModal(true);
   }, []);
+
+  const handlePayMethodSelect = useCallback((method: "wave" | "kbz") => {
+    setPayStep(method);
+    setOrderSent(false);
+  }, []);
+
+  const handleSubmitAndEmail = useCallback(async (method: "wave" | "kbz") => {
+    if (buyerEmail && buyerEmail.includes("@") && !orderSent) {
+      setOrderSent(true);
+      try {
+        await fetch("/api/orders/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: buyerEmail, method }),
+        });
+      } catch { /* fire and forget */ }
+    }
+    const subject = encodeURIComponent("ReadyPrompts Payment Screenshot");
+    const body = encodeURIComponent(
+      `Hi Mike,\n\nI've just sent payment via ${method === "wave" ? "Wave Money" : "KBZPay"} for ReadyPrompts ($7 / ~14,000 MMK).\n\nMy email: ${buyerEmail || "(see screenshot)"}\n\nPlease send my access code when you confirm. Thank you!`
+    );
+    window.open(`mailto:mikeronny18@gmail.com?subject=${subject}&body=${body}`);
+  }, [buyerEmail, orderSent]);
 
   // stats section
   const statsRef = useInView();
@@ -764,7 +791,7 @@ export default function HomePage() {
             {payStep === "pick" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {/* Wave Money */}
-                <button onClick={() => setPayStep("wave")} style={{
+                <button onClick={() => handlePayMethodSelect("wave")} style={{
                   display: "flex", alignItems: "center", gap: 14, padding: "16px 18px",
                   borderRadius: 14, border: "1px solid rgba(249,115,22,0.2)",
                   background: "rgba(249,115,22,0.05)", cursor: "pointer", textAlign: "left",
@@ -778,7 +805,7 @@ export default function HomePage() {
                 </button>
 
                 {/* KBZPay */}
-                <button onClick={() => setPayStep("kbz")} style={{
+                <button onClick={() => handlePayMethodSelect("kbz")} style={{
                   display: "flex", alignItems: "center", gap: 14, padding: "16px 18px",
                   borderRadius: 14, border: "1px solid rgba(59,130,246,0.2)",
                   background: "rgba(59,130,246,0.05)", cursor: "pointer", textAlign: "left",
@@ -816,6 +843,21 @@ export default function HomePage() {
               const border = isWave ? "rgba(249,115,22,0.25)" : "rgba(59,130,246,0.25)";
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* Email input */}
+                  <div>
+                    <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 6, fontWeight: 600 }}>Your email (to receive access code)</p>
+                    <input
+                      type="email"
+                      value={buyerEmail}
+                      onChange={e => setBuyerEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      style={{
+                        width: "100%", padding: "12px 14px", borderRadius: 10, fontSize: 14,
+                        background: "rgba(15,20,30,0.9)", border: `1px solid ${border}`,
+                        color: "#fff", outline: "none", boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
                   <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: "18px 20px" }}>
                     <p style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Transfer to</p>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -829,21 +871,18 @@ export default function HomePage() {
                     <p style={{ fontSize: 13, color: "#cbd5e1", fontWeight: 700 }}>{name}</p>
                     <p style={{ fontSize: 13, color: "#f97316", fontWeight: 800, marginTop: 8 }}>Amount: ~14,000 MMK</p>
                   </div>
-                  <div style={{ background: "rgba(30,41,59,0.4)", borderRadius: 14, padding: "14px 18px" }}>
-                    <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>
-                      After transfer, email your payment screenshot to{" "}
-                      <span style={{ color: "#f97316", fontWeight: 700 }}>mikeronny18@gmail.com</span>
-                      {" "}with your name. Mike will send your access code within a few hours.
-                    </p>
-                  </div>
                   <button
-                    onClick={handleEmailBuy}
+                    onClick={() => handleSubmitAndEmail(payStep as "wave" | "kbz")}
                     style={{
                       padding: "14px", borderRadius: 14, fontWeight: 900, fontSize: 15, cursor: "pointer",
                       background: "linear-gradient(135deg, #f97316, #fb923c)", color: "#fff", border: "none",
+                      opacity: buyerEmail.includes("@") ? 1 : 0.6,
                     }}>
-                    ✉️ Email Proof to Mike
+                    {orderSent ? "✅ Sent! Open email to send screenshot" : "✉️ I've Paid — Send Proof to Mike"}
                   </button>
+                  <p style={{ fontSize: 11, color: "#475569", textAlign: "center" }}>
+                    Mike will send your access code within a few hours
+                  </p>
                 </div>
               );
             })()}

@@ -3,18 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { PROMPTS } from "@/lib/prompts";
 
-type Payment = {
-  payment_id: string;
-  payment_status: string;
-  price_amount: number;
-  price_currency: string;
-  pay_currency: string;
+type Order = {
+  id: string;
+  email: string;
+  name: string;
+  method: string;
+  status: string;
   created_at: string;
-  order_id?: string;
 };
 
 type Stats = {
-  payments: Payment[];
+  payments: never[];
   total_usd: number;
   count: number;
   total_count: number;
@@ -34,17 +33,6 @@ type Analytics = {
   detail?: unknown;
 };
 
-const STATUS_COLOR: Record<string, string> = {
-  finished: "#22c55e",
-  confirmed: "#22c55e",
-  waiting: "#f59e0b",
-  confirming: "#f59e0b",
-  sending: "#3b82f6",
-  partially_paid: "#a78bfa",
-  failed: "#ef4444",
-  expired: "#6b7280",
-  refunded: "#ef4444",
-};
 
 const CATEGORIES = [...new Set(PROMPTS.map((p) => p.category))];
 
@@ -52,12 +40,25 @@ export default function AdminPage() {
   const [pass, setPass] = useState("");
   const [authed, setAuthed] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"payments" | "traffic" | "prompts">("payments");
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(CATEGORIES[0]);
   const [error, setError] = useState("");
+
+  const fetchOrders = useCallback(async (password: string) => {
+    setOrdersLoading(true);
+    try {
+      const res = await fetch(`/api/orders/list?pass=${encodeURIComponent(password)}`);
+      const data = await res.json();
+      if (res.status !== 401) setOrders(data.orders || []);
+    } catch { /* ignore */ } finally {
+      setOrdersLoading(false);
+    }
+  }, []);
 
   const fetchStats = useCallback(async (password: string) => {
     setLoading(true);
@@ -71,13 +72,14 @@ export default function AdminPage() {
         setStats(data);
         setAuthed(true);
         setError("");
+        fetchOrders(password);
       }
     } catch {
       setError("Failed to load");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchOrders]);
 
   const fetchAnalytics = useCallback(async (password: string) => {
     setAnalyticsLoading(true);
@@ -100,9 +102,9 @@ export default function AdminPage() {
   useEffect(() => {
     if (!authed) return;
     fetchAnalytics(pass);
-    const interval = setInterval(() => fetchStats(pass), 60000);
+    const interval = setInterval(() => { fetchStats(pass); fetchOrders(pass); }, 60000);
     return () => clearInterval(interval);
-  }, [authed, pass, fetchStats, fetchAnalytics]);
+  }, [authed, pass, fetchStats, fetchAnalytics, fetchOrders]);
 
   useEffect(() => {
     if (activeTab === "traffic" && authed && !analytics) {
@@ -170,21 +172,19 @@ export default function AdminPage() {
         </div>
 
         {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {[
-              { label: "Revenue", value: `$${stats.total_usd.toFixed(0)}`, color: "#f97316" },
-              { label: "Sales", value: stats.count, color: "#22c55e" },
-              { label: "All Payments", value: stats.total_count, color: "#3b82f6" },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="rounded-xl p-4 text-center"
-                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
-                <div className="text-2xl font-black mb-1" style={{ color }}>{value}</div>
-                <div className="text-xs" style={{ color: "#64748b" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {[
+            { label: "Orders", value: orders.length, color: "#f97316" },
+            { label: "Pending", value: orders.filter(o => o.status === "pending").length, color: "#f59e0b" },
+            { label: "Wave / KBZ", value: `${orders.filter(o => o.method === "wave").length}/${orders.filter(o => o.method === "kbz").length}`, color: "#3b82f6" },
+          ].map(({ label, value, color }) => (
+            <div key={label} className="rounded-xl p-4 text-center"
+              style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+              <div className="text-2xl font-black mb-1" style={{ color }}>{value}</div>
+              <div className="text-xs" style={{ color: "#64748b" }}>{label}</div>
+            </div>
+          ))}
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-5 flex-wrap">
@@ -205,44 +205,58 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Payments Tab */}
-        {activeTab === "payments" && stats && (
+        {/* Orders Tab */}
+        {activeTab === "payments" && (
           <div>
-            {stats.payments.length === 0 ? (
+            {ordersLoading ? (
+              <div className="rounded-2xl p-8 text-center"
+                style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
+                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm" style={{ color: "#64748b" }}>Loading orders...</p>
+              </div>
+            ) : orders.length === 0 ? (
               <div className="rounded-2xl p-8 text-center"
                 style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
                 <p className="text-4xl mb-3">📭</p>
-                <p className="text-sm" style={{ color: "#64748b" }}>No payments yet. Share your link!</p>
+                <p className="text-sm mb-2" style={{ color: "#64748b" }}>No orders yet.</p>
+                <p className="text-xs" style={{ color: "#334155" }}>
+                  Orders appear here when buyers enter their email in the payment modal.
+                  Make sure BLOB_READ_WRITE_TOKEN is set in Vercel env vars.
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
-                {stats.payments.map((p) => (
-                  <div key={p.payment_id} className="rounded-xl p-4"
+                {orders.map((o) => (
+                  <div key={o.id} className="rounded-xl p-4"
                     style={{ background: "rgba(10,15,26,0.9)", border: "1px solid rgba(30,41,59,0.6)" }}>
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ background: STATUS_COLOR[p.payment_status] || "#64748b" }} />
-                        <span className="text-xs font-semibold capitalize" style={{ color: STATUS_COLOR[p.payment_status] || "#64748b" }}>
-                          {p.payment_status}
+                        <span className="text-sm">{o.method === "wave" ? "📱" : o.method === "kbz" ? "💳" : "✉️"}</span>
+                        <span className="text-xs font-bold uppercase" style={{ color: o.method === "wave" ? "#f97316" : "#60a5fa" }}>
+                          {o.method}
                         </span>
                       </div>
-                      <span className="text-sm font-bold" style={{ color: "#f97316" }}>
-                        ${p.price_amount || 2} {p.price_currency?.toUpperCase() || "USD"}
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize"
+                        style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>
+                        {o.status}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: "#475569" }}>
-                        {p.pay_currency?.toUpperCase() || "—"}
-                      </span>
-                      <span className="text-xs" style={{ color: "#334155" }}>
-                        {p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
-                      </span>
-                    </div>
+                    <p className="text-sm font-semibold text-white mb-0.5">{o.email}</p>
+                    {o.name && <p className="text-xs mb-1" style={{ color: "#64748b" }}>{o.name}</p>}
+                    <p className="text-xs" style={{ color: "#334155" }}>
+                      {new Date(o.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
+            <div className="flex justify-end mt-3">
+              <button onClick={() => fetchOrders(pass)}
+                className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                style={{ background: "rgba(30,41,59,0.6)", color: "#64748b" }}>
+                🔄 Refresh
+              </button>
+            </div>
           </div>
         )}
 
