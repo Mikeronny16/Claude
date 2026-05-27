@@ -1,0 +1,413 @@
+{
+  "name": "1 — Clinic Booking Bot (Viber + Messenger)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clinic-bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Webhook — Receive Message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse incoming message from Viber or Messenger\nconst body = $input.first().json;\n\nlet senderId = '';\nlet messageText = '';\nlet platform = 'unknown';\nlet senderName = '';\n\n// ---- VIBER ----\nif (body.event === 'message' && body.sender) {\n  platform = 'viber';\n  senderId = body.sender.id;\n  senderName = body.sender.name || 'Patient';\n  messageText = (body.message && body.message.text) ? body.message.text.trim() : '';\n}\n\n// ---- FACEBOOK MESSENGER ----\nif (body.object === 'page' && body.entry) {\n  platform = 'messenger';\n  const entry = body.entry[0];\n  const msg = entry.messaging && entry.messaging[0];\n  if (msg) {\n    senderId = msg.sender.id;\n    messageText = (msg.message && msg.message.text) ? msg.message.text.trim() : '';\n    senderName = 'Patient';\n  }\n}\n\n// Normalize text\nconst normalizedText = messageText.toLowerCase();\n\nreturn [{\n  json: {\n    senderId,\n    senderName,\n    messageText,\n    normalizedText,\n    platform,\n    rawBody: body\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.senderId }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "a1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Valid Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Sessions" },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "sender_id",
+              "lookupValue": "={{ $('Parse Message').first().json.senderId }}"
+            }
+          ]
+        },
+        "options": { "returnFirstMatch": true }
+      },
+      "id": "a1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Load Session",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [900, 240],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge session data with current message\nconst msg = $('Parse Message').first().json;\nconst sessionRows = $input.all();\n\nlet state = 'new';\nlet tempSlots = '';\nlet reason = '';\nlet patientName = msg.senderName;\nlet rowNumber = null;\n\nif (sessionRows.length > 0 && sessionRows[0].json.sender_id) {\n  const s = sessionRows[0].json;\n  state = s.state || 'new';\n  tempSlots = s.temp_slots || '';\n  reason = s.reason || '';\n  patientName = s.patient_name || msg.senderName;\n  rowNumber = s.row_number || null;\n}\n\n// Check for reset keywords\nconst resetWords = ['cancel', 'reset', 'start over', 'ပြန်', 'ကျပ်', 'ပယ်'];\nif (resetWords.some(w => msg.normalizedText.includes(w))) {\n  state = 'new';\n}\n\nreturn [{\n  json: {\n    ...msg,\n    state,\n    tempSlots,\n    reason,\n    patientName,\n    rowNumber\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0005-0005-0005-000000000005",
+      "name": "Merge Session",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 240]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "new", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "new"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_reason", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "awaiting_reason"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_slot", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "awaiting_slot"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_name", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "awaiting_name"
+            }
+          ]
+        },
+        "fallbackOutput": "extra"
+      },
+      "id": "a1b2c3d4-0006-0006-0006-000000000006",
+      "name": "Route by State",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE: new — Send welcome message\nconst d = $input.first().json;\nreturn [{\n  json: {\n    ...d,\n    replyText: `မင်္ဂလာပါ! 🏥 ClinicAI Myanmar မှ ကြိုဆိုပါတယ်\\n\\nAppointment ယူဖို့ ကူညီပေးပါမယ်။\\n\\nဆရာဝန်ဆီ လာရတဲ့ အကြောင်းအရင်းကို ပြောပြပါ\\n(ဥပမာ: ချမ်းတက်တယ်, ဆေးစစ်ချင်တယ်, မျက်စိနာတယ်)`,\n    newState: 'awaiting_reason',\n    action: 'upsert_session'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0007-0007-0007-000000000007",
+      "name": "Handle: New",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 80]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE: awaiting_reason — Got reason, show available slots\nconst d = $input.first().json;\nconst reason = d.messageText;\n\n// Get slots from Google Sheets (passed via previous node)\n// For now, use dynamic slots — in production these come from Slots sheet\nconst today = new Date();\nconst tomorrow = new Date(today);\ntomorrow.setDate(today.getDate() + 1);\nconst dayAfter = new Date(today);\ndayAfter.setDate(today.getDate() + 2);\n\nconst fmt = (d) => `${d.getDate()}/${d.getMonth()+1}`;\n\nconst slots = [\n  { key: '1', label: `မနက်ဖြန် (${fmt(tomorrow)}) — 9:00 AM` },\n  { key: '2', label: `မနက်ဖြန် (${fmt(tomorrow)}) — 11:00 AM` },\n  { key: '3', label: `မနက်ဖြန် (${fmt(tomorrow)}) — 3:00 PM` },\n  { key: '4', label: `${fmt(dayAfter)} — 9:00 AM` },\n  { key: '5', label: `${fmt(dayAfter)} — 11:00 AM` },\n];\n\nconst slotText = slots.map(s => `${s.key}️⃣ ${s.label}`).join('\\n');\nconst tempSlots = JSON.stringify(slots);\n\nreturn [{\n  json: {\n    ...d,\n    reason,\n    tempSlots,\n    replyText: `ကောင်းပါတယ်! \"${reason}\" အတွက် ဆရာဝန်နဲ့ တွေ့ဖို့ slot ရွေးပါ:\\n\\n${slotText}\\n\\nနံပါတ် (1-5) ပို့ပါ`,\n    newState: 'awaiting_slot',\n    action: 'upsert_session'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0008-0008-0008-000000000008",
+      "name": "Handle: Got Reason",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE: awaiting_slot — Got slot selection, ask for name\nconst d = $input.first().json;\nconst input = d.messageText.trim();\nconst slots = JSON.parse(d.tempSlots || '[]');\n\nconst chosen = slots.find(s => s.key === input || input.includes(s.key));\n\nif (!chosen) {\n  return [{\n    json: {\n      ...d,\n      replyText: `နံပါတ် 1 မှ ${slots.length} အတွင်း ရွေးပါ\\n(ဥပမာ: \"1\" ဆိုပြီး ပို့ပါ)`,\n      newState: 'awaiting_slot',\n      action: 'upsert_session'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...d,\n    selectedSlot: chosen.label,\n    replyText: `ကောင်းပါတယ်! ${chosen.label} ကို ရွေးပါပြီ\\n\\nနောက်ဆုံး — မင်းနာမည် ပြောပြပါ`,\n    newState: 'awaiting_name',\n    action: 'upsert_session'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0009-0009-0009-000000000009",
+      "name": "Handle: Got Slot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE: awaiting_name — Got name, confirm booking\nconst d = $input.first().json;\nconst patientName = d.messageText.trim();\n\n// Parse slot\nconst slotLabel = d.selectedSlot || d.tempSlots || 'Slot';\n\nreturn [{\n  json: {\n    ...d,\n    patientName,\n    replyText: `✅ Appointment Confirm ပါပြီ!\\n\\n👤 Patient: ${patientName}\\n📅 Slot: ${slotLabel}\\n💊 ကြောင်းရင်း: ${d.reason}\\n\\nReminder ကို 1 နာရီ အလိုမှာ auto-ပို့ပေးပါမယ် 🔔\\n\\nမေးစရာရှိရင် ဒီ number ကိုပဲ message ပို့ပါ`,\n    newState: 'confirmed',\n    action: 'save_booking'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0010-0010-0010-000000000010",
+      "name": "Handle: Got Name",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 500]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Sessions" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sender_id": "={{ $json.senderId }}",
+            "platform": "={{ $json.platform }}",
+            "state": "={{ $json.newState }}",
+            "reason": "={{ $json.reason || '' }}",
+            "temp_slots": "={{ $json.tempSlots || '' }}",
+            "selected_slot": "={{ $json.selectedSlot || '' }}",
+            "patient_name": "={{ $json.patientName || '' }}",
+            "last_updated": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": ["sender_id"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0011-0011-0011-000000000011",
+      "name": "Save Session",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1800, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "patient_name": "={{ $json.patientName }}",
+            "sender_id": "={{ $json.senderId }}",
+            "platform": "={{ $json.platform }}",
+            "reason": "={{ $json.reason }}",
+            "slot": "={{ $json.selectedSlot }}",
+            "status": "confirmed",
+            "reminder_24h_sent": "FALSE",
+            "reminder_2h_sent": "FALSE",
+            "review_sent": "FALSE",
+            "booked_at": "={{ $now.toISO() }}"
+          },
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0012-0012-0012-000000000012",
+      "name": "Save Appointment",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1800, 500],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Send reply via Viber or Messenger\nconst d = $input.first().json;\nreturn [{ json: d }];"
+      },
+      "id": "a1b2c3d4-0013-0013-0013-000000000013",
+      "name": "Prepare Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "viber", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "viber"
+            },
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "messenger", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "messenger"
+            }
+          ]
+        },
+        "fallbackOutput": "extra"
+      },
+      "id": "a1b2c3d4-0014-0014-0014-000000000014",
+      "name": "Route by Platform",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [2240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatapi.viber.com/pa/send_message",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "X-Viber-Auth-Token", "value": "YOUR_VIBER_BOT_TOKEN_HERE" }]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "receiver", "value": "={{ $json.senderId }}" },
+            { "name": "min_api_version", "value": "1" },
+            { "name": "sender.name", "value": "ClinicAI Myanmar" },
+            { "name": "sender.avatar", "value": "" },
+            { "name": "type", "value": "text" },
+            { "name": "text", "value": "={{ $json.replyText }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0015-0015-0015-000000000015",
+      "name": "Send Viber Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/me/messages?access_token=YOUR_PAGE_ACCESS_TOKEN_HERE",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"recipient\": { \"id\": \"{{ $json.senderId }}\" },\n  \"message\": { \"text\": \"{{ $json.replyText.replace(/\\n/g, '\\\\n') }}\" }\n}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0016-0016-0016-000000000016",
+      "name": "Send Messenger Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK"
+      },
+      "id": "a1b2c3d4-0017-0017-0017-000000000017",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook — Receive Message": {
+      "main": [[{ "node": "Parse Message", "type": "main", "index": 0 }]]
+    },
+    "Parse Message": {
+      "main": [[{ "node": "Valid Message?", "type": "main", "index": 0 }]]
+    },
+    "Valid Message?": {
+      "main": [
+        [{ "node": "Load Session", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Load Session": {
+      "main": [[{ "node": "Merge Session", "type": "main", "index": 0 }]]
+    },
+    "Merge Session": {
+      "main": [[{ "node": "Route by State", "type": "main", "index": 0 }]]
+    },
+    "Route by State": {
+      "main": [
+        [{ "node": "Handle: New", "type": "main", "index": 0 }],
+        [{ "node": "Handle: Got Reason", "type": "main", "index": 0 }],
+        [{ "node": "Handle: Got Slot", "type": "main", "index": 0 }],
+        [{ "node": "Handle: Got Name", "type": "main", "index": 0 }]
+      ]
+    },
+    "Handle: New": {
+      "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]]
+    },
+    "Handle: Got Reason": {
+      "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]]
+    },
+    "Handle: Got Slot": {
+      "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]]
+    },
+    "Handle: Got Name": {
+      "main": [
+        [{ "node": "Save Appointment", "type": "main", "index": 0 }],
+        [{ "node": "Save Session", "type": "main", "index": 0 }]
+      ]
+    },
+    "Save Session": {
+      "main": [[{ "node": "Prepare Reply", "type": "main", "index": 0 }]]
+    },
+    "Save Appointment": {
+      "main": [[{ "node": "Prepare Reply", "type": "main", "index": 0 }]]
+    },
+    "Prepare Reply": {
+      "main": [[{ "node": "Route by Platform", "type": "main", "index": 0 }]]
+    },
+    "Route by Platform": {
+      "main": [
+        [{ "node": "Send Viber Reply", "type": "main", "index": 0 }],
+        [{ "node": "Send Messenger Reply", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Viber Reply": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    },
+    "Send Messenger Reply": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "tags": [{ "name": "clinic-ai", "createdAt": "2026-01-01T00:00:00.000Z" }],
+  "_readme": {
+    "description": "ClinicAI Myanmar — Booking Bot Workflow",
+    "setup_steps": [
+      "1. YOUR_GOOGLE_SHEET_ID_HERE ကို actual Google Sheet ID နဲ့ ပြောင်းပါ",
+      "2. YOUR_VIBER_BOT_TOKEN_HERE ကို Viber Business account token နဲ့ ပြောင်းပါ",
+      "3. YOUR_PAGE_ACCESS_TOKEN_HERE ကို Facebook Page token နဲ့ ပြောင်းပါ",
+      "4. Google Sheets မှာ 'Sessions' sheet နဲ့ 'Appointments' sheet ဆောက်ပါ",
+      "5. Webhook URL ကို Viber webhook URL မှာ set လုပ်ပါ",
+      "6. Workflow activate လုပ်ပါ"
+    ],
+    "google_sheets_sessions_columns": ["sender_id", "platform", "state", "reason", "temp_slots", "selected_slot", "patient_name", "last_updated"],
+    "google_sheets_appointments_columns": ["patient_name", "sender_id", "platform", "reason", "slot", "status", "reminder_24h_sent", "reminder_2h_sent", "review_sent", "booked_at"]
+  }
+}

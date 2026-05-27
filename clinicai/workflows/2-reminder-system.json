@@ -1,0 +1,223 @@
+{
+  "name": "2 — Clinic Appointment Reminders (24h + 2h)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      },
+      "id": "b1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "filtersUI": {
+          "values": [
+            { "lookupColumn": "status", "lookupValue": "confirmed" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Get All Confirmed Appointments",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check which appointments need reminders right now\nconst appointments = $input.all();\nconst now = new Date();\nconst results = [];\n\nfor (const item of appointments) {\n  const appt = item.json;\n  if (!appt.slot) continue;\n\n  // Parse slot datetime — format: \"မနက်ဖြန် (28/5) — 9:00 AM\" or ISO string\n  // In production, store ISO datetime in 'appointment_datetime' column\n  // For demo, use appointment_datetime column directly\n  const apptTime = appt.appointment_datetime ? new Date(appt.appointment_datetime) : null;\n  if (!apptTime) continue;\n\n  const msUntil = apptTime - now;\n  const hoursUntil = msUntil / (1000 * 60 * 60);\n\n  // 24h reminder: between 24h and 25h before\n  const needs24h = hoursUntil >= 23.5 && hoursUntil <= 25 && appt.reminder_24h_sent === 'FALSE';\n  // 2h reminder: between 1.5h and 2.5h before\n  const needs2h = hoursUntil >= 1.5 && hoursUntil <= 2.5 && appt.reminder_2h_sent === 'FALSE';\n\n  if (needs24h) {\n    results.push({\n      json: {\n        ...appt,\n        reminderType: '24h',\n        apptTime: apptTime.toLocaleString('my-MM'),\n        hoursUntil: Math.round(hoursUntil)\n      }\n    });\n  } else if (needs2h) {\n    results.push({\n      json: {\n        ...appt,\n        reminderType: '2h',\n        apptTime: apptTime.toLocaleString('my-MM'),\n        hoursUntil: Math.round(hoursUntil)\n      }\n    });\n  }\n}\n\nif (results.length === 0) {\n  // No reminders needed this hour\n  return [{ json: { skip: true, message: 'No reminders needed' } }];\n}\n\nreturn results;"
+      },
+      "id": "b1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Check Who Needs Reminder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }],
+          "combinator": "and"
+        }
+      },
+      "id": "b1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Skip if None",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build reminder message\nconst d = $input.first().json;\nconst is24h = d.reminderType === '24h';\n\nconst msg24h = `🔔 Appointment Reminder!\\n\\nမနက်ဖြန် appointment ရှိပါတယ်\\n\\n👤 ${d.patient_name || 'Patient'}\\n📅 ${d.slot}\\n💊 ${d.reason || ''}\\n\\nLate ဖြစ်ပါက ကြိုပြောပေးပါ`;\n\nconst msg2h = `⏰ 2 နာရီ အတွင်း Appointment ရှိပါတယ်!\\n\\n👤 ${d.patient_name || 'Patient'}\\n📅 ${d.slot}\\n\\nအချိန်မီ ရောက်ပါ 🏥`;\n\nreturn [{\n  json: {\n    ...d,\n    replyText: is24h ? msg24h : msg2h\n  }\n}];"
+      },
+      "id": "b1b2c3d4-0005-0005-0005-000000000005",
+      "name": "Build Reminder Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 180]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "viber", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "viber"
+            },
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "messenger", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "messenger"
+            }
+          ]
+        },
+        "fallbackOutput": "extra"
+      },
+      "id": "b1b2c3d4-0006-0006-0006-000000000006",
+      "name": "Route Platform",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatapi.viber.com/pa/send_message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "X-Viber-Auth-Token", "value": "YOUR_VIBER_BOT_TOKEN_HERE" }]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "receiver", "value": "={{ $json.sender_id }}" },
+            { "name": "min_api_version", "value": "1" },
+            { "name": "sender.name", "value": "ClinicAI Myanmar" },
+            { "name": "type", "value": "text" },
+            { "name": "text", "value": "={{ $json.replyText }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0007-0007-0007-000000000007",
+      "name": "Send Viber Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/me/messages?access_token=YOUR_PAGE_ACCESS_TOKEN_HERE",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"recipient\": { \"id\": \"{{ $json.sender_id }}\" },\n  \"message\": { \"text\": \"{{ $json.replyText.replace(/\\n/g, '\\\\n') }}\" }\n}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-0008-0008-0008-000000000008",
+      "name": "Send Messenger Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 260]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "reminder_24h_sent": "={{ $('Check Who Needs Reminder').first().json.reminderType === '24h' ? 'TRUE' : $json.reminder_24h_sent }}",
+            "reminder_2h_sent": "={{ $('Check Who Needs Reminder').first().json.reminderType === '2h' ? 'TRUE' : $json.reminder_2h_sent }}"
+          },
+          "matchingColumns": ["sender_id"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0009-0009-0009-000000000009",
+      "name": "Mark Reminder Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1780, 180],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "chat_id", "value": "YOUR_TELEGRAM_CHAT_ID" },
+            { "name": "text", "value": "=📅 Reminder sent to {{ $('Check Who Needs Reminder').all().length }} patients" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0010-0010-0010-000000000010",
+      "name": "Notify Mike (Telegram)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 180]
+    }
+  ],
+  "connections": {
+    "Every Hour": {
+      "main": [[{ "node": "Get All Confirmed Appointments", "type": "main", "index": 0 }]]
+    },
+    "Get All Confirmed Appointments": {
+      "main": [[{ "node": "Check Who Needs Reminder", "type": "main", "index": 0 }]]
+    },
+    "Check Who Needs Reminder": {
+      "main": [[{ "node": "Skip if None", "type": "main", "index": 0 }]]
+    },
+    "Skip if None": {
+      "main": [
+        [],
+        [{ "node": "Build Reminder Message", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Reminder Message": {
+      "main": [[{ "node": "Route Platform", "type": "main", "index": 0 }]]
+    },
+    "Route Platform": {
+      "main": [
+        [{ "node": "Send Viber Reminder", "type": "main", "index": 0 }],
+        [{ "node": "Send Messenger Reminder", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Viber Reminder": {
+      "main": [[{ "node": "Mark Reminder Sent", "type": "main", "index": 0 }]]
+    },
+    "Send Messenger Reminder": {
+      "main": [[{ "node": "Mark Reminder Sent", "type": "main", "index": 0 }]]
+    },
+    "Mark Reminder Sent": {
+      "main": [[{ "node": "Notify Mike (Telegram)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "clinic-ai" }],
+  "_readme": {
+    "description": "Runs every hour. Checks Appointments sheet for upcoming appointments. Sends Viber/Messenger reminders at 24h and 2h before.",
+    "requirement": "Appointments sheet must have 'appointment_datetime' column in ISO format (e.g. 2026-05-29T09:00:00)"
+  }
+}

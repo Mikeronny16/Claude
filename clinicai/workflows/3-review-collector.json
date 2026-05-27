@@ -1,0 +1,202 @@
+{
+  "name": "3 — Clinic Review Collector (Auto after visit)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      },
+      "id": "c1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "filtersUI": {
+          "values": [
+            { "lookupColumn": "status", "lookupValue": "confirmed" },
+            { "lookupColumn": "review_sent", "lookupValue": "FALSE" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Get Appointments Without Review",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Find appointments that ended 2 hours ago\nconst appointments = $input.all();\nconst now = new Date();\nconst toSend = [];\n\nfor (const item of appointments) {\n  const appt = item.json;\n  if (!appt.appointment_datetime) continue;\n\n  const apptTime = new Date(appt.appointment_datetime);\n  // Assume 30 min appointment duration\n  const endTime = new Date(apptTime.getTime() + 30 * 60 * 1000);\n  const msSinceEnd = now - endTime;\n  const hoursSinceEnd = msSinceEnd / (1000 * 60 * 60);\n\n  // Send review request 1.5 to 3 hours after appointment ended\n  if (hoursSinceEnd >= 1.5 && hoursSinceEnd <= 3) {\n    toSend.push({ json: appt });\n  }\n}\n\nif (toSend.length === 0) {\n  return [{ json: { skip: true } }];\n}\n\nreturn toSend;"
+      },
+      "id": "c1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Find Completed Appointments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }],
+          "combinator": "and"
+        }
+      },
+      "id": "c1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Skip if None",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build review request message\nconst d = $input.first().json;\nconst googleReviewLink = 'YOUR_GOOGLE_REVIEW_LINK_HERE';\n\nconst reviewMsg = `ဒီနေ့ ကျွန်တော်တို့ clinic ကို လာပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ် 🙏\\n\\n${d.patient_name || 'Patient'} မင်္ဂလာပါ!\\n\\nကျွန်တော်တို့ service ကို ကျေနပ်ပါသလား?\\n\\n⭐ 5 stars ပေးရင်:\\n${googleReviewLink}\\n\\n❓ တိုင်ကြားချင်တာ ဆိုရင် ဒီ number ကို ဆက်သွယ်ပါ\\nကျေးဇူးတင်ပါတယ် 💚`;\n\nreturn [{\n  json: {\n    ...d,\n    replyText: reviewMsg\n  }\n}];"
+      },
+      "id": "c1b2c3d4-0005-0005-0005-000000000005",
+      "name": "Build Review Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 180]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "viber", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "viber"
+            },
+            {
+              "conditions": {
+                "conditions": [{ "leftValue": "={{ $json.platform }}", "rightValue": "messenger", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "messenger"
+            }
+          ]
+        },
+        "fallbackOutput": "extra"
+      },
+      "id": "c1b2c3d4-0006-0006-0006-000000000006",
+      "name": "Route Platform",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chatapi.viber.com/pa/send_message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "X-Viber-Auth-Token", "value": "YOUR_VIBER_BOT_TOKEN_HERE" }]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "receiver", "value": "={{ $json.sender_id }}" },
+            { "name": "min_api_version", "value": "1" },
+            { "name": "sender.name", "value": "ClinicAI Myanmar" },
+            { "name": "type", "value": "text" },
+            { "name": "text", "value": "={{ $json.replyText }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1b2c3d4-0007-0007-0007-000000000007",
+      "name": "Send Viber Review Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/me/messages?access_token=YOUR_PAGE_ACCESS_TOKEN_HERE",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"recipient\": { \"id\": \"{{ $json.sender_id }}\" },\n  \"message\": { \"text\": \"{{ $json.replyText.replace(/\\n/g, '\\\\n') }}\" }\n}",
+        "options": {}
+      },
+      "id": "c1b2c3d4-0008-0008-0008-000000000008",
+      "name": "Send Messenger Review Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 260]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID_HERE" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "review_sent": "TRUE",
+            "review_sent_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": ["sender_id"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c1b2c3d4-0009-0009-0009-000000000009",
+      "name": "Mark Review Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1780, 180],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+    }
+  ],
+  "connections": {
+    "Every Hour": {
+      "main": [[{ "node": "Get Appointments Without Review", "type": "main", "index": 0 }]]
+    },
+    "Get Appointments Without Review": {
+      "main": [[{ "node": "Find Completed Appointments", "type": "main", "index": 0 }]]
+    },
+    "Find Completed Appointments": {
+      "main": [[{ "node": "Skip if None", "type": "main", "index": 0 }]]
+    },
+    "Skip if None": {
+      "main": [
+        [],
+        [{ "node": "Build Review Message", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Review Message": {
+      "main": [[{ "node": "Route Platform", "type": "main", "index": 0 }]]
+    },
+    "Route Platform": {
+      "main": [
+        [{ "node": "Send Viber Review Request", "type": "main", "index": 0 }],
+        [{ "node": "Send Messenger Review Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Viber Review Request": {
+      "main": [[{ "node": "Mark Review Sent", "type": "main", "index": 0 }]]
+    },
+    "Send Messenger Review Request": {
+      "main": [[{ "node": "Mark Review Sent", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "clinic-ai" }],
+  "_readme": {
+    "description": "Sends review request 2 hours after appointment ends. Links to Google Review page.",
+    "setup": "Replace YOUR_GOOGLE_REVIEW_LINK_HERE with clinic's Google Maps review link"
+  }
+}
