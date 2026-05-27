@@ -149,40 +149,11 @@ export default function CinematicHero() {
       {/* ── Main content ── */}
       <div style={{ position: "relative", zIndex: 10, textAlign: "center", padding: "0 24px", maxWidth: 580 }}>
 
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.55, y: 24 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1.1, type: "spring", stiffness: 110, damping: 16, delay: 0.5 }}
-          style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}
-        >
-          <motion.div
-            animate={{ y: [0, -11, 0] }}
-            transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              width: 116, height: 116, borderRadius: 28,
-              background: "linear-gradient(145deg, rgba(254,203,0,0.12), rgba(2,7,4,0.95))",
-              border: "1.5px solid rgba(254,203,0,0.5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 52, fontWeight: 900, letterSpacing: -2,
-              boxShadow: [
-                "0 0 28px rgba(254,203,0,0.5)",
-                "0 0 60px rgba(254,203,0,0.2)",
-                "0 24px 48px rgba(0,0,0,0.9)",
-                "inset 0 1px 0 rgba(254,203,0,0.15)",
-              ].join(", "),
-            }}
-            className="grad-yg"
-          >
-            R
-          </motion.div>
-        </motion.div>
-
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.85 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}
         >
           <div style={{
