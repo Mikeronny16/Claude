@@ -1,14 +1,14 @@
 {
-  "name": "2 — Clinic Reminders (Telegram, 24h + 2h)",
+  "name": "2 — Reminder System (Telegram)",
   "nodes": [
     {
       "parameters": {
         "rule": { "interval": [{ "field": "hours", "hoursInterval": 1 }] }
       },
-      "id": "rm-0001-0001-0001-0001-000000000001",
+      "id": "r01",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.1,
       "position": [240, 300]
     },
     {
@@ -16,22 +16,21 @@
         "operation": "read",
         "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Appointments" },
-        "filtersUI": { "values": [{ "lookupColumn": "status", "lookupValue": "confirmed" }] },
         "options": {}
       },
-      "id": "rm-0002-0002-0002-0002-000000000002",
+      "id": "r02",
       "name": "Get Appointments",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.2,
       "position": [460, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "const appointments = $input.all();\nconst now = new Date();\nconst toSend = [];\n\nfor (const item of appointments) {\n  const a = item.json;\n  if (!a.appointment_datetime || !a.sender_id) continue;\n\n  const apptTime = new Date(a.appointment_datetime);\n  const hoursUntil = (apptTime - now) / (1000 * 60 * 60);\n\n  if (hoursUntil >= 23 && hoursUntil <= 25 && a.reminder_24h_sent === 'FALSE') {\n    toSend.push({ json: { ...a, reminderType: '24h' } });\n  } else if (hoursUntil >= 1.5 && hoursUntil <= 2.5 && a.reminder_2h_sent === 'FALSE') {\n    toSend.push({ json: { ...a, reminderType: '2h' } });\n  }\n}\n\nreturn toSend.length > 0 ? toSend : [{ json: { skip: true } }];"
+        "jsCode": "var items = $input.all();\nvar now = new Date();\nvar result = [];\n\nfor (var i = 0; i < items.length; i++) {\n  var row = items[i].json;\n\n  var status = (row[\"status\"] || \"\").toLowerCase();\n  if (status !== \"confirmed\") continue;\n\n  var apptDatetime = row[\"appointment_datetime\"] || \"\";\n  if (!apptDatetime) continue;\n\n  var apptTime = new Date(apptDatetime);\n  if (isNaN(apptTime.getTime())) continue;\n\n  var hoursUntil = (apptTime.getTime() - now.getTime()) / (1000 * 60 * 60);\n\n  var senderId = \"\" + row[\"sender_id\"];\n  var patientName = row[\"patient_name\"] || \"Patient\";\n  var slotLabel = row[\"slot\"] || apptDatetime;\n  var reason = row[\"reason\"] || \"\";\n\n  if (row[\"reminder_24h_sent\"] === \"FALSE\" && hoursUntil >= 23 && hoursUntil <= 25) {\n    result.push({json:{\n      sender_id: senderId,\n      patient_name: patientName,\n      appointment_datetime: apptDatetime,\n      reason: reason,\n      slot: slotLabel,\n      reminderType: \"24h\",\n      reminderText: \"Reminder!\\n\\nမနက်ဖြန် appointment ရှိပါတယ်\\n\\nPatient: \" + patientName + \"\\nSlot: \" + slotLabel + \"\\nကြောင်းရင်း: \" + reason + \"\\n\\nCancel ဆိုရင် bot ကို reply ပို့ပါ\"\n    }});\n  }\n\n  if (row[\"reminder_2h_sent\"] === \"FALSE\" && hoursUntil >= 1.5 && hoursUntil <= 2.5) {\n    result.push({json:{\n      sender_id: senderId,\n      patient_name: patientName,\n      appointment_datetime: apptDatetime,\n      reason: reason,\n      slot: slotLabel,\n      reminderType: \"2h\",\n      reminderText: \"Appointment 2 နာရီ အတွင်း!\\n\\nPatient: \" + patientName + \"\\nSlot: \" + slotLabel + \"\\nကြောင်းရင်း: \" + reason + \"\\n\\nဘေးကင်းစွာ ရောက်ပါစေ\"\n    }});\n  }\n}\n\nif (result.length === 0) return [{json:{skip:true}}];\nreturn result;"
       },
-      "id": "rm-0003-0003-0003-0003-000000000003",
-      "name": "Find Due Reminders",
+      "id": "r03",
+      "name": "Check Reminders",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [680, 300]
@@ -39,11 +38,13 @@
     {
       "parameters": {
         "conditions": {
-          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notEquals" } }],
+          "conditions": [
+            { "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notEquals" } }
+          ],
           "combinator": "and"
         }
       },
-      "id": "rm-0004-0004-0004-0004-000000000004",
+      "id": "r04",
       "name": "Has Reminders?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -51,58 +52,102 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst is24h = d.reminderType === '24h';\n\nconst msg24h = `🔔 Appointment Reminder!\\n\\nမနက်ဖြန် appointment ရှိပါတယ် 📅\\n\\n👤 ${d.patient_name}\\n🕘 ${d.slot}\\n💊 ${d.reason}\\n\\nLate ဖြစ်ပါက ဒီ bot ကိုပဲ ကြိုပြောပေးပါ`;\n\nconst msg2h = `⏰ 2 နာရီ အတွင်း Appointment ရှိပါတယ်!\\n\\n👤 ${d.patient_name}\\n🕘 ${d.slot}\\n\\nအချိန်မီ ကြွပါ 🏥`;\n\nreturn [{ json: { ...d, replyText: is24h ? msg24h : msg2h } }];"
-      },
-      "id": "rm-0005-0005-0005-0005-000000000005",
-      "name": "Build Message",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1120, 220]
-    },
-    {
-      "parameters": {
         "chatId": "={{ $json.sender_id }}",
-        "text": "={{ $json.replyText }}",
+        "text": "={{ $json.reminderText }}",
         "additionalFields": {}
       },
-      "id": "rm-0006-0006-0006-0006-000000000006",
-      "name": "Send Telegram Reminder",
+      "id": "r05",
+      "name": "Send Reminder",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1340, 220],
-      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram Bot" } }
+      "position": [1120, 240],
+      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
     },
     {
       "parameters": {
-        "operation": "update",
+        "rules": {
+          "values": [
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.reminderType }}", "rightValue": "24h", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "24h"
+            },
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.reminderType }}", "rightValue": "2h", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "2h"
+            }
+          ]
+        },
+        "fallbackOutput": "extra"
+      },
+      "id": "r06",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 240]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
         "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Appointments" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "reminder_24h_sent": "={{ $('Find Due Reminders').first().json.reminderType === '24h' ? 'TRUE' : $json.reminder_24h_sent }}",
-            "reminder_2h_sent": "={{ $('Find Due Reminders').first().json.reminderType === '2h' ? 'TRUE' : $json.reminder_2h_sent }}"
+            "sender_id": "={{ $json.sender_id }}",
+            "appointment_datetime": "={{ $json.appointment_datetime }}",
+            "reminder_24h_sent": "TRUE"
           },
-          "matchingColumns": ["sender_id"],
+          "matchingColumns": ["sender_id", "appointment_datetime"],
           "schema": []
         },
         "options": {}
       },
-      "id": "rm-0007-0007-0007-0007-000000000007",
-      "name": "Mark Sent",
+      "id": "r07",
+      "name": "Mark 24h Sent",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.2,
-      "position": [1560, 220],
-      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+      "position": [1560, 160],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sender_id": "={{ $json.sender_id }}",
+            "appointment_datetime": "={{ $json.appointment_datetime }}",
+            "reminder_2h_sent": "TRUE"
+          },
+          "matchingColumns": ["sender_id", "appointment_datetime"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "r08",
+      "name": "Mark 2h Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1560, 340],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
     }
   ],
   "connections": {
     "Every Hour": { "main": [[{ "node": "Get Appointments", "type": "main", "index": 0 }]] },
-    "Get Appointments": { "main": [[{ "node": "Find Due Reminders", "type": "main", "index": 0 }]] },
-    "Find Due Reminders": { "main": [[{ "node": "Has Reminders?", "type": "main", "index": 0 }]] },
-    "Has Reminders?": { "main": [[{ "node": "Build Message", "type": "main", "index": 0 }], []] },
-    "Build Message": { "main": [[{ "node": "Send Telegram Reminder", "type": "main", "index": 0 }]] },
-    "Send Telegram Reminder": { "main": [[{ "node": "Mark Sent", "type": "main", "index": 0 }]] }
+    "Get Appointments": { "main": [[{ "node": "Check Reminders", "type": "main", "index": 0 }]] },
+    "Check Reminders": { "main": [[{ "node": "Has Reminders?", "type": "main", "index": 0 }]] },
+    "Has Reminders?": { "main": [[{ "node": "Send Reminder", "type": "main", "index": 0 }], []] },
+    "Send Reminder": { "main": [[{ "node": "Route by Type", "type": "main", "index": 0 }]] },
+    "Route by Type": {
+      "main": [
+        [{ "node": "Mark 24h Sent", "type": "main", "index": 0 }],
+        [{ "node": "Mark 2h Sent", "type": "main", "index": 0 }]
+      ]
+    }
   },
   "settings": { "executionOrder": "v1" },
   "tags": [{ "name": "clinic-ai-telegram" }]
