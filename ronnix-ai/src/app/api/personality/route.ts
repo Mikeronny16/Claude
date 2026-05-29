@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const result = await generatePersonality(name.trim(), lang)
     return NextResponse.json({ result, name: name.trim(), lang })
   } catch (err) {
-    console.error("Personality API error:", err)
+    console.error("Personality API error:", (err as Error).message)
     return NextResponse.json({ error: "AI error ဖြစ်သွားသည်၊ ထပ်ကြိုးစားပါ" }, { status: 500 })
   }
 }

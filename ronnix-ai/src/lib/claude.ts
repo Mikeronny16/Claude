@@ -6,50 +6,51 @@ export async function generatePersonality(name: string, lang: "mm" | "en"): Prom
   const isMM = lang === "mm"
 
   const system = isMM
-    ? `You are a mystical Myanmar fortune teller who reads personalities through names.
-You blend astrology, Myanmar spirit wisdom, and modern psychology.
-Your readings feel accurate, personal, and slightly poetic — not generic.
-Always respond in Myanmar Unicode (Burmese) with English field names.
-Be fun, slightly dramatic, and share-worthy. Make people think "this is SO me".`
+    ? `သင်သည် မြန်မာ့ ရိုးရာ နက်နဲသော အမည်ဆရာ ဖြစ်သည်။ နာမည်တစ်ခုကို ကြည့်ရုံနှင့် လူ့စိတ်ဓာတ်ကို ဖတ်တတ်သည်။
+မြန်မာ့ ဗေဒင်ပညာ၊ နတ်ဝိညာဉ် ဆိုင်ရာ ပညာ၊ နှင့် ခေတ်မီ စိတ်ပညာ တို့ကို ပေါင်းစပ်၍ reading ပြုလုပ်သည်။
+သဘာဝကျသော မြန်မာဘာသာဖြင့် ရေးသားပါ — ဘာသာပြန်ထားသောဟန် မဟုတ်ဘဲ မြန်မာ့ သဘာဝ ဆန်ဆန် ရေးပါ။
+ကဗျာဆန်ဆန်၊ နည်းနည်း ဒရာမာဆန်ဆန် ဖြင့် ဖော်ပြပါ — ဖတ်သူက "ဒါ ငါပဲ" ဟု ထင်မှတ်စေရမည်။
+မြန်မာ Unicode ဖြင့် ပြန်ပါ။ field name များသာ English ဖြစ်သည်။`
     : `You are a mystical personality reader who reveals the hidden soul within a name.
 You blend numerology, archetype psychology, and cosmic energy into readings that feel personal and shareable.
 Be poetic, insightful, and slightly dramatic — make people think "this is SO me".`
 
   const prompt = isMM
-    ? `"${name}" ဆိုတဲ့ နာမည်ရဲ့ personality reading ရေးပေးပါ။
+    ? `"${name}" ဆိုသော နာမည်ရှင်၏ personality reading ကို ရေးပေးပါ။
+မြန်မာ့ ယဉ်ကျေးမှုဆိုင်ရာ ပညာနှင့် လူ့စိတ်ပညာ ကို ပေါင်းစပ်ပြီး ဖော်ပြပါ။
 
-ဒီ JSON format နဲ့ ပြန်ပါ (JSON only, no extra text):
+JSON format တိတိကျကျသာ ပြန်ပါ (markdown မပါပါနှင့်၊ JSON သက်သက်သာ):
 {
-  "title": "နာမည်ကို reflect တဲ့ poetic title (e.g. ရဲသောနှလုံးရှင်)",
-  "element": "သဘာဝ ဓာတ် (မီး/ရေ/ကြေး/လေ/မြေ)",
-  "spirit_animal": "Myanmar spirit animal နဲ့ emoji (e.g. ကျား 🐯)",
-  "traits": ["trait 1", "trait 2", "trait 3"],
-  "strength": "အဓိက strengths (1-2 ကြောင်း, poetic)",
-  "shadow": "shadow side — honest but not harsh (1 ကြောင်း)",
-  "fortune_2026": "2026 fortune (hopeful, specific feeling, 1-2 ကြောင်း)",
-  "love": "love personality (1 ကြောင်း)",
-  "lucky_color": "lucky color (Myanmar name)",
-  "lucky_number": "number only"
+  "title": "နာမည်ကို ထင်ဟပ်သော ကဗျာဆန်သည့် ခေါင်းစဉ် (ဥပမာ — ငြိမ်သောမင်းသမီး၊ မီးသတ္တိရှင်၊ ကံကောင်းသောနှလုံး)",
+  "element": "ဓာတ် — မီး၊ ရေ၊ ကြေး၊ လေ၊ မြေ — တစ်ခုတည်းသာ",
+  "spirit_animal": "ကာကွယ်သောတိရစ္ဆာန် နှင့် emoji (ဥပမာ — ဆင် 🐘၊ ခြင်္သေ့ 🦁၊ လင်းယုန် 🦅)",
+  "traits": ["ပင်ကိုယ်လက္ခဏာ တစ်ခု", "လက္ခဏာ နှစ်ခု", "လက္ခဏာ သုံးခု", "လက္ခဏာ လေးခု"],
+  "strength": "အဓိက အားသာချက်များ — ကဗျာဆန်ဆန်၊ နှစ်ကြောင်း",
+  "shadow": "ဂရုစိုက်ရမည့် ကိစ္စ — ကြင်နာသောစကားဖြင့်၊ တစ်ကြောင်း",
+  "fortune_2026": "2026 ကံကြမ္မာ — မျှော်လင့်ချက်ပေးသော၊ နှစ်ကြောင်း",
+  "love": "ချစ်ခြင်းမေတ္တာ ပုံစံ — တစ်ကြောင်း",
+  "lucky_color": "ကံကောင်းစေသောအရောင် (မြန်မာဘာသာဖြင့်)",
+  "lucky_number": "ကံဂဏန်း (ဂဏန်းသာ)"
 }`
     : `Generate a personality reading for the name "${name}".
 
-Return ONLY this JSON (no extra text):
+Return ONLY valid JSON (no markdown, no extra text):
 {
-  "title": "poetic archetype title (e.g. The Quiet Storm)",
-  "element": "Fire / Water / Earth / Air / Ether",
-  "spirit_animal": "spirit animal with emoji (e.g. Wolf 🐺)",
-  "traits": ["trait 1", "trait 2", "trait 3"],
-  "strength": "core strength (1-2 lines, poetic and specific)",
-  "shadow": "honest shadow side — not harsh (1 line)",
-  "fortune_2026": "2026 fortune (hopeful and specific, 1-2 lines)",
-  "love": "love personality (1 line)",
+  "title": "poetic archetype title (e.g. The Quiet Storm, The Golden Flame)",
+  "element": "Fire / Water / Earth / Air / Ether — one only",
+  "spirit_animal": "spirit animal with emoji (e.g. Wolf 🐺, Eagle 🦅)",
+  "traits": ["trait one", "trait two", "trait three", "trait four"],
+  "strength": "core strengths — poetic and specific, 2 lines",
+  "shadow": "honest shadow side — gentle, not harsh, 1 line",
+  "fortune_2026": "2026 fortune — hopeful and specific, 2 lines",
+  "love": "love personality — 1 line",
   "lucky_color": "lucky color name",
   "lucky_number": "number only"
 }`
 
   const response = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 600,
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1200,
     messages: [
       { role: "user", content: prompt }
     ],
@@ -57,8 +58,10 @@ Return ONLY this JSON (no extra text):
   })
 
   const raw = response.content[0].type === "text" ? response.content[0].text.trim() : ""
-  const jsonMatch = raw.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error("Invalid response format")
+  // Strip markdown code fences if Claude wraps output in ```json ... ```
+  const cleaned = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim()
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) throw new Error(`Invalid response format. Raw: ${raw.slice(0, 200)}`)
 
   return JSON.parse(jsonMatch[0]) as PersonalityResult
 }
