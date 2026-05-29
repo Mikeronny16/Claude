@@ -65,12 +65,21 @@
 
 ## Telegram Bot Setup (5 minutes)
 
-1. Message @BotFather on Telegram: `/newbot`
-2. Follow prompts → copy bot token
-3. In n8n: Credentials → New → Telegram API → paste token
-4. Name the credential exactly: **"Telegram account"**
-5. Import `1-booking-bot-telegram.json` → assign credentials → Activate
-6. Test: send any message to your bot
+### Patient Bot (@clinicai_mmtest_bot) — already done
+- Token: `8944511208:AAH9m7Id0M3-IS8w3zp4Pad6CHQul2re5KA`
+- Credential name in n8n: **"Telegram account"**
+- Handles: patient bookings, reminders, doctor notifications
+
+### Doctor Bot (@new_doctor_bot) — setup steps
+1. Token: `8866988860:AAHRnLqm_R8n5l5C961GDHqgsDz0y55Lhc8`
+2. In n8n: Credentials → New → Telegram API → paste token above
+3. Name the credential exactly: **"Doctor Telegram account"**
+4. Import `3-doctor-bot-telegram.json` → assign credentials → Activate
+5. Test: message @new_doctor_bot with `today`
+
+### Mike's Telegram Chat ID (already set in workflow 1)
+- Chat ID: `1636633347`
+- Doctor notifications will arrive from @clinicai_mmtest_bot (patient bot)
 
 ---
 
@@ -86,12 +95,26 @@
 
 ## Testing Checklist
 
-- [ ] Send message to Viber bot → bot replies with greeting
+- [ ] Send message to patient bot → bot replies with greeting
 - [ ] Reply with reason → bot shows slots
 - [ ] Pick slot number → bot asks for name
 - [ ] Give name → confirmation message + Google Sheets row added
+- [ ] Mike receives notification on Telegram (from @clinicai_mmtest_bot)
+- [ ] Send another message to patient bot → bot greets fresh (not "Confirm" again)
+- [ ] Message @new_doctor_bot with `today` → see today's appointments
+- [ ] Message @new_doctor_bot with `tomorrow` → see tomorrow's appointments
+- [ ] Message @new_doctor_bot with `cancel NAME` → appointment marked cancelled
 - [ ] Reminder workflow runs hourly
 - [ ] Review workflow sends 2h after appointment
+
+## Doctor Bot Commands
+
+| Command | Myanmar | Result |
+|---|---|---|
+| `today` or `1` | `ဒီနေ့` | Today's appointments |
+| `tomorrow` or `2` | `မနက်ဖြန်` | Tomorrow's appointments |
+| `all` or `3` | `အားလုံး` | All upcoming appointments |
+| `cancel Ko Aung` | `ပယ်ဖျက် ကိုအောင်` | Cancel that patient's booking |
 
 ---
 
