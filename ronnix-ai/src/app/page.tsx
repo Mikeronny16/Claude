@@ -6,6 +6,12 @@ import CinematicHero from "@/components/CinematicHero"
 import { Sparkles, MessageSquare, FileText, ArrowRight, Zap, Star, Quote, Check, X, ChevronDown, Mic, Megaphone, Heart, Layers, Hash, BarChart2, Film, Calendar } from "lucide-react"
 import { useState } from "react"
 
+const VIRAL_SAMPLES = [
+  { name: "Thin Thin", title: "ငြိမ်သောမြစ်ရိုး", element: "ရေ 💧", trait: "ကိုယ်ချစ်တဲ့လူတွေကို ကန်းဆင်ပေးတတ်သည်" },
+  { name: "Kyaw Zin", title: "The Storm Bringer", element: "Fire 🔥", trait: "Born to lead — even when it's uncomfortable" },
+  { name: "May Thu", title: "ရွှေသောနှလုံး", element: "မြေ 🌿", trait: "ပတ်ဝန်းကျင်ကို ကောင်းကောင်း ကြည့်တတ်သည်" },
+]
+
 const FADE = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }
 
 const TOOLS = [
@@ -91,6 +97,65 @@ export default function Landing() {
 
       {/* ── CINEMATIC HERO ── */}
       <CinematicHero />
+
+      {/* ── VIRAL PERSONALITY SECTION ── */}
+      <section style={{ position: "relative", zIndex: 10, padding: "60px 24px 40px", maxWidth: 700, margin: "0 auto" }}>
+        <motion.div variants={FADE} initial="hidden" whileInView="show" viewport={{ once: true }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 100,
+              background: "rgba(254,203,0,0.1)", border: "1px solid rgba(254,203,0,0.25)", marginBottom: 16 }}>
+              <span style={{ fontSize: 14 }}>🔮</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#FECB00", letterSpacing: 1 }}>FREE · NO LOGIN</span>
+            </div>
+            <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5, marginBottom: 10 }}>
+              နာမည် ထည့် — Soul ဖတ်မည်
+            </h2>
+            <p className="font-mm" style={{ fontSize: 14, color: "var(--muted)", lineHeight: 1.7 }}>
+              AI က မင်းနာမည်မှ ကိုယ်ရည်ကိုယ်သွေး၊ 2026 ကံကြမ္မာ နဲ့ lucky elements ဖတ်ပေးမည်
+            </p>
+          </div>
+
+          {/* Sample cards carousel */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 28, overflowX: "auto", paddingBottom: 4 }}>
+            {VIRAL_SAMPLES.map((s) => (
+              <div key={s.name} style={{
+                minWidth: 200, borderRadius: 16, padding: "18px 20px", flexShrink: 0,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              }}>
+                <div style={{ fontSize: 11, color: "var(--muted2)", marginBottom: 4 }}>{s.element}</div>
+                <p style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", marginBottom: 2 }}>{s.name}</p>
+                <p className="font-mm" style={{ fontSize: 12, color: "#FECB00", fontWeight: 700, marginBottom: 8 }}>{s.title}</p>
+                <p className="font-mm" style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.6 }}>{s.trait}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <Link href="/personality" style={{ textDecoration: "none", display: "block" }}>
+            <motion.div
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              style={{
+                background: "linear-gradient(135deg, #FECB00 0%, #FF9500 100%)",
+                borderRadius: 18, padding: "20px 24px",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                boxShadow: "0 0 60px rgba(254,203,0,0.25)",
+                cursor: "pointer",
+              }}
+            >
+              <div>
+                <p style={{ fontWeight: 900, fontSize: 16, color: "#020704", marginBottom: 2 }}>
+                  🔮 Personality Reading — ဒီနေ့ ကြည့်မည်
+                </p>
+                <p className="font-mm" style={{ fontSize: 12, color: "rgba(2,7,4,0.65)", fontWeight: 600 }}>
+                  နာမည်တစ်ခုသာ လိုသည် · Login မလို · Free
+                </p>
+              </div>
+              <ArrowRight style={{ width: 22, height: 22, color: "#020704", flexShrink: 0 }} />
+            </motion.div>
+          </Link>
+        </motion.div>
+      </section>
 
       {/* ── PAIN SECTION ── */}
       <section style={{ position: "relative", zIndex: 10, padding: "60px 24px", maxWidth: 860, margin: "0 auto" }}>
