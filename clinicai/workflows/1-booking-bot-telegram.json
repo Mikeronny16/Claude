@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "jsCode": "var allItems = $input.all();\nvar msg = null;\nvar sessionRow = null;\nfor (var i = 0; i < allItems.length; i++) {\n  var item = allItems[i].json;\n  if (item[\"senderId\"]) { msg = item; }\n  if (item[\"sender_id\"]) { sessionRow = item; }\n}\nif (!msg) { return [{json:{skip:true}}]; }\n\nvar state = \"new\";\nvar tempSlots = \"\";\nvar reason = \"\";\nvar selectedSlot = \"\";\nvar selectedDatetime = \"\";\nvar patientName = msg[\"senderName\"] || \"Patient\";\n\nif (sessionRow) {\n  state = sessionRow[\"state\"] || \"new\";\n  tempSlots = sessionRow[\"temp_slots\"] || \"\";\n  reason = sessionRow[\"reason\"] || \"\";\n  selectedSlot = sessionRow[\"selected_slot\"] || \"\";\n  selectedDatetime = sessionRow[\"selected_datetime\"] || \"\";\n  patientName = sessionRow[\"patient_name\"] || patientName;\n}\n\nif (!selectedSlot && tempSlots) {\n  try {\n    var tsParsed = JSON.parse(tempSlots);\n    if (tsParsed && tsParsed[\"selected\"]) {\n      selectedSlot = tsParsed[\"selected\"];\n      if (!selectedDatetime && tsParsed[\"selectedDatetime\"]) {\n        selectedDatetime = tsParsed[\"selectedDatetime\"];\n      }\n    }\n  } catch(e) {}\n}\n\nvar resetWords = [\"start\",\"restart\",\"cancel\",\"reset\"];\nfor (var j = 0; j < resetWords.length; j++) {\n  if (msg[\"normalizedText\"] && msg[\"normalizedText\"].indexOf(resetWords[j]) >= 0) {\n    state = \"new\";\n    break;\n  }\n}\n\nvar result = {};\nresult[\"senderId\"] = msg[\"senderId\"];\nresult[\"senderName\"] = msg[\"senderName\"];\nresult[\"messageText\"] = msg[\"messageText\"];\nresult[\"normalizedText\"] = msg[\"normalizedText\"];\nresult[\"platform\"] = msg[\"platform\"];\nresult[\"state\"] = state;\nresult[\"tempSlots\"] = tempSlots;\nresult[\"reason\"] = reason;\nresult[\"selectedSlot\"] = selectedSlot;\nresult[\"selectedDatetime\"] = selectedDatetime;\nresult[\"patientName\"] = patientName;\nreturn [{json:result}];"
+        "jsCode": "var allItems = $input.all();\nvar msg = null;\nvar sessionRow = null;\nfor (var i = 0; i < allItems.length; i++) {\n  var item = allItems[i].json;\n  if (item[\"senderId\"]) { msg = item; }\n  if (item[\"sender_id\"]) { sessionRow = item; }\n}\nif (!msg) { return [{json:{skip:true}}]; }\n\nvar state = \"new\";\nvar tempSlots = \"\";\nvar reason = \"\";\nvar selectedSlot = \"\";\nvar selectedDatetime = \"\";\nvar patientName = msg[\"senderName\"] || \"Patient\";\n\nif (sessionRow) {\n  state = sessionRow[\"state\"] || \"new\";\n  tempSlots = sessionRow[\"temp_slots\"] || \"\";\n  reason = sessionRow[\"reason\"] || \"\";\n  selectedSlot = sessionRow[\"selected_slot\"] || \"\";\n  selectedDatetime = sessionRow[\"selected_datetime\"] || \"\";\n  patientName = sessionRow[\"patient_name\"] || patientName;\n}\n\nif (state === \"confirmed\") { state = \"new\"; }\n\nif (!selectedSlot && tempSlots) {\n  try {\n    var tsParsed = JSON.parse(tempSlots);\n    if (tsParsed && tsParsed[\"selected\"]) {\n      selectedSlot = tsParsed[\"selected\"];\n      if (!selectedDatetime && tsParsed[\"selectedDatetime\"]) {\n        selectedDatetime = tsParsed[\"selectedDatetime\"];\n      }\n    }\n  } catch(e) {}\n}\n\nvar resetWords = [\"start\",\"restart\",\"cancel\",\"reset\"];\nfor (var j = 0; j < resetWords.length; j++) {\n  if (msg[\"normalizedText\"] && msg[\"normalizedText\"].indexOf(resetWords[j]) >= 0) {\n    state = \"new\";\n    break;\n  }\n}\n\nvar result = {};\nresult[\"senderId\"] = msg[\"senderId\"];\nresult[\"senderName\"] = msg[\"senderName\"];\nresult[\"messageText\"] = msg[\"messageText\"];\nresult[\"normalizedText\"] = msg[\"normalizedText\"];\nresult[\"platform\"] = msg[\"platform\"];\nresult[\"state\"] = state;\nresult[\"tempSlots\"] = tempSlots;\nresult[\"reason\"] = reason;\nresult[\"selectedSlot\"] = selectedSlot;\nresult[\"selectedDatetime\"] = selectedDatetime;\nresult[\"patientName\"] = patientName;\nreturn [{json:result}];"
       },
       "id": "n06",
       "name": "Merge Session",
@@ -150,7 +150,7 @@
     },
     {
       "parameters": {
-        "jsCode": "var d = $input.first().json;\nvar patientName = (d[\"messageText\"] || \"\").trim();\n\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\nresult[\"patientName\"] = patientName;\nresult[\"replyText\"] = \"Appointment Confirm ပါပြီ!\\n\\nPatient: \" + patientName + \"\\nSlot: \" + d[\"selectedSlot\"] + \"\\nကြောင်းရင်း: \" + d[\"reason\"] + \"\\n\\nReminder 1 နာရီ အလိုမှာ ပို့ပေးပါမယ်\\n\\nမေးစရာရှိရင် ဒီ bot ကို message ပို့ပါ\";\nresult[\"newState\"] = \"confirmed\";\nresult[\"saveBooking\"] = true;\nreturn [{json:result}];"
+        "jsCode": "var d = $input.first().json;\nvar patientName = (d[\"messageText\"] || \"\").trim();\n\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\nresult[\"patientName\"] = patientName;\nresult[\"replyText\"] = \"Appointment Confirm ပါပြီ!\\n\\nPatient: \" + patientName + \"\\nSlot: \" + d[\"selectedSlot\"] + \"\\nကြောင်းရင်း: \" + d[\"reason\"] + \"\\n\\nReminder 1 နာရီ အလိုမှာ ပို့ပေးပါမယ်\\n\\nမေးစရာရှိရင် ဒီ bot ကို message ပို့ပါ\";\nresult[\"newState\"] = \"new\";\nresult[\"saveBooking\"] = true;\nresult[\"doctorNotifyText\"] = \"New Booking!\\n\\nPatient: \" + patientName + \"\\nReason: \" + d[\"reason\"] + \"\\nSlot: \" + d[\"selectedSlot\"] + \"\\nDatetime: \" + d[\"selectedDatetime\"] + \"\\nChat ID: \" + d[\"senderId\"];\nreturn [{json:result}];"
       },
       "id": "n11",
       "name": "Handle: Got Name",
@@ -231,6 +231,19 @@
       "typeVersion": 1.2,
       "position": [2040, 300],
       "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_DOCTOR_CHAT_ID",
+        "text": "={{ $json.doctorNotifyText }}",
+        "additionalFields": {}
+      },
+      "id": "n15",
+      "name": "Notify Doctor",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1800, 640],
+      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
     }
   ],
   "connections": {
@@ -287,7 +300,9 @@
     "Handle: Got Name": {
       "main": [[
         { "node": "Save Appointment", "type": "main", "index": 0 },
-        { "node": "Send Reply", "type": "main", "index": 0 }
+        { "node": "Save Session", "type": "main", "index": 0 },
+        { "node": "Send Reply", "type": "main", "index": 0 },
+        { "node": "Notify Doctor", "type": "main", "index": 0 }
       ]]
     }
   },
@@ -298,14 +313,19 @@
       "Parse Message: iPhone-safe code (var, double quotes, bracket notation)",
       "Merge node added: prevents 0-items stop when new user has no session",
       "Handle nodes -> Send Reply in PARALLEL with Save Session (fixes undefined replyText)",
-      "Send Reply uses $json.senderId from Handle node output directly"
+      "Handle: Got Name now connects to Save Session (fixes confirmed-state loop bug)",
+      "Handle: Got Name sets newState=new (session resets after booking)",
+      "Merge Session: if state=confirmed, auto-reset to new (backup fix)",
+      "Handle: Got Name: adds Notify Doctor step for doctor notification"
     ],
     "setup": [
       "1. Telegram credential name: Telegram account",
       "2. Google Sheets credential name: Google Sheets account",
       "3. Sheet ID: 1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og",
       "4. Sheet tabs: Sessions and Appointments (exact names)",
-      "5. Activate workflow -> test with any message to @clinicai_mmtest_bot"
+      "5. Replace YOUR_DOCTOR_CHAT_ID with Mike's personal Telegram chat ID",
+      "6. To find your Telegram chat ID: message @userinfobot on Telegram",
+      "7. Activate workflow -> test with any message to @clinicai_mmtest_bot"
     ]
   }
 }
