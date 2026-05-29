@@ -225,3 +225,54 @@ html {
 
 /* ── Bottom tab safe area ─────────────── */
 .pb-tab { padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom)); }
+
+/* ── Liquid Glass (iOS 26 style) ─────────────────────────────── */
+.lg {
+  backdrop-filter: blur(28px) saturate(165%) brightness(1.04);
+  -webkit-backdrop-filter: blur(28px) saturate(165%) brightness(1.04);
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.075) 0%,
+    rgba(255,255,255,0.025) 100%
+  );
+  border-top: 1px solid rgba(255,255,255,0.22);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.24);
+  border-left: 1px solid rgba(255,255,255,0.06);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.11) inset,
+    0 -1px 0 rgba(0,0,0,0.14) inset,
+    0 8px 32px rgba(0,0,0,0.42),
+    0 2px 8px rgba(0,0,0,0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top light-catch — the signature iOS liquid glass shimmer */
+.lg::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 12%; right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.60) 50%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.light .lg {
+  backdrop-filter: blur(24px) saturate(200%) brightness(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(200%) brightness(1.06);
+  background: linear-gradient(160deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.58) 100%);
+  border-top: 1px solid rgba(255,255,255,0.95);
+  border-right: 1px solid rgba(255,255,255,0.55);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-left: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.95) inset,
+    0 8px 32px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.05);
+}
+
+html.light .lg::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 50%, transparent);
+}
