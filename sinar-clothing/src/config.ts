@@ -3,9 +3,9 @@ export const SITE = {
   tagline: "ချစ်စရာ ဝတ်စုံလေးများ",
   facebookPageId: "14anQs8AyMd",
   facebookUrl: "https://www.facebook.com/share/14anQs8AyMd/",
-  phone: "+959XXXXXXXXX",
-  viber: "+959XXXXXXXXX",
-  whatsapp: "+959XXXXXXXXX",
+  phone: "+959790543312",
+  viber: "+959790543312",
+  whatsapp: "+959790543312",
 }
 
 export function messengerUrl(productName: string) {
