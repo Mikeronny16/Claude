@@ -9,11 +9,11 @@ import FourDSection from "./sections/FourDSection"
 import "./index.css"
 
 export const DIMS = [
-  { id: 0, label: "0D", color: "#C0C0FF" },
-  { id: 1, label: "1D", color: "#00F5FF" },
-  { id: 2, label: "2D", color: "#A855F7" },
-  { id: 3, label: "3D", color: "#FF1F6E" },
-  { id: 4, label: "4D", color: "#FFD700" },
+  { id: 0, label: "0D", color: "#E8E8FF" },
+  { id: 1, label: "1D", color: "#00F0FF" },
+  { id: 2, label: "2D", color: "#7C3AED" },
+  { id: 3, label: "3D", color: "#10B981" },
+  { id: 4, label: "4D", color: "#F59E0B" },
 ]
 
 const PANELS = [ZeroDSection, OneDSection, TwoDSection, ThreeDSection, FourDSection]
@@ -26,7 +26,7 @@ function SideDots({ active, setActive }: { active: number; setActive: (i: number
         return (
           <button key={dim.id} onClick={() => setActive(dim.id)}
             className="relative flex items-center gap-2.5 group">
-            <span className="absolute right-5 font-orbitron text-[9px] font-bold whitespace-nowrap
+            <span className="absolute right-6 font-orbitron text-[9px] font-bold whitespace-nowrap
               opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0
               transition-all duration-200 pointer-events-none"
               style={{ color: dim.color }}>
@@ -34,9 +34,9 @@ function SideDots({ active, setActive }: { active: number; setActive: (i: number
             </span>
             <div className="rounded-full flex-shrink-0 transition-all duration-300"
               style={{
-                width: on ? 10 : 6, height: on ? 10 : 6,
-                background: on ? dim.color : "rgba(255,255,255,0.22)",
-                boxShadow: on ? `0 0 12px ${dim.color}, 0 0 28px ${dim.color}45` : "none",
+                width: on ? 10 : 5, height: on ? 10 : 5,
+                background: on ? dim.color : "rgba(255,255,255,0.18)",
+                boxShadow: on ? `0 0 10px ${dim.color}, 0 0 24px ${dim.color}55` : "none",
               }} />
           </button>
         )
@@ -49,8 +49,8 @@ function LangToggle() {
   const { lang, toggle } = useLang()
   return (
     <button onClick={toggle}
-      className="fixed top-5 left-5 z-50 font-mono text-[10px] border border-white/10 px-3 py-1.5 rounded-full text-white/40 hover:border-white/30 hover:text-white/70 transition-all"
-      style={{ backdropFilter: "blur(12px)", background: "rgba(0,0,0,0.4)" }}>
+      className="fixed top-5 left-5 z-50 font-mono text-[10px] border border-white/10 px-3 py-1.5 rounded-full text-white/35 hover:border-white/25 hover:text-white/60 transition-all"
+      style={{ backdropFilter: "blur(16px)", background: "rgba(5,5,8,0.6)" }}>
       {lang === "mm" ? "EN" : "MM"}
     </button>
   )
@@ -62,13 +62,11 @@ function Inner() {
 
   return (
     <>
-      {/* Scene — no overflow:hidden so iOS fixed children work */}
-      <div style={{ position: "fixed", inset: 0, background: "#000008" }}>
+      <div style={{ position: "fixed", inset: 0, background: "#050508" }}>
         <AnimatePresence mode="wait">
           <Panel key={active} />
         </AnimatePresence>
       </div>
-      {/* UI outside the scene container so fixed positioning is relative to viewport */}
       <SideDots active={active} setActive={setActive} />
       <LangToggle />
     </>

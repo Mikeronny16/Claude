@@ -5,7 +5,8 @@ import { motion } from "framer-motion"
 import * as THREE from "three"
 import { useLang } from "../lib/lang"
 
-const C = "#FFD700"
+const C = "#F59E0B"
+const BG = "#050508"
 
 function project4Dto3D(v: number[], w: number, fov4d = 2): [number, number, number] {
   const d = fov4d / (fov4d - v[3] / w)
@@ -29,8 +30,8 @@ function Tesseract() {
   const colAttr = useRef<THREE.BufferAttribute>(null!)
 
   useFrame((_, delta) => {
-    angleRef.current += delta * 0.36
-    const a = angleRef.current, b = angleRef.current * 0.62
+    angleRef.current += delta * 0.32
+    const a = angleRef.current, b = angleRef.current * 0.6
     const c1 = Math.cos(a), s1 = Math.sin(a), c2 = Math.cos(b), s2 = Math.sin(b)
     const verts4d: number[][] = []
     for (let i = 0; i < 16; i++) {
@@ -51,9 +52,10 @@ function Tesseract() {
       const base = idx * 6
       positions[base]=p1[0]; positions[base+1]=p1[1]; positions[base+2]=p1[2]
       positions[base+3]=p2[0]; positions[base+4]=p2[1]; positions[base+5]=p2[2]
+      // Gold → dim amber gradient by W position
       const t = (verts4d[ai][3]+verts4d[bi][3]+2) / 4
-      colors[base]=1; colors[base+1]=t*0.85+0.1; colors[base+2]=0
-      colors[base+3]=t*0.5; colors[base+4]=0.12; colors[base+5]=1
+      colors[base]=1; colors[base+1]=t*0.62+0.28; colors[base+2]=t*0.05
+      colors[base+3]=t*0.55; colors[base+4]=0.08; colors[base+5]=1-t*0.9
     })
     if (posAttr.current) posAttr.current.needsUpdate = true
     if (colAttr.current) colAttr.current.needsUpdate = true
@@ -74,64 +76,87 @@ export default function FourDSection() {
   const { t } = useLang()
 
   return (
-    <motion.div className="absolute inset-0" style={{ background: "#080500" }}
+    <motion.div style={{ position: "absolute", inset: 0, background: BG }}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}>
+      transition={{ duration: 0.35 }}>
 
-      <div className="absolute inset-0">
+      <div style={{ position: "absolute", inset: 0 }}>
         <Canvas camera={{ position: [4, 3, 4], fov: 50 }}>
-          <ambientLight intensity={0.4} />
-          <pointLight position={[5,5,5]} color={C} intensity={3} />
+          <ambientLight intensity={0.3} />
+          <pointLight position={[5,5,5]} color={C} intensity={2.5} />
           <Tesseract />
           <OrbitControls enableZoom={false} enablePan={false} />
         </Canvas>
       </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_32%,#080500_88%)] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-[55%] bg-gradient-to-t from-[#080500] via-[#080500]/65 to-transparent pointer-events-none lg:hidden" />
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "radial-gradient(ellipse at center, transparent 30%, #050508 86%)"
+      }} />
 
+      {/* Card — LEFT on desktop */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:right-10 xl:right-14 lg:left-auto"
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.18, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="w-full lg:w-[340px] xl:w-[380px] px-5 pt-5 pb-8 lg:p-7 lg:rounded-2xl rounded-t-2xl"
+        className="absolute bottom-0 left-0 right-0 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:left-10 xl:left-14 lg:right-auto"
+        initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+
+        <div className="lg:hidden" style={{
+          position: "absolute", bottom: "100%", left: 0, right: 0, height: 140,
+          background: `linear-gradient(to bottom, transparent, ${BG})`,
+          pointerEvents: "none"
+        }} />
+
+        <div className="w-full lg:w-[360px] xl:w-[400px] lg:rounded-2xl"
           style={{
-            background: `linear-gradient(145deg,${C}07,${C}02)`,
+            background: "rgba(5,5,8,0.84)",
             backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
-            borderTop: `1px solid ${C}20`, borderLeft: `1px solid ${C}12`, borderRight: `1px solid ${C}0C`,
+            borderTop: "1px solid rgba(245,158,11,0.12)",
+            borderLeft: `3px solid ${C}`,
+            borderRight: "1px solid rgba(245,158,11,0.05)",
+            padding: "22px 22px 34px 26px",
           }}>
-          <p className="font-mono text-[9px] tracking-[0.5em] uppercase mb-2" style={{ color: C + "55" }}>
+
+          <p className="font-mono" style={{ fontSize: 9, letterSpacing: "0.45em", color: `${C}88`, marginBottom: 8, textTransform: "uppercase" }}>
             {t("ဒိမ်နရှင် လေး", "Dimension Four")}
           </p>
-          <div className="font-orbitron font-black leading-none mb-2"
-            style={{ fontSize: "clamp(3rem,10vw,5rem)", color: C, textShadow: `0 0 50px ${C}70` }}>
+
+          <div className="font-orbitron" style={{
+            fontSize: "clamp(4.5rem,13vw,7rem)", fontWeight: 900, lineHeight: 1,
+            color: C, textShadow: `0 0 55px ${C}50`, marginBottom: 8
+          }}>
             4D
           </div>
-          <h2 className="font-orbitron text-sm lg:text-base font-bold text-white mb-3">
+
+          <h2 className="font-orbitron" style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.88)", marginBottom: 14, letterSpacing: "0.03em" }}>
             {t("အချိန် · Tesseract", "Time · The Unseen Axis")}
           </h2>
-          <p className="font-mm text-sm text-white/50 leading-relaxed mb-3">
+
+          <p className="font-mm" style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", lineHeight: 1.75, marginBottom: 20 }}>
             {t(
-              "မင်းသည် ယခုပင် 4D ထဲ ရွေ့လျားနေသည် — Time ဆိုသော axis ဖြင့် — နောက်ပြန်မဆုတ်နိုင်ဘဲ ။ Geometry အရ — Cube ကဲ့သို့ Tesseract သည် 4D ဘက်သို့ extend ထားသည်။",
+              "မင်းသည် ယခုပင် 4D ထဲ ရွေ့လျားနေသည် — Time ဆိုသော axis ဖြင့် — နောက်ပြန်မဆုတ်နိုင်ဘဲ ။ Tesseract သည် 4D object ၏ 3D shadow ဖြစ်သည်။",
               "You're already moving through 4D right now — called Time — and you can't turn back. The Tesseract you see is a 3D shadow of a 4D object."
             )}
           </p>
-          <p className="font-mono text-[9px] text-white/22 mb-4">
-            {t("ဦးနှောက်ကျဲသွားရင် မှန်ပါ 😵", "Brain hurt? That's normal. 😵")}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {[["Dim","4"],["Axes","X,Y,Z,W"],["Verts","16"],[t("ဥပမာ","Ex."),"Spacetime"]].map(([l,v]) => (
-              <div key={l} className="px-2.5 py-1.5 rounded-lg" style={{ background: C+"09", border:`1px solid ${C}1E` }}>
-                <p className="font-mono text-[7px] tracking-widest" style={{ color: C+"45" }}>{l}</p>
-                <p className="font-orbitron text-xs font-bold" style={{ color: C }}>{v}</p>
+              <div key={l} style={{
+                padding: "7px 12px", borderRadius: 8,
+                background: `${C}08`, border: `1px solid ${C}22`
+              }}>
+                <p className="font-mono" style={{ fontSize: 7, letterSpacing: "0.18em", color: `${C}88`, marginBottom: 2 }}>{l}</p>
+                <p className="font-orbitron" style={{ fontSize: 11, fontWeight: 700, color: C }}>{v}</p>
               </div>
             ))}
           </div>
         </div>
       </motion.div>
 
-      <div className="absolute bottom-[52%] right-4 lg:bottom-6 font-mono text-[8px] tracking-widest text-white/18 pointer-events-none">
-        {t("drag ↺", "drag ↺")}
+      <div className="absolute bottom-[53%] right-4 lg:bottom-6" style={{
+        fontFamily: "Space Mono", fontSize: 8, letterSpacing: "0.2em",
+        color: "rgba(255,255,255,0.14)", pointerEvents: "none"
+      }}>
+        drag ↺
       </div>
     </motion.div>
   )
