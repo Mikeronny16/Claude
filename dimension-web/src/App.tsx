@@ -6,6 +6,7 @@ import OneDSection from "./sections/OneDSection"
 import TwoDSection from "./sections/TwoDSection"
 import ThreeDSection from "./sections/ThreeDSection"
 import FourDSection from "./sections/FourDSection"
+import StarField from "./components/StarField"
 import "./index.css"
 
 export const DIMS = [
@@ -63,6 +64,7 @@ function Inner() {
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "#050508" }}>
+        <StarField />
         <AnimatePresence mode="wait">
           <Panel key={active} />
         </AnimatePresence>
