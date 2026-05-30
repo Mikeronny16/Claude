@@ -30,3 +30,24 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Other project config files
+.env.example
+
+# Other projects (tracked on their own branches)
+.next/
+ronnix-ai/
+sinar-clothing/
+spawn-ai/
+spawn-ai-mobile/
+app_spawn_backup/
+clinicai/
+colddm/
+draftwin/
+portfolio/
+readyprompts/
+readyuse/
+tikcheck/
+toynar/
+whispr/
+tsconfig.tsbuildinfo
