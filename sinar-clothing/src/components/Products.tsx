@@ -7,6 +7,7 @@ import ProductCard from "./ProductCard"
 import QuickViewModal from "./QuickViewModal"
 import OrderInstructions from "./OrderInstructions"
 import SizeGuide from "./SizeGuide"
+import FlashSaleBanner from "./FlashSaleBanner"
 import { HelpCircle, Ruler, Search, X } from "lucide-react"
 import { useLang } from "@/lib/lang"
 import { useTheme } from "@/lib/theme"
@@ -229,6 +230,9 @@ export default function Products() {
             })}
           </div>
         </motion.div>
+
+        {/* Flash Sale Banner */}
+        <FlashSaleBanner />
 
         {/* Editorial masonry-ish grid */}
         {items.length > 0 ? (
