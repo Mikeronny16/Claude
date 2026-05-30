@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dimension Web — Design Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans+Myanmar:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --c0: #C0C0FF;
+  --c1: #00F5FF;
+  --c2: #A855F7;
+  --c3: #FF1F6E;
+  --c4: #FFD700;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000008;
+  color: white;
+  font-family: 'Space Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { width: 100%; height: 100%; position: relative; }
+
+/* ── Typography ────────────────────────────────────── */
+.orbitron { font-family: 'Orbitron', sans-serif; }
+.mono     { font-family: 'Space Mono', monospace; }
+.myanmar  { font-family: 'Noto Sans Myanmar', sans-serif; }
+
+/* ── Sections ──────────────────────────────────────── */
+.section {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.section.active {
+  opacity: 1; pointer-events: all;
+}
+
+canvas.bg { position: absolute; inset: 0; display: block; }
+
+/* ── Glass cards ───────────────────────────────────── */
+.glass-card {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 20px 20px 32px;
+  border-radius: 1.5rem 1.5rem 0 0;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  animation: slideUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.18s both;
+}
+
+@media (min-width: 1024px) {
+  .glass-card {
+    bottom: auto; top: 50%; transform: translateY(-50%);
+    left: 40px; right: auto;
+    width: 360px;
+    border-radius: 1.5rem;
+    padding: 28px;
+  }
+  .glass-card.right {
+    left: auto; right: 40px;
+  }
+}
+
+.dim-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.35;
+}
+
+.dim-number {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.dim-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.dim-desc {
+  font-family: 'Noto Sans Myanmar', sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.tag .tag-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.3;
+}
+.tag .tag-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ── Side navigation dots ──────────────────────────── */
+#sidenav {
+  position: fixed;
+  right: 16px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.nav-dot-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-dot-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.nav-dot-wrap:hover .nav-dot-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.nav-dot {
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.22);
+  width: 6px; height: 6px;
+}
+
+.nav-dot-wrap.active .nav-dot {
+  width: 10px; height: 10px;
+}
+
+/* ── Language toggle ───────────────────────────────── */
+#lang-toggle {
+  position: fixed;
+  top: 20px; left: 20px;
+  z-index: 100;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  color: rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+#lang-toggle:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7);
+}
+
+/* ── Animations ────────────────────────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glitch {
+  0%,100% { text-shadow: none; transform: translate(0); }
+  10% { text-shadow: -2px 0 #00F5FF; transform: translate(-1px); }
+  20% { text-shadow:  2px 0 #FF1F6E; transform: translate(1px); }
+  30% { text-shadow: -1px 0 #A855F7; transform: translate(0); }
+  90% { text-shadow: none; transform: translate(0); }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-20px); }
+}
+
+@keyframes pulse-ring {
+  0%  { transform: scale(1); opacity: 0.6; }
+  100%{ transform: scale(2.8); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes spin3d {
+  0%   { transform: rotateX(0deg)   rotateY(0deg); }
+  100% { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+@keyframes spin4d {
+  0%   { transform: rotateX(0deg)   rotateY(0deg)   rotateZ(0deg); }
+  100% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg); }
+}
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes draw-line { from{stroke-dashoffset:1000} to{stroke-dashoffset:0} }
+
+/* ── HERO ──────────────────────────────────────────── */
+#hero {
+  position: absolute; inset: 0;
+  background: #000008;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.hero-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(168,85,247,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 0 20px;
+  animation: fadeIn 1s ease;
+}
+
+.hero-overline {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  color: #A855F7;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero-title-main {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3rem, 15vw, 9rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: white;
+  animation: glitch 3s infinite;
+}
+
+.hero-title-accent {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3rem, 15vw, 9rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(to right, #00F5FF, #A855F7, #FF1F6E);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  font-family: 'Noto Sans Myanmar', sans-serif;
+  font-size: 18px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.hero-scroll {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.3em;
+}
+
+.hero-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.hero-pill {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.hero-bottom {
+  position: absolute;
+  bottom: 32px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-line {
+  width: 1px; height: 64px;
+  background: linear-gradient(to bottom, transparent, #A855F7);
+}
+
+.hero-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #A855F7;
+  box-shadow: 0 0 20px #A855F7, 0 0 40px #A855F7;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* ── Vignettes ─────────────────────────────────────── */
+.vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 28%, var(--bg) 85%);
+  pointer-events: none;
+}
+
+.bottom-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to top, var(--bg), rgba(0,0,0,0) 0%, transparent);
+  pointer-events: none;
+}
+
+/* ── 0D Section ────────────────────────────────────── */
+#s0 { --bg: #000008; }
+
+.point-visual {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.point-rings {
+  position: relative;
+  width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.point-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(192,192,255,0.08);
+  animation: pulse-ring 3s ease-out infinite;
+}
+
+.point-core {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, white 0%, #C0C0FF 40%, transparent 70%);
+  box-shadow: 0 0 30px #C0C0FF, 0 0 60px #C0C0FF44;
+  position: relative; z-index: 2;
+}
+
+/* ── 1D Section ────────────────────────────────────── */
+#s1 { --bg: #000a0a; }
+
+.line-visual {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw; max-width: 600px;
+}
+
+.line-svg { width: 100%; overflow: visible; }
+
+/* ── 2D Section ────────────────────────────────────── */
+#s2 { --bg: #070010; }
+
+.plane-visual {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px; height: 300px;
+}
+
+.plane-grid {
+  position: absolute; inset: -60px;
+  background-image:
+    linear-gradient(rgba(168,85,247,0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,85,247,0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.plane-square {
+  position: absolute; inset: 20px;
+  border: 2px solid #A855F7;
+  background: rgba(168,85,247,0.05);
+  box-shadow: 0 0 30px rgba(168,85,247,0.3), inset 0 0 30px rgba(168,85,247,0.05);
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ── 3D Section ────────────────────────────────────── */
+#s3 { --bg: #0a0005; }
+
+.cube-visual {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px; height: 180px;
+  perspective: 600px;
+}
+
+.cube {
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  animation: spin3d 10s linear infinite;
+}
+
+.cube-face {
+  position: absolute;
+  width: 100%; height: 100%;
+  border: 2px solid #FF1F6E;
+  background: rgba(255,31,110,0.03);
+  box-shadow: 0 0 20px rgba(255,31,110,0.2);
+}
+
+/* ── 4D Section ────────────────────────────────────── */
+#s4 { --bg: #080500; }
+
+.tesseract-visual {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px; height: 240px;
+  perspective: 800px;
+}
+
+.tesseract {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.tcube-outer {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  animation: spin4d 8s linear infinite;
+}
+
+.tcube-inner {
+  position: absolute;
+  inset: 40px;
+  transform-style: preserve-3d;
+  animation: spin4d 8s linear infinite reverse;
+}
+
+.tface {
+  position: absolute;
+  width: 100%; height: 100%;
+  border: 1.5px solid;
+}
+
+/* ── Axis labels ───────────────────────────────────── */
+.axis-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: absolute;
+}
+
+/* ── Drag hint ─────────────────────────────────────── */
+.drag-hint {
+  position: absolute;
+  bottom: 52%; right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.18);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .drag-hint { bottom: 24px; }
+}
+
+/* ── Mockup label ──────────────────────────────────── */
+#mockup-label {
+  position: fixed;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.12);
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ── Progress bar ──────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: 200;
+  background: rgba(255,255,255,0.05);
+}
+
+#progress-fill {
+  height: 100%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* ── Hero star particles (JS) ───────────────────────── */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: float var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
+  opacity: var(--op);
+}
+
+/* ── Keyboard hint ─────────────────────────────────── */
+#kbd-hint {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: rgba(255,255,255,0.15);
+  letter-spacing: 0.15em;
+  z-index: 100;
+}
+
+</style>
+</head>
+<body>
+<div id="root">
+
+  <!-- Progress bar -->
+  <div id="progress"><div id="progress-fill"></div></div>
+
+  <!-- HERO SECTION -->
+  <div id="hero" class="section active">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div id="hero-stars"></div>
+
+    <div class="hero-content">
+      <p class="hero-overline">မိတ်ဆက် • Interactive</p>
+
+      <div>
+        <div class="hero-title-main">DIM</div>
+        <div class="hero-title-accent">ENSIONS</div>
+      </div>
+
+      <p class="hero-sub">0D မှ 4D ထိ — အကြောင်းအရာ</p>
+      <p class="hero-scroll">scroll လုပ်ပြီး စတင်ကြည့်ရှုပါ ↓</p>
+
+      <div class="hero-pills">
+        <div class="hero-pill" style="color:#C0C0FF;border-color:#C0C0FF40;background:#C0C0FF10;" onclick="goTo(0)">0D</div>
+        <div class="hero-pill" style="color:#00F5FF;border-color:#00F5FF40;background:#00F5FF10;" onclick="goTo(1)">1D</div>
+        <div class="hero-pill" style="color:#A855F7;border-color:#A855F740;background:#A855F710;" onclick="goTo(2)">2D</div>
+        <div class="hero-pill" style="color:#FF1F6E;border-color:#FF1F6E40;background:#FF1F6E10;" onclick="goTo(3)">3D</div>
+        <div class="hero-pill" style="color:#FFD700;border-color:#FFD70040;background:#FFD70010;" onclick="goTo(4)">4D</div>
+      </div>
+    </div>
+
+    <div class="hero-bottom">
+      <div class="hero-line"></div>
+      <div class="hero-dot"></div>
+    </div>
+  </div>
+
+  <!-- 0D: POINT -->
+  <div id="s0" class="section">
+    <canvas id="c0" class="bg"></canvas>
+    <div class="vignette" style="--bg:#000008"></div>
+    <div class="bottom-fade" style="background:linear-gradient(to top,#000008 0%,rgba(0,0,8,0.7) 40%,transparent 100%)"></div>
+
+    <div class="glass-card" style="background:linear-gradient(145deg,#C0C0FF09,#C0C0FF03);border-top:1px solid #C0C0FF22;border-left:1px solid #C0C0FF14;">
+      <p class="dim-label" style="color:#C0C0FF">ဒိမ်နရှင် သုည</p>
+      <div class="dim-number" style="color:#C0C0FF;text-shadow:0 0 50px #C0C0FF70">0D</div>
+      <h2 class="dim-title">အမှတ် — မြစ်ဖျားခံ</h2>
+      <p class="dim-desc">တည်နေရာ ရှိသော်လည်း အတိုင်းအတာ မရှိ။ Line, Plane, Space အားလုံး ၎င်း Point မှ ဆင်းသက်သည်။</p>
+      <div class="tags">
+        <div class="tag" style="background:#C0C0FF09;border:1px solid #C0C0FF1E">
+          <div class="tag-label" style="color:#C0C0FF">Dim</div>
+          <div class="tag-val" style="color:#C0C0FF">0</div>
+        </div>
+        <div class="tag" style="background:#C0C0FF09;border:1px solid #C0C0FF1E">
+          <div class="tag-label" style="color:#C0C0FF">Axes</div>
+          <div class="tag-val" style="color:#C0C0FF">None</div>
+        </div>
+        <div class="tag" style="background:#C0C0FF09;border:1px solid #C0C0FF1E">
+          <div class="tag-label" style="color:#C0C0FF">Size</div>
+          <div class="tag-val" style="color:#C0C0FF">∅</div>
+        </div>
+        <div class="tag" style="background:#C0C0FF09;border:1px solid #C0C0FF1E">
+          <div class="tag-label" style="color:#C0C0FF">ဥပမာ</div>
+          <div class="tag-val" style="color:#C0C0FF">Pin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1D: LINE -->
+  <div id="s1" class="section">
+    <canvas id="c1" class="bg"></canvas>
+    <div class="vignette" style="--bg:#000a0a"></div>
+    <div class="bottom-fade" style="background:linear-gradient(to top,#000a0a 0%,rgba(0,10,10,0.65) 40%,transparent 100%)"></div>
+
+    <div class="glass-card" style="background:linear-gradient(145deg,#00F5FF07,#00F5FF02);border-top:1px solid #00F5FF20;border-left:1px solid #00F5FF12;">
+      <p class="dim-label" style="color:#00F5FF">ဒိမ်နရှင် တစ်</p>
+      <div class="dim-number" style="color:#00F5FF;text-shadow:0 0 50px #00F5FF70">1D</div>
+      <h2 class="dim-title">မျဉ်းကြောင်း — ဦးတည်ချက်</h2>
+      <p class="dim-desc">Point ကို ဦးတည်ချက် တစ်ဘက်သို့ ဆွဲလျှင် Line ဖြစ်သည်။ ဘယ်ဘက် ညာဘက်သာ ၊ အပေါ် အောက် မရ — ကမ္ဘာ နဲ့ ကွာလည်ရသည်မှာ dimension တစ်ခု ပဲ ။</p>
+      <div class="tags">
+        <div class="tag" style="background:#00F5FF09;border:1px solid #00F5FF1E">
+          <div class="tag-label" style="color:#00F5FF">Dim</div>
+          <div class="tag-val" style="color:#00F5FF">1</div>
+        </div>
+        <div class="tag" style="background:#00F5FF09;border:1px solid #00F5FF1E">
+          <div class="tag-label" style="color:#00F5FF">Axis</div>
+          <div class="tag-val" style="color:#00F5FF">X</div>
+        </div>
+        <div class="tag" style="background:#00F5FF09;border:1px solid #00F5FF1E">
+          <div class="tag-label" style="color:#00F5FF">Freedom</div>
+          <div class="tag-val" style="color:#00F5FF">←→</div>
+        </div>
+        <div class="tag" style="background:#00F5FF09;border:1px solid #00F5FF1E">
+          <div class="tag-label" style="color:#00F5FF">ဥပမာ</div>
+          <div class="tag-val" style="color:#00F5FF">Ruler</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2D: PLANE -->
+  <div id="s2" class="section">
+    <canvas id="c2" class="bg"></canvas>
+    <div class="vignette" style="--bg:#070010"></div>
+    <div class="bottom-fade" style="background:linear-gradient(to top,#070010 0%,rgba(7,0,16,0.65) 40%,transparent 100%)"></div>
+
+    <div class="glass-card right" style="background:linear-gradient(145deg,#A855F708,#A855F702);border-top:1px solid #A855F720;border-left:1px solid #A855F712;">
+      <p class="dim-label" style="color:#A855F7">ဒိမ်နရှင် နှစ်</p>
+      <div class="dim-number" style="color:#A855F7;text-shadow:0 0 50px #A855F770">2D</div>
+      <h2 class="dim-title">မျက်နှာပြင် — ညဘက်ပေါ်</h2>
+      <p class="dim-desc">Line ထဲသို့ ဦးတည်ချက် နောက်တစ်ခု ပေါင်းလျှင် Plane ဖြစ်သည်။ မြေပုံ၊ ဓာတ်ပုံ၊ Screen — Depth မပါ flat ကမ္ဘာများ ဖြစ်ကြသည်။ မင်း shadow သည် 2D ဖြစ်သည်။</p>
+      <div class="tags">
+        <div class="tag" style="background:#A855F709;border:1px solid #A855F71E">
+          <div class="tag-label" style="color:#A855F7">Dim</div>
+          <div class="tag-val" style="color:#A855F7">2</div>
+        </div>
+        <div class="tag" style="background:#A855F709;border:1px solid #A855F71E">
+          <div class="tag-label" style="color:#A855F7">Axes</div>
+          <div class="tag-val" style="color:#A855F7">X, Y</div>
+        </div>
+        <div class="tag" style="background:#A855F709;border:1px solid #A855F71E">
+          <div class="tag-label" style="color:#A855F7">Freedom</div>
+          <div class="tag-val" style="color:#A855F7">↑↓←→</div>
+        </div>
+        <div class="tag" style="background:#A855F709;border:1px solid #A855F71E">
+          <div class="tag-label" style="color:#A855F7">ဥပမာ</div>
+          <div class="tag-val" style="color:#A855F7">Screen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D: SPACE -->
+  <div id="s3" class="section">
+    <div id="three-placeholder-3d" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+      <div style="position:relative;width:240px;height:240px;perspective:600px;">
+        <div style="width:100%;height:100%;transform-style:preserve-3d;animation:spin3d 10s linear infinite;position:relative;">
+          <!-- CSS cube approximation -->
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E55;background:rgba(255,31,110,0.03);box-shadow:0 0 30px rgba(255,31,110,0.15);transform:translateZ(120px)"></div>
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E55;background:rgba(255,31,110,0.03);transform:translateZ(-120px)"></div>
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E40;background:rgba(255,31,110,0.02);transform:rotateY(90deg) translateZ(120px)"></div>
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E40;background:rgba(255,31,110,0.02);transform:rotateY(-90deg) translateZ(120px)"></div>
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E30;background:rgba(255,31,110,0.02);transform:rotateX(90deg) translateZ(120px)"></div>
+          <div style="position:absolute;inset:0;border:2px solid #FF1F6E30;background:rgba(255,31,110,0.02);transform:rotateX(-90deg) translateZ(120px)"></div>
+        </div>
+      </div>
+      <!-- Glow point -->
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,31,110,0.12) 0%,transparent 60%);pointer-events:none"></div>
+    </div>
+    <div class="vignette" style="--bg:#0a0005"></div>
+    <div class="bottom-fade" style="background:linear-gradient(to top,#0a0005 0%,rgba(10,0,5,0.65) 40%,transparent 100%)"></div>
+
+    <div class="glass-card" style="background:linear-gradient(145deg,#FF1F6E08,#FF1F6E02);border-top:1px solid #FF1F6E20;border-left:1px solid #FF1F6E12;">
+      <p class="dim-label" style="color:#FF1F6E">ဒိမ်နရှင် သုံး</p>
+      <div class="dim-number" style="color:#FF1F6E;text-shadow:0 0 50px #FF1F6E70">3D</div>
+      <h2 class="dim-title">အာကာသ — ကမ္ဘာတည်ရာ</h2>
+      <p class="dim-desc">Depth ထပ်ထည့်သောအခါ Volume ဖြစ်သည်။ Shadow ကျသည်၊ Weight ရှိသည်၊ ကိုင်လို့ ရသည် — ဒါ ကျွန်တော်တို့ ကမ္ဘာ ဖြစ်သည်။</p>
+      <div style="display:flex;gap:12px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#00F5FF;box-shadow:0 0 8px #00F5FF"></div>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#00F5FF">X →</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#A855F7;box-shadow:0 0 8px #A855F7"></div>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#A855F7">Y ↑</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#FF1F6E;box-shadow:0 0 8px #FF1F6E"></div>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#FF1F6E">Z ↗</span>
+        </div>
+      </div>
+      <div class="tags">
+        <div class="tag" style="background:#FF1F6E09;border:1px solid #FF1F6E1E">
+          <div class="tag-label" style="color:#FF1F6E">Dim</div>
+          <div class="tag-val" style="color:#FF1F6E">3</div>
+        </div>
+        <div class="tag" style="background:#FF1F6E09;border:1px solid #FF1F6E1E">
+          <div class="tag-label" style="color:#FF1F6E">Axes</div>
+          <div class="tag-val" style="color:#FF1F6E">X,Y,Z</div>
+        </div>
+        <div class="tag" style="background:#FF1F6E09;border:1px solid #FF1F6E1E">
+          <div class="tag-label" style="color:#FF1F6E">Vol</div>
+          <div class="tag-val" style="color:#FF1F6E">3D</div>
+        </div>
+        <div class="tag" style="background:#FF1F6E09;border:1px solid #FF1F6E1E">
+          <div class="tag-label" style="color:#FF1F6E">ဥပမာ</div>
+          <div class="tag-val" style="color:#FF1F6E">ကမ္ဘာ</div>
+        </div>
+      </div>
+    </div>
+    <div class="drag-hint">drag ↺</div>
+  </div>
+
+  <!-- 4D: TIME / TESSERACT -->
+  <div id="s4" class="section">
+    <div id="tesseract-vis" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+      <!-- Tesseract approximation via CSS -->
+      <div style="position:relative;width:260px;height:260px;perspective:900px;">
+        <!-- Outer cube -->
+        <div style="position:absolute;inset:0;transform-style:preserve-3d;animation:spin4d 8s linear infinite;">
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70055;background:rgba(255,215,0,0.02);transform:translateZ(130px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70055;background:rgba(255,215,0,0.02);transform:translateZ(-130px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70040;transform:rotateY(90deg) translateZ(130px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70040;transform:rotateY(-90deg) translateZ(130px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70030;transform:rotateX(90deg) translateZ(130px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FFD70030;transform:rotateX(-90deg) translateZ(130px)"></div>
+        </div>
+        <!-- Inner cube -->
+        <div style="position:absolute;inset:50px;transform-style:preserve-3d;animation:spin4d 8s linear infinite reverse;">
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0055;transform:translateZ(80px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0055;transform:translateZ(-80px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0040;transform:rotateY(90deg) translateZ(80px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0040;transform:rotateY(-90deg) translateZ(80px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0030;transform:rotateX(90deg) translateZ(80px)"></div>
+          <div style="position:absolute;inset:0;border:1.5px solid #FF6B0030;transform:rotateX(-90deg) translateZ(80px)"></div>
+        </div>
+        <!-- Connector lines (4D shadow effect) -->
+        <svg style="position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);overflow:visible;pointer-events:none;opacity:0.25">
+          <line x1="0" y1="0" x2="50" y2="50" stroke="#FFD700" stroke-width="1"/>
+          <line x1="300" y1="0" x2="250" y2="50" stroke="#FFD700" stroke-width="1"/>
+          <line x1="0" y1="300" x2="50" y2="250" stroke="#FFD700" stroke-width="1"/>
+          <line x1="300" y1="300" x2="250" y2="250" stroke="#FFD700" stroke-width="1"/>
+        </svg>
+      </div>
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 60%);pointer-events:none"></div>
+    </div>
+
+    <div class="vignette" style="--bg:#080500"></div>
+    <div class="bottom-fade" style="background:linear-gradient(to top,#080500 0%,rgba(8,5,0,0.65) 40%,transparent 100%)"></div>
+
+    <div class="glass-card right" style="background:linear-gradient(145deg,#FFD70007,#FFD70002);border-top:1px solid #FFD70020;border-left:1px solid #FFD70012;">
+      <p class="dim-label" style="color:#FFD700">ဒိမ်နရှင် လေး</p>
+      <div class="dim-number" style="color:#FFD700;text-shadow:0 0 50px #FFD70070">4D</div>
+      <h2 class="dim-title">အချိန် · Tesseract</h2>
+      <p class="dim-desc">မင်းသည် ယခုပင် 4D ထဲ ရွေ့လျားနေသည် — Time ဆိုသော axis ဖြင့် — နောက်ပြန်မဆုတ်နိုင်ဘဲ ။ Geometry အရ — Cube ကဲ့သို့ Tesseract သည် 4D ဘက်သို့ extend ထားသည်။</p>
+      <p style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.22);margin-bottom:16px;">ဦးနှောက်ကျဲသွားရင် မှန်ပါ 😵</p>
+      <div class="tags">
+        <div class="tag" style="background:#FFD70009;border:1px solid #FFD7001E">
+          <div class="tag-label" style="color:#FFD700">Dim</div>
+          <div class="tag-val" style="color:#FFD700">4</div>
+        </div>
+        <div class="tag" style="background:#FFD70009;border:1px solid #FFD7001E">
+          <div class="tag-label" style="color:#FFD700">Axes</div>
+          <div class="tag-val" style="color:#FFD700">X,Y,Z,W</div>
+        </div>
+        <div class="tag" style="background:#FFD70009;border:1px solid #FFD7001E">
+          <div class="tag-label" style="color:#FFD700">Verts</div>
+          <div class="tag-val" style="color:#FFD700">16</div>
+        </div>
+        <div class="tag" style="background:#FFD70009;border:1px solid #FFD7001E">
+          <div class="tag-label" style="color:#FFD700">ဥပမာ</div>
+          <div class="tag-val" style="color:#FFD700">Spacetime</div>
+        </div>
+      </div>
+    </div>
+    <div class="drag-hint">drag ↺</div>
+  </div>
+
+  <!-- Side navigation -->
+  <div id="sidenav"></div>
+
+  <!-- Language toggle -->
+  <div id="lang-toggle" onclick="toggleLang()">EN</div>
+
+  <!-- Mockup label -->
+  <div id="mockup-label">dimension-web — design mockup v1</div>
+
+  <!-- Keyboard hint -->
+  <div id="kbd-hint">← → arrow keys to navigate</div>
+
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────
+const DIMS = [
+  { id: "hero", label: null,  color: "#ffffff" },
+  { id: "s0",   label: "0D",  color: "#C0C0FF" },
+  { id: "s1",   label: "1D",  color: "#00F5FF" },
+  { id: "s2",   label: "2D",  color: "#A855F7" },
+  { id: "s3",   label: "3D",  color: "#FF1F6E" },
+  { id: "s4",   label: "4D",  color: "#FFD700" },
+]
+
+let active = 0
+let lang   = "mm"
+
+// ── Navigation ───────────────────────────────────────
+function goTo(idx) {
+  if (idx < 0 || idx >= DIMS.length) return
+  DIMS.forEach((d, i) => {
+    const el = document.getElementById(d.id)
+    el.classList.toggle("active", i === idx)
+  })
+  active = idx
+  updateNav()
+  updateProgress()
+}
+
+function updateProgress() {
+  const fill = document.getElementById("progress-fill")
+  const pct  = active / (DIMS.length - 1) * 100
+  const col  = DIMS[active].color
+  fill.style.width      = pct + "%"
+  fill.style.background = `linear-gradient(to right, ${col}88, ${col})`
+  fill.style.boxShadow  = `0 0 8px ${col}88`
+}
+
+function updateNav() {
+  document.querySelectorAll(".nav-dot-wrap").forEach((el, i) => {
+    const on = i === active
+    el.classList.toggle("active", on)
+    const dot = el.querySelector(".nav-dot")
+    const d   = DIMS[i]
+    dot.style.background  = on ? d.color : "rgba(255,255,255,0.22)"
+    dot.style.boxShadow   = on ? `0 0 12px ${d.color}, 0 0 28px ${d.color}45` : "none"
+    dot.style.width       = on ? "10px" : "6px"
+    dot.style.height      = on ? "10px" : "6px"
+    const lbl = el.querySelector(".nav-dot-label")
+    if (lbl) lbl.style.color = d.color
+  })
+}
+
+// ── Build side nav ────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById("sidenav")
+  DIMS.forEach((d, i) => {
+    const wrap = document.createElement("div")
+    wrap.className = "nav-dot-wrap" + (i === 0 ? " active" : "")
+    wrap.onclick   = () => goTo(i)
+
+    if (d.label) {
+      const lbl = document.createElement("span")
+      lbl.className = "nav-dot-label orbitron"
+      lbl.textContent = d.label
+      lbl.style.color = d.color
+      wrap.appendChild(lbl)
+    }
+
+    const dot = document.createElement("div")
+    dot.className = "nav-dot"
+    dot.style.background = i === 0 ? d.color : "rgba(255,255,255,0.22)"
+    if (i === 0) { dot.style.width = "10px"; dot.style.height = "10px" }
+    wrap.appendChild(dot)
+    nav.appendChild(wrap)
+  })
+}
+
+// ── Language ──────────────────────────────────────────
+const TEXTS = {
+  mm: {
+    overline: "မိတ်ဆက် • Interactive",
+    subtitle: "0D မှ 4D ထိ — အကြောင်းအရာ",
+    scroll:   "scroll လုပ်ပြီး စတင်ကြည့်ရှုပါ ↓",
+    d0label:  "ဒိမ်နရှင် သုည",
+    d0title:  "အမှတ် — မြစ်ဖျားခံ",
+    d0desc:   "တည်နေရာ ရှိသော်လည်း အတိုင်းအတာ မရှိ။ Line, Plane, Space အားလုံး ၎င်း Point မှ ဆင်းသက်သည်။",
+    d1label:  "ဒိမ်နရှင် တစ်",
+    d1title:  "မျဉ်းကြောင်း — ဦးတည်ချက်",
+    d1desc:   "Point ကို ဦးတည်ချက် တစ်ဘက်သို့ ဆွဲလျှင် Line ဖြစ်သည်။",
+  },
+  en: {
+    overline: "Interactive • Introduction",
+    subtitle: "From 0D to 4D — The Full Story",
+    scroll:   "scroll to explore ↓",
+    d0label:  "Dimension Zero",
+    d0title:  "The Point — Origin of All",
+    d0desc:   "A location with no size — yet every line, plane, and universe is built from infinite points like this one.",
+    d1label:  "Dimension One",
+    d1title:  "The Line — Direction Born",
+    d1desc:   "Stretch a point in one direction and you get infinity. Forward or back — but never sideways.",
+  }
+}
+
+function toggleLang() {
+  lang = lang === "mm" ? "en" : "mm"
+  document.getElementById("lang-toggle").textContent = lang === "mm" ? "EN" : "MM"
+}
+
+// ── Keyboard navigation ────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown")  goTo(active + 1)
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")    goTo(active - 1)
+})
+
+// ── Wheel navigation ───────────────────────────────────
+let wheelLock = false
+document.addEventListener("wheel", e => {
+  if (wheelLock) return
+  wheelLock = true
+  setTimeout(() => wheelLock = false, 800)
+  if (e.deltaY > 0) goTo(active + 1)
+  else              goTo(active - 1)
+}, { passive: true })
+
+// ── Touch swipe ────────────────────────────────────────
+let touchY = 0
+document.addEventListener("touchstart", e => { touchY = e.touches[0].clientY }, { passive: true })
+document.addEventListener("touchend", e => {
+  const dy = touchY - e.changedTouches[0].clientY
+  if (Math.abs(dy) < 40) return
+  if (dy > 0) goTo(active + 1)
+  else        goTo(active - 1)
+}, { passive: true })
+
+// ── Star particles for hero ────────────────────────────
+function buildStars() {
+  const container = document.getElementById("hero-stars")
+  container.style.cssText = "position:absolute;inset:0;pointer-events:none"
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement("div")
+    const sz = Math.random() * 2.5 + 0.5
+    s.className = "star"
+    s.style.cssText = `
+      width: ${sz}px; height: ${sz}px;
+      left: ${Math.random() * 100}%;
+      top:  ${Math.random() * 100}%;
+      --dur:   ${3 + Math.random() * 4}s;
+      --delay: ${Math.random() * 3}s;
+      --op:    ${Math.random() * 0.5 + 0.1};
+    `
+    container.appendChild(s)
+  }
+}
+
+// ── Canvas: 0D (point + glow rings) ───────────────────
+function drawZeroD() {
+  const canvas = document.getElementById("c0")
+  if (!canvas) return
+  const ctx = canvas.getContext("2d")
+  let raf, time = 0
+
+  const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight }
+  resize()
+  window.addEventListener("resize", resize)
+
+  const C = "#C0C0FF"
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    time += 0.018
+    const cx = canvas.width  / 2
+    const cy = canvas.height * 0.38
+    const r  = 16 + Math.sin(time * 2) * 6
+
+    for (let i = 8; i >= 1; i--) {
+      ctx.beginPath(); ctx.arc(cx, cy, r * i * 2.8, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(192,192,255,${0.018 / i})`; ctx.fill()
+    }
+
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 3.5)
+    g.addColorStop(0, "#fff"); g.addColorStop(0.28, C)
+    g.addColorStop(0.6, C + "40"); g.addColorStop(1, "transparent")
+    ctx.beginPath(); ctx.arc(cx, cy, r * 3.5, 0, Math.PI * 2)
+    ctx.fillStyle = g; ctx.fill()
+
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2)
+    ctx.fillStyle = "#fff"; ctx.shadowBlur = 20; ctx.shadowColor = C
+    ctx.fill(); ctx.shadowBlur = 0
+
+    raf = requestAnimationFrame(draw)
+  }
+  draw()
+
+  // Stop animation when section not active (perf)
+  const obs = new MutationObserver(() => {
+    if (!document.getElementById("s0").classList.contains("active"))
+      cancelAnimationFrame(raf)
+    else draw()
+  })
+  obs.observe(document.getElementById("s0"), { attributes: true })
+}
+
+// ── Canvas: 1D (animated number line) ─────────────────
+function drawOneD() {
+  const canvas = document.getElementById("c1")
+  if (!canvas) return
+  const ctx = canvas.getContext("2d")
+  let raf, time = 0
+  const C = "#00F5FF"
+
+  const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight }
+  resize()
+  window.addEventListener("resize", resize)
+
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    time += 0.015
+    const cx = canvas.width  / 2
+    const cy = canvas.height * 0.38
+    const len = canvas.width * 0.38 + Math.sin(time) * 12
+
+    const grad = ctx.createLinearGradient(cx - len, cy, cx + len, cy)
+    grad.addColorStop(0, "transparent"); grad.addColorStop(0.07, C + "50")
+    grad.addColorStop(0.5, C); grad.addColorStop(0.93, C + "50"); grad.addColorStop(1, "transparent")
+    ctx.shadowBlur = 32; ctx.shadowColor = C
+    ctx.beginPath(); ctx.moveTo(cx - len, cy); ctx.lineTo(cx + len, cy)
+    ctx.strokeStyle = grad; ctx.lineWidth = 2.5; ctx.stroke(); ctx.shadowBlur = 0
+
+    for (let i = -5; i <= 5; i++) {
+      const x = cx + (i / 5) * len
+      ctx.beginPath(); ctx.moveTo(x, cy - 8); ctx.lineTo(x, cy + 8)
+      ctx.strokeStyle = i === 0 ? "#fff" : C + "65"
+      ctx.lineWidth = i === 0 ? 2 : 1; ctx.stroke()
+      ctx.fillStyle = C + "65"; ctx.font = "10px Space Mono"; ctx.textAlign = "center"
+      ctx.fillText(String(i), x, cy + 22)
+    }
+
+    ;[-1, 1].forEach(d => {
+      const ax = cx + d * len
+      ctx.beginPath(); ctx.moveTo(ax + d * 14, cy)
+      ctx.lineTo(ax, cy - 7); ctx.lineTo(ax, cy + 7)
+      ctx.fillStyle = C; ctx.shadowBlur = 15; ctx.shadowColor = C; ctx.fill(); ctx.shadowBlur = 0
+    })
+
+    const px = cx + Math.sin(time * 0.8) * len * 0.72
+    ctx.beginPath(); ctx.arc(px, cy, 7, 0, Math.PI * 2)
+    ctx.fillStyle = "#fff"; ctx.shadowBlur = 24; ctx.shadowColor = C; ctx.fill(); ctx.shadowBlur = 0
+    ctx.fillStyle = C + "90"; ctx.font = "10px Space Mono"; ctx.textAlign = "left"
+    ctx.fillText("x = " + ((px - cx) / len * 5).toFixed(1), px + 12, cy - 12)
+    ctx.fillStyle = C; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "right"
+    ctx.fillText("X →", cx + len, cy - 18)
+
+    raf = requestAnimationFrame(draw)
+  }
+  draw()
+}
+
+// ── Canvas: 2D (grid + animated square + point) ────────
+function drawTwoD() {
+  const canvas = document.getElementById("c2")
+  if (!canvas) return
+  const ctx = canvas.getContext("2d")
+  let raf, time = 0
+  const C = "#A855F7"
+
+  const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight }
+  resize()
+  window.addEventListener("resize", resize)
+
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    time += 0.012
+    const cx   = canvas.width  / 2
+    const cy   = canvas.height * 0.38
+    const size = Math.min(canvas.width, canvas.height) * 0.22
+
+    ctx.strokeStyle = C + "18"; ctx.lineWidth = 1
+    const step = size / 3
+    for (let i = -6; i <= 6; i++) {
+      ctx.beginPath(); ctx.moveTo(cx + i*step, cy - size*2); ctx.lineTo(cx + i*step, cy + size*2); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(cx - size*2, cy + i*step); ctx.lineTo(cx + size*2, cy + i*step); ctx.stroke()
+    }
+
+    const s = size + Math.sin(time) * 10
+    ctx.shadowBlur = 32; ctx.shadowColor = C
+    ctx.strokeStyle = C; ctx.lineWidth = 2
+    ctx.strokeRect(cx - s, cy - s, s*2, s*2)
+    ctx.fillStyle = C + "07"; ctx.fillRect(cx - s, cy - s, s*2, s*2)
+    ctx.shadowBlur = 0
+
+    const corners = [[cx-s,cy-s],[cx+s,cy-s],[cx-s,cy+s],[cx+s,cy+s]]
+    corners.forEach(([x,y]) => {
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2)
+      ctx.fillStyle = "#fff"; ctx.shadowBlur = 14; ctx.shadowColor = C; ctx.fill(); ctx.shadowBlur = 0
+    })
+
+    ctx.shadowBlur = 14; ctx.shadowColor = C; ctx.strokeStyle = C + "55"; ctx.lineWidth = 1.5
+    ctx.beginPath(); ctx.moveTo(cx-size*1.7,cy); ctx.lineTo(cx+size*1.7,cy); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(cx,cy-size*1.7); ctx.lineTo(cx,cy+size*1.7); ctx.stroke()
+    ctx.shadowBlur = 0
+
+    ctx.fillStyle = C; ctx.font = "bold 12px Orbitron"
+    ctx.textAlign = "right"; ctx.fillText("X →", cx+size*1.65, cy-12)
+    ctx.textAlign = "center"; ctx.fillText("↑ Y", cx+8, cy-size*1.6+18)
+
+    const px = cx + Math.cos(time*0.7)*s*0.52
+    const py = cy + Math.sin(time*0.9)*s*0.52
+    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2)
+    ctx.fillStyle = "#fff"; ctx.shadowBlur = 22; ctx.shadowColor = C; ctx.fill(); ctx.shadowBlur = 0
+    ctx.fillStyle = C + "90"; ctx.font = "10px Space Mono"; ctx.textAlign = "left"
+    ctx.fillText(`(${((px-cx)/s*3).toFixed(1)}, ${(-(py-cy)/s*3).toFixed(1)})`, px+10, py-8)
+
+    raf = requestAnimationFrame(draw)
+  }
+  draw()
+}
+
+// ── Init ─────────────────────────────────────────────
+buildNav()
+buildStars()
+updateProgress()
+drawZeroD()
+drawOneD()
+drawTwoD()
+</script>
+</body>
+</html>
