@@ -18,27 +18,26 @@ export const DIMS = [
 
 const PANELS = [ZeroDSection, OneDSection, TwoDSection, ThreeDSection, FourDSection]
 
-function DimNav({ active, setActive }: { active: number; setActive: (i: number) => void }) {
-  const d = DIMS[active]
+function SideDots({ active, setActive }: { active: number; setActive: (i: number) => void }) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-2 py-2 rounded-full"
-      style={{
-        background: "rgba(0,0,8,0.7)",
-        backdropFilter: "blur(24px)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        boxShadow: `0 0 40px ${d.color}18`,
-      }}>
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-5 items-end">
       {DIMS.map(dim => {
         const on = active === dim.id
         return (
           <button key={dim.id} onClick={() => setActive(dim.id)}
-            className="px-4 py-1.5 font-orbitron text-xs font-bold rounded-full transition-all duration-400"
-            style={{
-              color: on ? "#000008" : dim.color + "60",
-              background: on ? dim.color : "transparent",
-              boxShadow: on ? `0 0 18px ${dim.color}55` : "none",
-            }}>
-            {dim.label}
+            className="relative flex items-center gap-2.5 group">
+            <span className="absolute right-5 font-orbitron text-[9px] font-bold whitespace-nowrap
+              opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0
+              transition-all duration-200 pointer-events-none"
+              style={{ color: dim.color }}>
+              {dim.label}
+            </span>
+            <div className="rounded-full flex-shrink-0 transition-all duration-300"
+              style={{
+                width: on ? 10 : 6, height: on ? 10 : 6,
+                background: on ? dim.color : "rgba(255,255,255,0.22)",
+                boxShadow: on ? `0 0 12px ${dim.color}, 0 0 28px ${dim.color}45` : "none",
+              }} />
           </button>
         )
       })}
@@ -50,8 +49,8 @@ function LangToggle() {
   const { lang, toggle } = useLang()
   return (
     <button onClick={toggle}
-      className="fixed top-5 right-5 z-50 font-mono text-[10px] border border-white/10 px-3 py-1.5 rounded-full text-white/40 hover:border-white/30 hover:text-white/70 transition-all"
-      style={{ backdropFilter: "blur(12px)", background: "rgba(0,0,0,0.35)" }}>
+      className="fixed top-5 left-5 z-50 font-mono text-[10px] border border-white/10 px-3 py-1.5 rounded-full text-white/40 hover:border-white/30 hover:text-white/70 transition-all"
+      style={{ backdropFilter: "blur(12px)", background: "rgba(0,0,0,0.4)" }}>
       {lang === "mm" ? "EN" : "MM"}
     </button>
   )
@@ -62,13 +61,17 @@ function Inner() {
   const Panel = PANELS[active]
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ background: "#000008" }}>
-      <AnimatePresence mode="wait">
-        <Panel key={active} />
-      </AnimatePresence>
-      <DimNav active={active} setActive={setActive} />
+    <>
+      {/* Scene — no overflow:hidden so iOS fixed children work */}
+      <div style={{ position: "fixed", inset: 0, background: "#000008" }}>
+        <AnimatePresence mode="wait">
+          <Panel key={active} />
+        </AnimatePresence>
+      </div>
+      {/* UI outside the scene container so fixed positioning is relative to viewport */}
+      <SideDots active={active} setActive={setActive} />
       <LangToggle />
-    </div>
+    </>
   )
 }
 
