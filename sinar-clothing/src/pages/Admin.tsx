@@ -21,6 +21,8 @@ type FormData = {
   name_en: string
   category: string
   price: number
+  original_price: number | null
+  badge: string
   sizes: string
   status: string
   image_url: string
@@ -44,10 +46,12 @@ function ProductForm({ initial, onClose, onSave }: {
     defaultValues: initial ? {
       name_mm: initial.name_mm, name_en: initial.name_en,
       category: initial.category, price: initial.price,
+      original_price: initial.original_price ?? null,
+      badge: initial.badge ?? "",
       sizes: initial.sizes.join(", "), status: initial.status,
       image_url: initial.image_url, sold_out: initial.sold_out,
       sort_order: initial.sort_order,
-    } : { status: "In Stock", sold_out: false, sort_order: 99, price: 0 },
+    } : { status: "In Stock", sold_out: false, sort_order: 99, price: 0, original_price: null, badge: "" },
   })
 
   const [uploading, setUploading] = useState(false)
@@ -148,6 +152,23 @@ function ProductForm({ initial, onClose, onSave }: {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={lbl}>Original Price (Sale အတွက်)</label>
+              <input type="number" {...register("original_price", { setValueAs: (v) => v === "" || v === null ? null : Number(v) })} className={inp} placeholder="25000 (ဖျက်ထားသောဈေး)" />
+            </div>
+            <div>
+              <label className={lbl}>Badge / Label</label>
+              <select {...register("badge")} className={inp}>
+                <option value="">— Badge မပါ —</option>
+                <option value="new">✨ New</option>
+                <option value="hot">🔥 Hot Item</option>
+                <option value="sale">💸 Sale</option>
+                <option value="low">⚡ Almost Gone</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className={lbl}>Sizes (comma separated)</label>
             <input {...register("sizes")} placeholder="S, M, L, XL or 28, 29, 30" className={inp} />
@@ -240,7 +261,12 @@ export default function Admin() {
   const saveMutation = useMutation({
     mutationFn: async (payload: FormData & { id?: string }) => {
       const sizes = (payload.sizes as unknown as string).split(",").map((s) => s.trim()).filter(Boolean)
-      const row = { ...payload, sizes }
+      const row = {
+        ...payload,
+        sizes,
+        original_price: payload.original_price || null,
+        badge: payload.badge || null,
+      }
       if (payload.id) {
         const { error } = await supabase.from("products").update(row).eq("id", payload.id)
         if (error) throw error
