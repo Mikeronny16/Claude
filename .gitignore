@@ -36,6 +36,7 @@ dist-ssr
 
 # Other projects (tracked on their own branches)
 .next/
+ronnix-ai/
 spawn-ai/
 spawn-ai-mobile/
 app_spawn_backup/
