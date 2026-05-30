@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import { SITE } from "@/config"
 
-const IMG = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+const IMG = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80"
 
 export default function About() {
   return (
