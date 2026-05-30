@@ -229,7 +229,7 @@ export default function Admin() {
   })
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    localStorage.removeItem("sinar_admin_auth")
     navigate("/auth", { replace: true })
   }
 
