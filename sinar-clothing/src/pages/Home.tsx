@@ -6,6 +6,7 @@ import CustomerReviews from "@/components/CustomerReviews"
 import About from "@/components/About"
 import Footer from "@/components/Footer"
 import SocialProofTicker from "@/components/SocialProofTicker"
+import FlashSaleBanner from "@/components/FlashSaleBanner"
 import { useTheme } from "@/lib/theme"
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
       <div id="marquee">
         <MarqueeStrip />
       </div>
+      <FlashSaleBanner />
       <Products />
       <CustomerReviews />
       <About />
