@@ -6,19 +6,19 @@
         "updates": ["message"],
         "additionalFields": {}
       },
-      "id": "tg-0001-0001-0001-0001-000000000001",
+      "id": "n01",
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
       "position": [240, 300],
       "webhookId": "clinic-bot-webhook",
-      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram Bot" } }
+      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.first().json;\n\nconst msg = body.message || body.edited_message;\nif (!msg) return [{ json: { skip: true } }];\n\nconst senderId = String(msg.chat.id);\nconst senderName = msg.from?.first_name || 'Patient';\nconst messageText = (msg.text || '').trim();\nconst normalizedText = messageText.toLowerCase();\n\nreturn [{\n  json: {\n    senderId,\n    senderName,\n    messageText,\n    normalizedText,\n    platform: 'telegram'\n  }\n}];"
+        "jsCode": "var body = $input.first().json;\nvar msg = body[\"message\"] || body[\"edited_message\"];\nif (!msg) return [{json:{skip:true}}];\nvar chat = msg[\"chat\"] || {};\nvar from = msg[\"from\"] || {};\nvar senderId = \"\" + chat[\"id\"];\nvar senderName = from[\"first_name\"] || \"Patient\";\nvar messageText = (msg[\"text\"] || \"\").trim();\nvar normalizedText = messageText.toLowerCase();\nreturn [{json:{senderId:senderId,senderName:senderName,messageText:messageText,normalizedText:normalizedText,platform:\"telegram\"}}];"
       },
-      "id": "tg-0002-0002-0002-0002-000000000002",
+      "id": "n02",
       "name": "Parse Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -27,11 +27,17 @@
     {
       "parameters": {
         "conditions": {
-          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notEquals" } }],
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "notEquals" }
+            }
+          ],
           "combinator": "and"
         }
       },
-      "id": "tg-0003-0003-0003-0003-000000000003",
+      "id": "n03",
       "name": "Valid Message?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -43,50 +49,80 @@
         "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
         "sheetName": { "mode": "name", "value": "Sessions" },
         "filtersUI": {
-          "values": [{ "lookupColumn": "sender_id", "lookupValue": "={{ $('Parse Message').first().json.senderId }}" }]
+          "values": [
+            { "lookupColumn": "sender_id", "lookupValue": "={{ $('Parse Message').first().json.senderId }}" }
+          ]
         },
         "options": { "returnFirstMatch": true }
       },
-      "id": "tg-0004-0004-0004-0004-000000000004",
+      "id": "n04",
       "name": "Load Session",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.2,
-      "position": [900, 240],
-      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+      "position": [900, 180],
+      "continueOnFail": true,
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "const msg = $('Parse Message').first().json;\nconst rows = $input.all();\n\nlet state = 'new';\nlet tempSlots = '';\nlet reason = '';\nlet selectedSlot = '';\nlet patientName = msg.senderName;\n\nif (rows.length > 0 && rows[0].json.sender_id) {\n  const s = rows[0].json;\n  state = s.state || 'new';\n  tempSlots = s.temp_slots || '';\n  reason = s.reason || '';\n  selectedSlot = s.selected_slot || '';\n  patientName = s.patient_name || msg.senderName;\n}\n\n// Reset keywords\nconst resetWords = ['start', 'restart', 'ပြန်', 'cancel', 'reset'];\nif (resetWords.some(w => msg.normalizedText.includes(w))) {\n  state = 'new';\n}\n\nreturn [{ json: { ...msg, state, tempSlots, reason, selectedSlot, patientName } }];"
+        "mode": "append",
+        "options": {}
       },
-      "id": "tg-0005-0005-0005-0005-000000000005",
+      "id": "n05",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [900, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "var allItems = $input.all();\nvar msg = null;\nvar sessionRow = null;\nfor (var i = 0; i < allItems.length; i++) {\n  var item = allItems[i].json;\n  if (item[\"senderId\"]) { msg = item; }\n  if (item[\"sender_id\"]) { sessionRow = item; }\n}\nif (!msg) { return [{json:{skip:true}}]; }\n\nvar state = \"new\";\nvar tempSlots = \"\";\nvar reason = \"\";\nvar selectedSlot = \"\";\nvar selectedDatetime = \"\";\nvar patientName = msg[\"senderName\"] || \"Patient\";\n\nif (sessionRow) {\n  state = sessionRow[\"state\"] || \"new\";\n  tempSlots = sessionRow[\"temp_slots\"] || \"\";\n  reason = sessionRow[\"reason\"] || \"\";\n  selectedSlot = sessionRow[\"selected_slot\"] || \"\";\n  selectedDatetime = sessionRow[\"selected_datetime\"] || \"\";\n  patientName = sessionRow[\"patient_name\"] || patientName;\n}\n\nif (state === \"confirmed\") { state = \"new\"; }\n\nif (!selectedSlot && tempSlots) {\n  try {\n    var tsParsed = JSON.parse(tempSlots);\n    if (tsParsed && tsParsed[\"selected\"]) {\n      selectedSlot = tsParsed[\"selected\"];\n      if (!selectedDatetime && tsParsed[\"selectedDatetime\"]) {\n        selectedDatetime = tsParsed[\"selectedDatetime\"];\n      }\n    }\n  } catch(e) {}\n}\n\nvar resetWords = [\"start\",\"restart\",\"cancel\",\"reset\"];\nfor (var j = 0; j < resetWords.length; j++) {\n  if (msg[\"normalizedText\"] && msg[\"normalizedText\"].indexOf(resetWords[j]) >= 0) {\n    state = \"new\";\n    break;\n  }\n}\n\nvar result = {};\nresult[\"senderId\"] = msg[\"senderId\"];\nresult[\"senderName\"] = msg[\"senderName\"];\nresult[\"messageText\"] = msg[\"messageText\"];\nresult[\"normalizedText\"] = msg[\"normalizedText\"];\nresult[\"platform\"] = msg[\"platform\"];\nresult[\"state\"] = state;\nresult[\"tempSlots\"] = tempSlots;\nresult[\"reason\"] = reason;\nresult[\"selectedSlot\"] = selectedSlot;\nresult[\"selectedDatetime\"] = selectedDatetime;\nresult[\"patientName\"] = patientName;\nreturn [{json:result}];"
+      },
+      "id": "n06",
       "name": "Merge Session",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1120, 240]
+      "position": [1120, 300]
     },
     {
       "parameters": {
         "rules": {
           "values": [
-            { "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "new", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "new" },
-            { "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_reason", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "awaiting_reason" },
-            { "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_slot", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "awaiting_slot" },
-            { "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_name", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "awaiting_name" }
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "new", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "new"
+            },
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_reason", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "awaiting_reason"
+            },
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_slot", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "awaiting_slot"
+            },
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.state }}", "rightValue": "awaiting_name", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" },
+              "renameOutput": true,
+              "outputKey": "awaiting_name"
+            }
           ]
         },
         "fallbackOutput": "extra"
       },
-      "id": "tg-0006-0006-0006-0006-000000000006",
+      "id": "n07",
       "name": "Route by State",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [1340, 240]
+      "position": [1340, 300]
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nreturn [{ json: { ...d,\n  replyText: `မင်္ဂလာပါ! 🏥 ClinicAI Myanmar မှ ကြိုဆိုပါတယ်\\n\\nAppointment ယူဖို့ ကူညီပေးပါမယ်။\\n\\nဆရာဝန်ဆီ လာရတဲ့ အကြောင်းအရင်းကို ပြောပြပါ\\n(ဥပမာ: ချမ်းတက်တယ်, ဆေးစစ်ချင်တယ်, မျက်စိနာတယ်)`,\n  newState: 'awaiting_reason'\n} }];"
+        "jsCode": "var d = $input.first().json;\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\nresult[\"replyText\"] = \"မင်္ဂလာပါ! ClinicAI Myanmar\\n\\nAppointment ယူဖို့ ကူညီပေးပါမယ်\\n\\nဆရာဝန်ဆီ လာရတဲ့ ကြောင်းကို ပြောပါ\\n(ဥပမာ: ချမ်းတက်, ဆေးစစ်, မျက်စိနာ)\";\nresult[\"newState\"] = \"awaiting_reason\";\nreturn [{json:result}];"
       },
-      "id": "tg-0007-0007-0007-0007-000000000007",
+      "id": "n08",
       "name": "Handle: New",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -94,9 +130,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst reason = d.messageText;\n\nconst today = new Date();\nconst tmr = new Date(today); tmr.setDate(today.getDate()+1);\nconst d2 = new Date(today); d2.setDate(today.getDate()+2);\nconst fmt = x => `${x.getDate()}/${x.getMonth()+1}`;\n\nconst slots = [\n  { key: '1', label: `မနက်ဖြန် ${fmt(tmr)} — 9:00 AM`, datetime: tmr.toISOString().split('T')[0]+'T09:00:00' },\n  { key: '2', label: `မနက်ဖြန် ${fmt(tmr)} — 11:00 AM`, datetime: tmr.toISOString().split('T')[0]+'T11:00:00' },\n  { key: '3', label: `မနက်ဖြန် ${fmt(tmr)} — 3:00 PM`, datetime: tmr.toISOString().split('T')[0]+'T15:00:00' },\n  { key: '4', label: `${fmt(d2)} — 9:00 AM`, datetime: d2.toISOString().split('T')[0]+'T09:00:00' },\n  { key: '5', label: `${fmt(d2)} — 2:00 PM`, datetime: d2.toISOString().split('T')[0]+'T14:00:00' },\n];\n\nconst slotText = slots.map(s => `${s.key}️⃣  ${s.label}`).join('\\n');\n\nreturn [{ json: { ...d, reason, tempSlots: JSON.stringify(slots),\n  replyText: `ကောင်းပါတယ်! \"${reason}\" အတွက် slot ရွေးပါ:\\n\\n${slotText}\\n\\nနံပါတ် (1-5) ပို့ပါ`,\n  newState: 'awaiting_slot'\n} }];"
+        "jsCode": "var d = $input.first().json;\nvar reason = d[\"messageText\"];\n\nvar today = new Date();\nvar tmr = new Date(today); tmr.setDate(today.getDate()+1);\nvar d2 = new Date(today); d2.setDate(today.getDate()+2);\nfunction fmt(x) { return (x.getDate()) + \"/\" + (x.getMonth()+1); }\n\nvar tmrDate = tmr.toISOString().split(\"T\")[0];\nvar d2Date = d2.toISOString().split(\"T\")[0];\n\nvar slots = [\n  {key:\"1\",label:\"မနက်ဖြန် \"+fmt(tmr)+\" 9:00 AM\",datetime:tmrDate+\"T09:00:00\"},\n  {key:\"2\",label:\"မနက်ဖြန် \"+fmt(tmr)+\" 11:00 AM\",datetime:tmrDate+\"T11:00:00\"},\n  {key:\"3\",label:\"မနက်ဖြန် \"+fmt(tmr)+\" 3:00 PM\",datetime:tmrDate+\"T15:00:00\"},\n  {key:\"4\",label:fmt(d2)+\" 9:00 AM\",datetime:d2Date+\"T09:00:00\"},\n  {key:\"5\",label:fmt(d2)+\" 2:00 PM\",datetime:d2Date+\"T14:00:00\"}\n];\n\nvar slotLines = [];\nfor (var i = 0; i < slots.length; i++) {\n  slotLines.push(slots[i][\"key\"] + \". \" + slots[i][\"label\"]);\n}\nvar slotText = slotLines.join(\"\\n\");\n\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\nresult[\"reason\"] = reason;\nresult[\"tempSlots\"] = JSON.stringify(slots);\nresult[\"replyText\"] = \"OK! \\\"\" + reason + \"\\\" အတွက် slot ရွေးပါ:\\n\\n\" + slotText + \"\\n\\nနံပါတ် (1-5) ပို့ပါ\";\nresult[\"newState\"] = \"awaiting_slot\";\nreturn [{json:result}];"
       },
-      "id": "tg-0008-0008-0008-0008-000000000008",
+      "id": "n09",
       "name": "Handle: Got Reason",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -104,9 +140,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst input = d.messageText.trim();\nlet slots = [];\ntry { slots = JSON.parse(d.tempSlots || '[]'); } catch(e) {}\n\nconst chosen = slots.find(s => input === s.key || input.startsWith(s.key));\n\nif (!chosen) {\n  return [{ json: { ...d,\n    replyText: `နံပါတ် 1 မှ ${slots.length} အတွင်း ရွေးပါ\\n(ဥပမာ: \"1\" ဆိုပြီး ပို့ပါ)`,\n    newState: 'awaiting_slot'\n  } }];\n}\n\nreturn [{ json: { ...d,\n  selectedSlot: chosen.label,\n  selectedDatetime: chosen.datetime,\n  replyText: `${chosen.label} ကို ရွေးပါပြီ ✅\\n\\nနောက်ဆုံး — မင်းနာမည် ပြောပြပါ`,\n  newState: 'awaiting_name'\n} }];"
+        "jsCode": "var d = $input.first().json;\nvar input = (d[\"messageText\"] || \"\").trim();\nvar slots = [];\ntry {\n  var parsed = JSON.parse(d[\"tempSlots\"] || \"[]\");\n  slots = parsed[\"slots\"] || parsed;\n} catch(e) {}\n\nvar chosen = null;\nfor (var i = 0; i < slots.length; i++) {\n  if (input === slots[i][\"key\"] || input.indexOf(slots[i][\"key\"]) === 0) {\n    chosen = slots[i];\n    break;\n  }\n}\n\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\n\nif (!chosen) {\n  result[\"replyText\"] = \"နံပါတ် 1 မှ \" + slots.length + \" ရွေးပါ\\n(ဥပမာ 1 ဆိုပြီး ပို့ပါ)\";\n  result[\"newState\"] = \"awaiting_slot\";\n  return [{json:result}];\n}\n\nresult[\"selectedSlot\"] = chosen[\"label\"];\nresult[\"selectedDatetime\"] = chosen[\"datetime\"];\nresult[\"tempSlots\"] = JSON.stringify({slots:slots,selected:chosen[\"label\"],selectedDatetime:chosen[\"datetime\"]});\nresult[\"replyText\"] = chosen[\"label\"] + \" ရွေးပါပြီ OK\\n\\nနောက်ဆုံး — မင်းနာမည် ပြောပြပါ\";\nresult[\"newState\"] = \"awaiting_name\";\nreturn [{json:result}];"
       },
-      "id": "tg-0009-0009-0009-0009-000000000009",
+      "id": "n10",
       "name": "Handle: Got Slot",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -114,9 +150,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst patientName = d.messageText.trim();\n\nreturn [{ json: { ...d, patientName,\n  replyText: `✅ Appointment Confirm ပါပြီ!\\n\\n👤 Patient: ${patientName}\\n📅 Slot: ${d.selectedSlot}\\n💊 ကြောင်းရင်း: ${d.reason}\\n\\n🔔 Reminder ကို 1 နာရီ အလိုမှာ auto-ပို့ပေးပါမယ်\\n\\nမေးစရာရှိရင် ဒီ bot ကိုပဲ message ပို့ပါ 🏥`,\n  newState: 'confirmed',\n  saveBooking: true\n} }];"
+        "jsCode": "var d = $input.first().json;\nvar patientName = (d[\"messageText\"] || \"\").trim();\n\nvar result = {};\nfor (var k in d) { result[k] = d[k]; }\nresult[\"patientName\"] = patientName;\nresult[\"replyText\"] = \"Appointment Confirm ပါပြီ!\\n\\nPatient: \" + patientName + \"\\nSlot: \" + d[\"selectedSlot\"] + \"\\nကြောင်းရင်း: \" + d[\"reason\"] + \"\\n\\nReminder 1 နာရီ အလိုမှာ ပို့ပေးပါမယ်\\n\\nမေးစရာရှိရင် ဒီ bot ကို message ပို့ပါ\";\nresult[\"newState\"] = \"new\";\nresult[\"saveBooking\"] = true;\nresult[\"doctorNotifyText\"] = \"New Booking!\\n\\nPatient: \" + patientName + \"\\nReason: \" + d[\"reason\"] + \"\\nSlot: \" + d[\"selectedSlot\"] + \"\\nDatetime: \" + d[\"selectedDatetime\"] + \"\\nChat ID: \" + d[\"senderId\"];\nreturn [{json:result}];"
       },
-      "id": "tg-0010-0010-0010-0010-000000000010",
+      "id": "n11",
       "name": "Handle: Got Name",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -145,12 +181,12 @@
         },
         "options": {}
       },
-      "id": "tg-0011-0011-0011-0011-000000000011",
+      "id": "n12",
       "name": "Save Session",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.2,
-      "position": [1800, 260],
-      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+      "position": [1800, 200],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
@@ -176,33 +212,65 @@
         },
         "options": {}
       },
-      "id": "tg-0012-0012-0012-0012-000000000012",
+      "id": "n13",
       "name": "Save Appointment",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.2,
       "position": [1800, 480],
-      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets" } }
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "chatId": "={{ $('Parse Message').first().json.senderId }}",
+        "chatId": "={{ $json.senderId }}",
         "text": "={{ $json.replyText }}",
-        "additionalFields": { "parse_mode": "HTML" }
+        "additionalFields": {}
       },
-      "id": "tg-0013-0013-0013-0013-000000000013",
-      "name": "Send Telegram Reply",
+      "id": "n14",
+      "name": "Send Reply",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [2040, 340],
-      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram Bot" } }
+      "position": [2040, 300],
+      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
+    },
+    {
+      "parameters": {
+        "chatId": "1636633347",
+        "text": "={{ $json.doctorNotifyText }}",
+        "additionalFields": {}
+      },
+      "id": "n15",
+      "name": "Notify Doctor",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1800, 640],
+      "credentials": { "telegramApi": { "id": "YOUR_TELEGRAM_CRED_ID", "name": "Telegram account" } }
     }
   ],
   "connections": {
-    "Telegram Trigger": { "main": [[{ "node": "Parse Message", "type": "main", "index": 0 }]] },
-    "Parse Message": { "main": [[{ "node": "Valid Message?", "type": "main", "index": 0 }]] },
-    "Valid Message?": { "main": [[{ "node": "Load Session", "type": "main", "index": 0 }], []] },
-    "Load Session": { "main": [[{ "node": "Merge Session", "type": "main", "index": 0 }]] },
-    "Merge Session": { "main": [[{ "node": "Route by State", "type": "main", "index": 0 }]] },
+    "Telegram Trigger": {
+      "main": [[{ "node": "Parse Message", "type": "main", "index": 0 }]]
+    },
+    "Parse Message": {
+      "main": [[{ "node": "Valid Message?", "type": "main", "index": 0 }]]
+    },
+    "Valid Message?": {
+      "main": [
+        [
+          { "node": "Load Session", "type": "main", "index": 0 },
+          { "node": "Merge", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "Load Session": {
+      "main": [[{ "node": "Merge", "type": "main", "index": 1 }]]
+    },
+    "Merge": {
+      "main": [[{ "node": "Merge Session", "type": "main", "index": 0 }]]
+    },
+    "Merge Session": {
+      "main": [[{ "node": "Route by State", "type": "main", "index": 0 }]]
+    },
     "Route by State": {
       "main": [
         [{ "node": "Handle: New", "type": "main", "index": 0 }],
@@ -211,24 +279,53 @@
         [{ "node": "Handle: Got Name", "type": "main", "index": 0 }]
       ]
     },
-    "Handle: New": { "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]] },
-    "Handle: Got Reason": { "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]] },
-    "Handle: Got Slot": { "main": [[{ "node": "Save Session", "type": "main", "index": 0 }]] },
-    "Handle: Got Name": {
-      "main": [[{ "node": "Save Appointment", "type": "main", "index": 0 }]]
+    "Handle: New": {
+      "main": [[
+        { "node": "Save Session", "type": "main", "index": 0 },
+        { "node": "Send Reply", "type": "main", "index": 0 }
+      ]]
     },
-    "Save Session": { "main": [[{ "node": "Send Telegram Reply", "type": "main", "index": 0 }]] },
-    "Save Appointment": { "main": [[{ "node": "Send Telegram Reply", "type": "main", "index": 0 }]] }
+    "Handle: Got Reason": {
+      "main": [[
+        { "node": "Save Session", "type": "main", "index": 0 },
+        { "node": "Send Reply", "type": "main", "index": 0 }
+      ]]
+    },
+    "Handle: Got Slot": {
+      "main": [[
+        { "node": "Save Session", "type": "main", "index": 0 },
+        { "node": "Send Reply", "type": "main", "index": 0 }
+      ]]
+    },
+    "Handle: Got Name": {
+      "main": [[
+        { "node": "Save Appointment", "type": "main", "index": 0 },
+        { "node": "Save Session", "type": "main", "index": 0 },
+        { "node": "Send Reply", "type": "main", "index": 0 },
+        { "node": "Notify Doctor", "type": "main", "index": 0 }
+      ]]
+    }
   },
   "settings": { "executionOrder": "v1" },
   "tags": [{ "name": "clinic-ai-telegram" }],
   "_readme": {
+    "fixes": [
+      "Parse Message: iPhone-safe code (var, double quotes, bracket notation)",
+      "Merge node added: prevents 0-items stop when new user has no session",
+      "Handle nodes -> Send Reply in PARALLEL with Save Session (fixes undefined replyText)",
+      "Handle: Got Name now connects to Save Session (fixes confirmed-state loop bug)",
+      "Handle: Got Name sets newState=new (session resets after booking)",
+      "Merge Session: if state=confirmed, auto-reset to new (backup fix)",
+      "Handle: Got Name: adds Notify Doctor step for doctor notification"
+    ],
     "setup": [
-      "1. Telegram မှာ @BotFather ကို message ပို့ → /newbot → token ယူ",
-      "2. n8n မှာ Telegram credential add (token paste)",
-      "3. 1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og → Mike ရဲ့ Sheet ID",
-      "4. Google Sheets credential connect (OAuth2)",
-      "5. Workflow activate → bot ကို /start ပို့ပြီး test"
+      "1. Telegram credential name: Telegram account",
+      "2. Google Sheets credential name: Google Sheets account",
+      "3. Sheet ID: 1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og",
+      "4. Sheet tabs: Sessions and Appointments (exact names)",
+      "5. Replace YOUR_DOCTOR_CHAT_ID with Mike's personal Telegram chat ID",
+      "6. To find your Telegram chat ID: message @userinfobot on Telegram",
+      "7. Activate workflow -> test with any message to @clinicai_mmtest_bot"
     ]
   }
 }

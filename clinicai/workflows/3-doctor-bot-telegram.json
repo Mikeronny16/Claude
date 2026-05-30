@@ -1,0 +1,155 @@
+{
+  "name": "3 — Doctor Bot (Telegram)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "d01",
+      "name": "Doctor Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "doctor-bot-webhook",
+      "credentials": { "telegramApi": { "id": "YOUR_DOCTOR_TELEGRAM_CRED_ID", "name": "Doctor Telegram account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "var body = $input.first().json;\nvar msg = body[\"message\"] || body[\"edited_message\"];\nif (!msg) return [{json:{skip:true}}];\nvar chat = msg[\"chat\"] || {};\nvar senderId = \"\" + chat[\"id\"];\nvar text = (msg[\"text\"] || \"\").trim();\nvar lower = text.toLowerCase();\n\nvar command = \"help\";\nvar cancelTarget = \"\";\n\nif (lower === \"today\" || lower.indexOf(\"ဒီနေ့\") >= 0 || lower === \"1\") {\n  command = \"today\";\n} else if (lower === \"tomorrow\" || lower.indexOf(\"မနက်ဖြန်\") >= 0 || lower === \"2\") {\n  command = \"tomorrow\";\n} else if (lower === \"all\" || lower.indexOf(\"အားလုံး\") >= 0 || lower === \"3\") {\n  command = \"all\";\n} else if (lower.indexOf(\"cancel \") === 0) {\n  command = \"cancel\";\n  cancelTarget = text.substring(7).trim();\n} else if (lower.indexOf(\"ပယ်ဖျက် \") === 0) {\n  command = \"cancel\";\n  cancelTarget = text.substring(9).trim();\n} else {\n  command = \"help\";\n}\n\nreturn [{json:{senderId:senderId, command:command, cancelTarget:cancelTarget, rawText:text}}];"
+      },
+      "id": "d02",
+      "name": "Parse Doctor Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "options": {}
+      },
+      "id": "d03",
+      "name": "Read All Appointments",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "continueOnFail": true,
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "var cmdData = $('Parse Doctor Command').first().json;\nvar command = cmdData[\"command\"];\nvar cancelTarget = (cmdData[\"cancelTarget\"] || \"\").toLowerCase();\nvar senderId = cmdData[\"senderId\"];\n\nvar appts = [];\nvar allItems = $input.all();\nfor (var i = 0; i < allItems.length; i++) {\n  var item = allItems[i].json;\n  if (item[\"appointment_datetime\"]) { appts.push(item); }\n}\n\nvar today = new Date();\nvar todayStr = today.toISOString().split(\"T\")[0];\nvar tmr = new Date(today); tmr.setDate(today.getDate()+1);\nvar tmrStr = tmr.toISOString().split(\"T\")[0];\n\nvar replyText = \"\";\nvar needsUpdate = false;\nvar updatePatientName = \"\";\nvar updateDatetime = \"\";\n\nif (command === \"help\") {\n  replyText = \"Doctor Bot Commands:\\n\\n1 or 'today' — Today appts\\n2 or 'tomorrow' — Tomorrow appts\\n3 or 'all' — All upcoming appts\\n'cancel NAME' — Cancel appointment\\n\\nExample:\\ncancel Ko Aung\";\n}\nelse if (command === \"today\" || command === \"tomorrow\" || command === \"all\") {\n  var filtered = [];\n  for (var i = 0; i < appts.length; i++) {\n    var a = appts[i];\n    var dt = (a[\"appointment_datetime\"] || \"\").split(\"T\")[0];\n    var status = (a[\"status\"] || \"\").toLowerCase();\n    if (status === \"cancelled\") continue;\n    if (command === \"today\" && dt === todayStr) { filtered.push(a); }\n    else if (command === \"tomorrow\" && dt === tmrStr) { filtered.push(a); }\n    else if (command === \"all\") { filtered.push(a); }\n  }\n  if (filtered.length === 0) {\n    var dayWord = command === \"today\" ? \"ဒီနေ့\" : command === \"tomorrow\" ? \"မနက်ဖြန်\" : \"Upcoming\";\n    replyText = dayWord + \" appointment မရှိပါ\";\n  } else {\n    var lines = [];\n    for (var i = 0; i < filtered.length; i++) {\n      var a = filtered[i];\n      var dtParts = (a[\"appointment_datetime\"] || \"\").split(\"T\");\n      var datePart = dtParts[0] || \"\";\n      var timePart = dtParts.length > 1 ? dtParts[1].substring(0,5) : \"\";\n      var line = (i+1) + \". \" + (a[\"patient_name\"] || \"?\");\n      if (command === \"all\") { line += \" (\" + datePart + \")\"; }\n      line += \" — \" + timePart + \" | \" + (a[\"reason\"] || \"\");\n      lines.push(line);\n    }\n    var header = command === \"today\" ? \"Today Appointments\" : command === \"tomorrow\" ? \"Tomorrow Appointments\" : \"All Upcoming Appointments\";\n    replyText = header + \" (\" + filtered.length + \"):\\n\\n\" + lines.join(\"\\n\");\n  }\n}\nelse if (command === \"cancel\") {\n  if (!cancelTarget) {\n    replyText = \"Usage: cancel NAME\\nExample: cancel Ko Aung\";\n  } else {\n    var found = null;\n    for (var i = 0; i < appts.length; i++) {\n      var a = appts[i];\n      var name = (a[\"patient_name\"] || \"\").toLowerCase();\n      var status = (a[\"status\"] || \"\").toLowerCase();\n      if (status === \"cancelled\") continue;\n      if (name.indexOf(cancelTarget) >= 0) { found = a; break; }\n    }\n    if (!found) {\n      replyText = \"'\" + cancelTarget + \"' မတွေ့ပါ\\n\\nPatient name မှန်မမှန် စစ်ပါ\";\n    } else {\n      needsUpdate = true;\n      updatePatientName = found[\"patient_name\"];\n      updateDatetime = found[\"appointment_datetime\"];\n      replyText = \"Cancelled: \" + found[\"patient_name\"] + \"\\nSlot: \" + (found[\"slot\"] || found[\"appointment_datetime\"]);\n    }\n  }\n}\n\nreturn [{json:{\n  senderId: senderId,\n  command: command,\n  replyText: replyText,\n  needsUpdate: needsUpdate,\n  updatePatientName: updatePatientName,\n  updateDatetime: updateDatetime\n}}];"
+      },
+      "id": "d04",
+      "name": "Process Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.needsUpdate }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "d05",
+      "name": "Need Cancel Update?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "mode": "id", "value": "1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og" },
+        "sheetName": { "mode": "name", "value": "Appointments" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "patient_name": "={{ $json.updatePatientName }}",
+            "appointment_datetime": "={{ $json.updateDatetime }}",
+            "status": "cancelled"
+          },
+          "matchingColumns": ["patient_name", "appointment_datetime"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "d06",
+      "name": "Cancel Appointment",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1340, 180],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CRED_ID", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.senderId }}",
+        "text": "={{ $json.replyText }}",
+        "additionalFields": {}
+      },
+      "id": "d07",
+      "name": "Send Doctor Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1560, 300],
+      "credentials": { "telegramApi": { "id": "YOUR_DOCTOR_TELEGRAM_CRED_ID", "name": "Doctor Telegram account" } }
+    }
+  ],
+  "connections": {
+    "Doctor Telegram Trigger": {
+      "main": [[{ "node": "Parse Doctor Command", "type": "main", "index": 0 }]]
+    },
+    "Parse Doctor Command": {
+      "main": [[{ "node": "Read All Appointments", "type": "main", "index": 0 }]]
+    },
+    "Read All Appointments": {
+      "main": [[{ "node": "Process Command", "type": "main", "index": 0 }]]
+    },
+    "Process Command": {
+      "main": [[{ "node": "Need Cancel Update?", "type": "main", "index": 0 }]]
+    },
+    "Need Cancel Update?": {
+      "main": [
+        [{ "node": "Cancel Appointment", "type": "main", "index": 0 }],
+        [{ "node": "Send Doctor Reply", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cancel Appointment": {
+      "main": [[{ "node": "Send Doctor Reply", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "clinic-ai-telegram" }],
+  "_readme": {
+    "description": "Doctor management bot — receives booking notifications and handles doctor commands",
+    "commands": [
+      "today / 1 / ဒီနေ့ — Show today's appointments",
+      "tomorrow / 2 / မနက်ဖြန် — Show tomorrow's appointments",
+      "all / 3 / အားလုံး — Show all upcoming appointments",
+      "cancel NAME — Cancel appointment by patient name"
+    ],
+    "setup": [
+      "1. Create a NEW Telegram bot via @BotFather → /newbot",
+      "2. Copy the new bot token",
+      "3. In n8n: Credentials → New → Telegram API → paste token",
+      "4. Name the credential exactly: Doctor Telegram account",
+      "5. Google Sheets credential name: Google Sheets account",
+      "6. Sheet ID: 1-6Hh2yuRqTv9gx-yJBhB4uqEfe1eGWfo4KnwjEeF8Og",
+      "7. In workflow 1 (booking bot): replace YOUR_DOCTOR_CHAT_ID with your personal Telegram chat ID",
+      "8. To find your chat ID: message @userinfobot on Telegram",
+      "9. Import this workflow → assign credentials → Activate",
+      "10. Message your new doctor bot: 'today' to test"
+    ]
+  }
+}

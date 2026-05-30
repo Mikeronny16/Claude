@@ -5,7 +5,7 @@ import { Loader2, Lock } from "lucide-react"
 import { toast } from "sonner"
 
 const LOCAL_ADMIN_KEY = "sinar_admin_auth"
-const LOCAL_ADMIN_PWD = "sinar2025"
+const LOCAL_ADMIN_PWD = import.meta.env.VITE_ADMIN_PASSWORD || "sinar2025"
 
 export default function Auth() {
   const navigate = useNavigate()

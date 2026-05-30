@@ -3,6 +3,7 @@ import { useState } from "react";
 
 const VIBER = "09969279092";
 const GMAIL = "mikeronny18@gmail.com";
+const TELEGRAM_BOT = "https://t.me/clinicai_mmtest_bot";
 const VIBER_LINK = `viber://chat?number=%2B95${VIBER.slice(1)}`;
 const MESSENGER_LINK = "https://m.me/mikeronny16";
 
@@ -10,16 +11,16 @@ type Lang = "mm" | "en";
 
 const T = {
   mm: {
-    nav_cta: "Viber မှာ Free Demo တောင်းပါ",
+    nav_cta: "✈️ Telegram Demo ကြည့်ပါ",
     hero_badge: "🇲🇲 Myanmar Clinics အတွက် AI Automation",
     hero_h1_1: "No-show",
     hero_h1_2: "တွေကို Bot နဲ့",
     hero_h1_3: "ဖြေရှင်းလိုက်ပါ",
-    hero_sub: "Appointment ပျောက်ဆုံးနေတာ၊ ညနေ inquiry မဖြေနိုင်တာ၊ staff overtime — ဒါတွေကို Viber bot တစ်ခုနဲ့ auto လုပ်ပေးတယ်",
-    hero_cta1: "🎯 Free Pilot စမ်းမယ်",
+    hero_sub: "Appointment ပျောက်ဆုံးနေတာ၊ ညနေ inquiry မဖြေနိုင်တာ၊ staff overtime — ဒါတွေကို Telegram / Viber bot တစ်ခုနဲ့ auto လုပ်ပေးတယ်",
+    hero_cta1: "🤖 Bot Demo စမ်းကြည့်မယ်",
     hero_cta2: "Pricing ကြည့်မယ် ↓",
     pilot_tag: "✨ Patient interaction ပထမ 100 ခု — အခမဲ့",
-    social_title: "Yangon clinics တွေ ယုံကြည်ကိုးကွယ်",
+    social_title: "Yangon clinics တွေ ယုံကြည်အားကိုး",
     problem_label: "Pain Points",
     problem_h2: "Clinic တိုင်းကြုံနေတဲ့ ပြဿနာ ၄ ခု",
     how_label: "Process",
@@ -37,6 +38,7 @@ const T = {
     faq_h2: "မေးလေ့ရှိတဲ့ မေးခွန်းများ",
     cta_h2: "Free Pilot ကနေ စလိုက်ပါ",
     cta_sub: "Patient interaction ပထမ 100 ခု — အခမဲ့ \n ကြိုက်မှ ဆက်ပေးပါ",
+    cta_telegram: "✈️ Telegram Bot Demo",
     cta_viber: "📱 Viber မှာ ဆက်သွယ်ပါ",
     cta_messenger: "💬 Messenger မှာ ဆက်သွယ်ပါ",
     footer_copy: "Myanmar clinics အတွက် AI automation",
@@ -51,13 +53,13 @@ const T = {
     lang_toggle: "EN",
   },
   en: {
-    nav_cta: "Get Free Demo on Viber",
+    nav_cta: "✈️ Try Telegram Demo",
     hero_badge: "🇲🇲 AI Automation for Myanmar Clinics",
     hero_h1_1: "Fill Your",
     hero_h1_2: "Schedule",
     hero_h1_3: "While You Sleep",
-    hero_sub: "Reduce no-shows by 40%, save 15+ receptionist hours/week, and answer patient questions 24/7 — all automated via Viber & Facebook Messenger.",
-    hero_cta1: "🎯 Start Free Pilot",
+    hero_sub: "Reduce no-shows by 40%, save 15+ receptionist hours/week, and answer patient questions 24/7 — automated via Telegram, Viber & Facebook Messenger.",
+    hero_cta1: "🤖 Try Live Bot Demo",
     hero_cta2: "View Pricing ↓",
     pilot_tag: "✨ First 100 patient interactions — completely free",
     social_title: "Trusted by clinics in Yangon and across Myanmar",
@@ -78,6 +80,7 @@ const T = {
     faq_h2: "Frequently Asked Questions",
     cta_h2: "Start Your Free Pilot",
     cta_sub: "First 100 patient interactions free.\nOnly pay if you love the results.",
+    cta_telegram: "✈️ Try Telegram Demo",
     cta_viber: "📱 Message on Viber",
     cta_messenger: "💬 Message on Messenger",
     footer_copy: "AI Automation for Myanmar Clinics",
@@ -126,7 +129,7 @@ const steps = {
 const features = {
   mm: [
     { icon: "🤖", title: "24/7 Booking Bot", desc: "Patient တွေ ညမဆိုအချိန်မဆို appointment ယူနိုင်တယ်" },
-    { icon: "🔔", title: "Auto Reminder", desc: "24h + 2h ကြိုပြီး Viber/Messenger reminder auto-ပို့" },
+    { icon: "🔔", title: "Auto Reminder", desc: "24h + 2h ကြိုပြီး Telegram/Viber/Messenger reminder auto-ပို့" },
     { icon: "📋", title: "Patient Intake Form", desc: "လာမယ့် appointment မတိုင်ခင် patient info auto-collect" },
     { icon: "💊", title: "Chronic Patient Follow-up", desc: "DM/HT patient တွေကို 1 လ / 3 လ follow-up auto-ပို့" },
     { icon: "⭐", title: "Review Collection", desc: "Visit ပြီးသွားရင် Google Review link auto-ပို့" },
@@ -134,7 +137,7 @@ const features = {
   ],
   en: [
     { icon: "🤖", title: "24/7 Booking Bot", desc: "Patients book appointments anytime — day or night" },
-    { icon: "🔔", title: "Auto Reminders", desc: "24h + 2h reminders sent automatically via Viber/Messenger" },
+    { icon: "🔔", title: "Auto Reminders", desc: "24h + 2h reminders sent automatically via Telegram/Viber/Messenger" },
     { icon: "📋", title: "Patient Intake Form", desc: "Collect patient info before they arrive — auto-sent" },
     { icon: "💊", title: "Chronic Patient Follow-up", desc: "Automated 1-month and 3-month follow-ups for DM/HT patients" },
     { icon: "⭐", title: "Review Collection", desc: "After each visit, patients get a Google Review link automatically" },
@@ -184,7 +187,7 @@ const packages = [
 
 const faqs = {
   mm: [
-    { q: "Tech မသိသေးဘူး setup ရမလား?", a: "Mike ကပဲ အကုန် setup လုပ်ပေးတယ်။ Qdoctor တွေ Google Sheets တစ်ခုပဲ ကြည့်ရတယ် — training မလိုဘူး။" },
+    { q: "Tech မသိသေးဘူး setup ရမလား?", a: "Mike ကပဲ အကုန် setup လုပ်ပေးတယ်။ ဆရာဝန်တွေ Google Sheets တစ်ခုပဲ ကြည့်ရတယ် — training မလိုဘူး။" },
     { q: "Bot က error ဖြစ်ရင် ဘယ်လိုလုပ်မလဲ?", a: "Bot မဖြေနိုင်တဲ့ question ကို staff ဆီကို auto-forward လုပ်တယ်။ Human fallback always ပါတယ်။" },
     { q: "Patient data ဘေးကင်းသလား?", a: "Data အကုန် ဆရာဝန်ရဲ့ Google Sheets မှာပဲ သိမ်းတယ်။ Third party server မပါဘူး။" },
     { q: "WhatsApp ရသလား Viber ပဲရသလား?", a: "Myanmar မှာ Viber + Facebook Messenger ကို optimize လုပ်ထားတယ်။ WhatsApp လဲ request ရှိရင် ထည့်ပေးနိုင်တယ်။" },
@@ -208,6 +211,8 @@ export default function Home() {
   const t = T[lang];
 
   const openModal = (pkg: string) => { setSelectedPkg(pkg); setModalOpen(true); };
+
+  const contactTelegram = () => { window.open(TELEGRAM_BOT); setModalOpen(false); };
 
   const contactViber = () => {
     const msg = encodeURIComponent(lang === "mm"
@@ -251,13 +256,13 @@ export default function Home() {
           }}>
             {t.lang_toggle}
           </button>
-          <button onClick={() => openModal("Starter")} style={{
+          <a href={TELEGRAM_BOT} target="_blank" rel="noreferrer" style={{
             padding: "8px 16px", borderRadius: 20, fontSize: 13, fontWeight: 700,
             background: `linear-gradient(135deg,${G},${GL})`,
-            color: "#fff", border: "none", cursor: "pointer", whiteSpace: "nowrap",
+            color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
           }}>
             {t.nav_cta}
-          </button>
+          </a>
         </div>
       </nav>
 
@@ -284,14 +289,14 @@ export default function Home() {
           </div>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
-            <button onClick={() => openModal("Growth")} style={{
+            <a href={TELEGRAM_BOT} target="_blank" rel="noreferrer" style={{
               padding: "16px 32px", borderRadius: 14, fontWeight: 900, fontSize: 16,
               background: `linear-gradient(135deg,${G},${GL})`,
-              color: "#fff", border: "none", cursor: "pointer",
+              color: "#fff", textDecoration: "none", display: "inline-block",
               boxShadow: "0 4px 20px rgba(22,163,74,0.3)",
             }}>
               {t.hero_cta1}
-            </button>
+            </a>
             <a href="#packages" style={{
               padding: "16px 28px", borderRadius: 14, fontWeight: 700, fontSize: 15,
               background: "#fff", color: G, border: "2px solid #86efac",
@@ -400,14 +405,14 @@ export default function Home() {
             {lang === "mm" ? "Patient တစ်ယောက် ဘာတွေမြင်မလဲ" : "What your patients experience"}
           </h2>
           <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 28 }}>
-            {lang === "mm" ? "Viber / Facebook Messenger bot — real conversation" : "Real bot conversation via Viber / Facebook Messenger"}
+            {lang === "mm" ? "Telegram bot — live demo ကြည့်နိုင်တယ်" : "Live Telegram bot — try it yourself"}
           </p>
           <div style={{ background: "#fff", borderRadius: 20, padding: 24, border: "1px solid #bbf7d0", textAlign: "left", boxShadow: "0 4px 20px rgba(22,163,74,0.07)" }}>
             {[
               { side: "patient", msg: lang === "mm" ? "မင်္ဂလာပါ appointment ယူချင်တယ်" : "Hi, I want to book an appointment" },
               { side: "bot", msg: lang === "mm" ? "🏥 မင်္ဂလာပါ! ဘာကြောင့် လာမလဲ?" : "🏥 Hello! What's the reason for your visit?" },
               { side: "patient", msg: lang === "mm" ? "ချမ်းတက် ဆေးစစ်ချင်တယ်" : "I have a fever and want to be checked" },
-              { side: "bot", msg: lang === "mm" ? "📅 ဒီ slot တွေ available ပါတယ်:\n• မနက်ဖြန် 9:00 AM ✅\n• မနက်ဖြန် 11:00 AM ✅\n• မတ်ပတ်ဖြန် 2:00 PM ✅" : "📅 These slots are available:\n• Tomorrow 9:00 AM ✅\n• Tomorrow 11:00 AM ✅\n• Day after 2:00 PM ✅" },
+              { side: "bot", msg: lang === "mm" ? "📅 ဒီ slot တွေ available ပါတယ်:\n• မနက်ဖြန် 9:00 AM ✅\n• မနက်ဖြန် 11:00 AM ✅\n• တနက်ခါ 2:00 PM ✅" : "📅 These slots are available:\n• Tomorrow 9:00 AM ✅\n• Tomorrow 11:00 AM ✅\n• Day after 2:00 PM ✅" },
               { side: "patient", msg: lang === "mm" ? "မနက်ဖြန် 9:00 AM" : "Tomorrow 9:00 AM please" },
               { side: "bot", msg: lang === "mm" ? "✅ Confirm ပါပြီ!\nMa Hnin — မနက်ဖြန် 9:00 AM\n🔔 Reminder ကို 1 နာရီခွဲ အလိုမှာ ပို့ပေးမှာပါ" : "✅ Confirmed!\nMa Hnin — Tomorrow 9:00 AM\n🔔 We'll send you a reminder 90 minutes before" },
             ].map((m, i) => (
@@ -471,10 +476,10 @@ export default function Home() {
           <h2 style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: 900, color: "#111827", marginBottom: 28 }}>{t.channels_h2}</h2>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             {[
+              { icon: "✈️", name: "Telegram", sub: "Demo ready now" },
               { icon: "📱", name: "Viber", sub: "Myanmar #1" },
               { icon: "💬", name: "Facebook Messenger", sub: "Myanmar popular" },
               { icon: "📊", name: "Google Sheets", sub: "Your dashboard" },
-              { icon: "📅", name: "Google Calendar", sub: "Scheduling" },
               { icon: "⚙️", name: "n8n", sub: "Automation engine" },
             ].map((ch, i) => (
               <div key={i} style={{ background: "#fff", border: "1px solid #bbf7d0", borderRadius: 14, padding: "14px 18px", textAlign: "center", minWidth: 90 }}>
@@ -554,11 +559,11 @@ export default function Home() {
           <h2 style={{ fontSize: "clamp(24px,5vw,38px)", fontWeight: 900, color: "#fff", marginBottom: 12 }}>{t.cta_h2}</h2>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.85)", marginBottom: 32, lineHeight: 1.7, whiteSpace: "pre-line" }}>{t.cta_sub}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
-            <a href={VIBER_LINK} style={{ padding: "16px 28px", borderRadius: 14, fontWeight: 900, fontSize: 15, background: "#fff", color: G, border: "none", textDecoration: "none", display: "inline-block" }}>
-              {t.cta_viber}
+            <a href={TELEGRAM_BOT} target="_blank" rel="noreferrer" style={{ padding: "16px 28px", borderRadius: 14, fontWeight: 900, fontSize: 15, background: "#fff", color: G, border: "none", textDecoration: "none", display: "inline-block" }}>
+              {t.cta_telegram}
             </a>
-            <a href={MESSENGER_LINK} style={{ padding: "16px 28px", borderRadius: 14, fontWeight: 900, fontSize: 15, background: "rgba(255,255,255,0.15)", color: "#fff", border: "2px solid rgba(255,255,255,0.4)", textDecoration: "none", display: "inline-block" }}>
-              {t.cta_messenger}
+            <a href={VIBER_LINK} style={{ padding: "16px 28px", borderRadius: 14, fontWeight: 900, fontSize: 15, background: "rgba(255,255,255,0.15)", color: "#fff", border: "2px solid rgba(255,255,255,0.4)", textDecoration: "none", display: "inline-block" }}>
+              {t.cta_viber}
             </a>
           </div>
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>📞 {VIBER} &nbsp;|&nbsp; ✉️ {GMAIL}</p>
@@ -574,8 +579,8 @@ export default function Home() {
         <p style={{ fontSize: 12, color: "#6b7280" }}>{t.footer_copy} • Viber: {VIBER}</p>
       </footer>
 
-      {/* VIBER FLOATING BUTTON */}
-      <a href={VIBER_LINK} style={{
+      {/* TELEGRAM FLOATING BUTTON */}
+      <a href={TELEGRAM_BOT} target="_blank" rel="noreferrer" style={{
         position: "fixed", bottom: 24, right: 20, zIndex: 99,
         width: 56, height: 56, borderRadius: "50%",
         background: `linear-gradient(135deg,${G},${GL})`,
@@ -583,7 +588,7 @@ export default function Home() {
         fontSize: 26, boxShadow: "0 4px 20px rgba(22,163,74,0.4)",
         textDecoration: "none",
       }}>
-        📱
+        ✈️
       </a>
 
       {/* CONTACT MODAL */}
@@ -594,17 +599,17 @@ export default function Home() {
             <h3 style={{ fontWeight: 900, fontSize: 18, color: "#111827", textAlign: "center", marginBottom: 6 }}>{t.modal_title}</h3>
             <p style={{ fontSize: 13, color: "#9ca3af", textAlign: "center", marginBottom: 24 }}>{selectedPkg} Package — {t.modal_sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button onClick={contactViber} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#f0fdf4", color: "#15803d", border: "2px solid #86efac", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
+              <button onClick={contactTelegram} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#f0fdf4", color: "#15803d", border: "2px solid #86efac", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 24 }}>✈️</span>
+                <div><div>Telegram</div><div style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>@clinicai_mmtest_bot • Live demo</div></div>
+              </button>
+              <button onClick={contactViber} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#eff6ff", color: "#1d4ed8", border: "2px solid #bfdbfe", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: 24 }}>📱</span>
                 <div><div>Viber</div><div style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>Myanmar popular • {VIBER}</div></div>
               </button>
-              <button onClick={contactMessenger} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#eff6ff", color: "#1d4ed8", border: "2px solid #bfdbfe", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
+              <button onClick={contactMessenger} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#fafafa", color: "#374151", border: "2px solid #e5e7eb", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: 24 }}>💬</span>
                 <div><div>Facebook Messenger</div><div style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>Quick reply</div></div>
-              </button>
-              <button onClick={contactEmail} style={{ padding: 16, borderRadius: 14, fontWeight: 800, fontSize: 15, background: "#fafafa", color: "#374151", border: "2px solid #e5e7eb", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 24 }}>✉️</span>
-                <div><div>Email</div><div style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>{GMAIL}</div></div>
               </button>
             </div>
             <button onClick={() => setModalOpen(false)} style={{ width: "100%", marginTop: 14, padding: 12, borderRadius: 12, fontSize: 14, color: "#9ca3af", background: "none", border: "none", cursor: "pointer" }}>{t.modal_cancel}</button>
