@@ -5,6 +5,7 @@ import Products from "@/components/Products"
 import CustomerReviews from "@/components/CustomerReviews"
 import About from "@/components/About"
 import Footer from "@/components/Footer"
+import SocialProofTicker from "@/components/SocialProofTicker"
 import { useTheme } from "@/lib/theme"
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
       <CustomerReviews />
       <About />
       <Footer />
+      <SocialProofTicker />
     </div>
   )
 }
