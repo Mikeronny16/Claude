@@ -57,6 +57,14 @@ export default function Navbar() {
           ))}
 
           <a
+            href="/outfit"
+            className="relative text-xs font-semibold px-4 py-2 rounded-full bg-pink text-white hover:bg-pink/90 transition-all duration-300 flex items-center gap-1.5 shadow-sm"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span>Outfit Finder</span>
+          </a>
+
+          <a
             href="/style"
             className="relative text-xs font-semibold px-4 py-2 rounded-full border border-pink/40 text-pink hover:border-pink hover:bg-pink/10 transition-all duration-300 flex items-center gap-1.5"
           >
@@ -176,6 +184,18 @@ export default function Navbar() {
                     {l.label}
                   </motion.a>
                 ))}
+
+                <motion.a
+                  href="/outfit"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-4 flex items-center justify-center gap-2 bg-pink text-white text-sm font-semibold py-3.5 rounded-full tracking-wide"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: links.length * 0.06 + 0.02 }}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  ✨ Outfit Finder — မင်းနဲ့ကိုက်တဲ့ outfit ရှာ
+                </motion.a>
 
                 <motion.a
                   href="/style"

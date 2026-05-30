@@ -5,6 +5,7 @@ import Home from "./pages/Home"
 import Auth from "./pages/Auth"
 import Admin from "./pages/Admin"
 import StyleQuiz from "./pages/StyleQuiz"
+import OutfitQuiz from "./pages/OutfitQuiz"
 import LoadingScreen from "./components/LoadingScreen"
 import CursorFollower from "./components/CursorFollower"
 import { useEffect } from "react"
@@ -38,6 +39,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/style" element={<StyleQuiz />} />
+              <Route path="/outfit" element={<OutfitQuiz />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
