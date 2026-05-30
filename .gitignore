@@ -48,3 +48,4 @@ next-env.d.ts
 *.db-wal
 *.db-shm
 app_spawn_backup/
+dist/
