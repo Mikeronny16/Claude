@@ -80,19 +80,35 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
           </div>
         )}
 
-        {/* Status badge — top left */}
+        {/* FOMO badge — top left */}
         <div className="absolute top-3 left-3">
-          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold backdrop-blur-md uppercase tracking-wider ${
-            p.sold_out
-              ? "bg-pink/20 border border-pink/40 text-pink"
-              : p.status === "In Stock"
-              ? "bg-emerald-dim border border-emerald/20 text-emerald"
-              : "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400"
-          }`}>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            {p.sold_out ? t("ရောင်းပြီး", "Sold Out") : p.status}
-          </span>
+          {(() => {
+            const badge = (p as Product).badge
+            const BADGE: Record<string, { label: string; cls: string }> = {
+              new:  { label: "✨ New",         cls: "bg-emerald-500 text-white" },
+              hot:  { label: "🔥 Hot Item",   cls: "bg-pink text-white" },
+              sale: { label: "💸 Sale",        cls: "bg-amber-500 text-white" },
+              low:  { label: "⚡ Almost Gone", cls: "bg-orange-500 text-white" },
+            }
+            if (badge && BADGE[badge] && !p.sold_out) {
+              return <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm ${BADGE[badge].cls}`}>{BADGE[badge].label}</span>
+            }
+            if (p.sold_out) {
+              return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold backdrop-blur-md bg-pink/20 border border-pink/40 text-pink uppercase tracking-wider"><span className="w-1 h-1 rounded-full bg-current" />{t("ရောင်းပြီး", "Sold Out")}</span>
+            }
+            return null
+          })()}
         </div>
+
+        {/* Discount % pill */}
+        {(() => {
+          const op = (p as Product).original_price
+          if (op && op > p.price && !p.sold_out) {
+            const pct = Math.round((1 - p.price / op) * 100)
+            return <div className="absolute top-3 right-3 z-10"><span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-{pct}%</span></div>
+          }
+          return null
+        })()}
 
         {/* Top-right: Wishlist + Size chips */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
@@ -174,9 +190,12 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
 
         <div className="flex items-center justify-between">
           {p.price > 0 ? (
-            <p className="font-mm font-bold text-pink text-sm sm:text-base">
-              {p.price.toLocaleString()} ကျပ်
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="font-mm font-bold text-pink text-sm sm:text-base">{p.price.toLocaleString()} ကျပ်</p>
+              {(p as Product).original_price && (p as Product).original_price! > p.price && (
+                <p className="font-mm text-xs text-muted line-through">{(p as Product).original_price!.toLocaleString()}</p>
+              )}
+            </div>
           ) : (
             <p className={`font-mm text-xs ${textSub}`}>{t("ဈေးနှုန်းမေးရန်", "Ask for price")}</p>
           )}

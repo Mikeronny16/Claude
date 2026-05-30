@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Sun, Moon } from "lucide-react"
+import { Menu, X, Sun, Moon, Sparkles } from "lucide-react"
 import { SITE } from "@/config"
 import Logo from "@/components/Logo"
 import { useLang } from "@/lib/lang"
@@ -55,6 +55,14 @@ export default function Navbar() {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-pink group-hover:w-full transition-all duration-300" />
             </a>
           ))}
+
+          <a
+            href="/style"
+            className="relative text-xs font-semibold px-4 py-2 rounded-full border border-pink/40 text-pink hover:border-pink hover:bg-pink/10 transition-all duration-300 flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span>Style Quiz</span>
+          </a>
 
           <a
             href={SITE.facebookUrl}
@@ -168,6 +176,20 @@ export default function Navbar() {
                     {l.label}
                   </motion.a>
                 ))}
+
+                <motion.a
+                  href="/style"
+                  onClick={() => setMenuOpen(false)}
+                  className={`py-4 border-b flex items-center gap-2 text-base font-medium text-pink ${
+                    isDark ? "border-cream/10" : "border-green-brand/10"
+                  }`}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: links.length * 0.06 + 0.05 }}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Style Quiz
+                </motion.a>
 
                 <motion.a
                   href={SITE.facebookUrl}
