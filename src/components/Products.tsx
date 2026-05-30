@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase, isConfigured, type Product } from "@/lib/supabase"
 import { FALLBACK_PRODUCTS, type Category } from "@/lib/products"
 import ProductCard from "./ProductCard"
+import QuickViewModal from "./QuickViewModal"
 
 type Filter = "All" | Category
 
@@ -17,6 +18,7 @@ const FILTERS: { key: Filter; mm: string; en: string }[] = [
 
 export default function Products() {
   const [filter, setFilter] = useState<Filter>("All")
+  const [quickView, setQuickView] = useState<Product | null>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
 
   const { data: live } = useQuery({
@@ -89,7 +91,7 @@ export default function Products() {
         {/* Grid */}
         <div className="mt-12 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {items.map((p, i) => (
-            <ProductCard key={p.id} p={p} index={i} />
+            <ProductCard key={p.id} p={p} index={i} onQuickView={setQuickView} />
           ))}
         </div>
 
@@ -99,6 +101,8 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      <QuickViewModal product={quickView} onClose={() => setQuickView(null)} />
     </section>
   )
 }

@@ -21,6 +21,8 @@ export type Product = {
   sold_out: boolean
   sort_order: number
   price: number
+  original_price?: number
+  badge?: "new" | "hot" | "sale" | "low" | null
   created_at: string
   updated_at: string
 }

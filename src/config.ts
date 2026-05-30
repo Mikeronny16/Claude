@@ -10,3 +10,14 @@ export function messengerUrl(productName: string) {
   const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
   return `https://m.me/${SITE.facebookPageId}?text=${msg}`
 }
+
+export function viberUrl(productName: string) {
+  const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
+  return `viber://chat?number=${SITE.phone}&text=${msg}`
+}
+
+export function whatsappUrl(productName: string) {
+  const phone = SITE.phone.replace(/\D/g, "")
+  const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
+  return `https://wa.me/${phone}?text=${msg}`
+}

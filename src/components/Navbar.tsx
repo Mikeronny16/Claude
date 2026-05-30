@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Sparkles } from "lucide-react"
 import { SITE } from "@/config"
 
 export default function Navbar() {
@@ -34,6 +34,13 @@ export default function Navbar() {
             </a>
           ))}
           <a
+            href="/style"
+            className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border border-pink-400/60 text-pink-500 hover:border-pink-500 hover:bg-pink-50 transition-all duration-200"
+          >
+            <Sparkles className="w-3 h-3" />
+            Style Quiz
+          </a>
+          <a
             href={SITE.facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -63,6 +70,14 @@ export default function Navbar() {
               <span className="text-xs text-muted">{l.en}</span>
             </a>
           ))}
+          <a
+            href="/style"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-2 py-3 border-b border-hairline text-pink-500 font-mm text-sm"
+          >
+            <Sparkles className="w-4 h-4" />
+            Style Quiz — မင်းရဲ့ Fashion Style ဘာလဲ?
+          </a>
           <a
             href={SITE.facebookUrl}
             target="_blank"

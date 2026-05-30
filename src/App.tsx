@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Home from "./pages/Home"
 import Auth from "./pages/Auth"
 import Admin from "./pages/Admin"
+import StyleQuiz from "./pages/StyleQuiz"
 import { useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
@@ -29,6 +30,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/style" element={<StyleQuiz />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
