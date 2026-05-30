@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Sun, Moon } from "lucide-react"
+import { Menu, X, Sun, Moon, Sparkles } from "lucide-react"
 import { SITE } from "@/config"
 import Logo from "@/components/Logo"
 import { useLang } from "@/lib/lang"
@@ -55,6 +55,15 @@ export default function Navbar() {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-pink group-hover:w-full transition-all duration-300" />
             </a>
           ))}
+
+          {/* Style Quiz button */}
+          <a
+            href="/style"
+            className="relative text-xs font-semibold px-4 py-2 rounded-full border border-pink/40 text-pink hover:border-pink hover:bg-pink/10 transition-all duration-300 flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span className="font-mm">Style Quiz</span>
+          </a>
 
           <a
             href={SITE.facebookUrl}
