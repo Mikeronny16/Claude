@@ -34,6 +34,13 @@ function useWishlist(productId: string) {
   return { liked, toggle }
 }
 
+const BADGE_CONFIG = {
+  new:  { label: "✨ New",        bg: "bg-emerald-500/90", border: "border-emerald-400/50",  text: "text-white" },
+  hot:  { label: "🔥 Hot Item",   bg: "bg-pink/90",        border: "border-pink/60",          text: "text-white" },
+  sale: { label: "💸 Sale",       bg: "bg-amber-500/90",   border: "border-amber-400/50",     text: "text-white" },
+  low:  { label: "⚡ Almost Gone", bg: "bg-orange-500/85", border: "border-orange-400/50",    text: "text-white" },
+}
+
 export default function ProductCard({ p, index, onQuickView, large = false }: Props) {
   const dmUrl = messengerUrl(p.name_en)
   const { t, lang } = useLang()
@@ -46,6 +53,10 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
   const textMain = isDark ? "text-[#F5F0E8]" : "text-[#1A2E1F]"
   const textSub = isDark ? "text-[#7A8F7D]" : "text-[#3D5A45]"
 
+  const badge = p.badge && !p.sold_out ? BADGE_CONFIG[p.badge] : null
+  const hasDiscount = p.original_price && p.original_price > p.price
+  const discountPct = hasDiscount ? Math.round((1 - p.price / p.original_price!) * 100) : 0
+
   return (
     <motion.article
       className={`group relative ${bgCard} rounded-2xl overflow-hidden border ${border} ${hoverBorder} transition-all duration-500 flex flex-col shadow-card hover:shadow-editorial`}
@@ -55,7 +66,7 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
       transition={{ duration: 0.7, delay: (index % 5) * 0.07, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ y: -6 }}
     >
-      {/* Image container — 75% height */}
+      {/* Image container */}
       <div className={`relative overflow-hidden bg-[#0F2415] ${large ? "aspect-[3/4] sm:aspect-[2/3]" : "aspect-[3/4]"}`}>
         <img
           src={p.image_url || FALLBACK_IMG}
@@ -80,23 +91,39 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
           </div>
         )}
 
-        {/* Status badge — top left */}
-        <div className="absolute top-3 left-3">
-          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold backdrop-blur-md uppercase tracking-wider ${
-            p.sold_out
-              ? "bg-pink/20 border border-pink/40 text-pink"
-              : p.status === "In Stock"
-              ? "bg-emerald-dim border border-emerald/20 text-emerald"
-              : "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400"
-          }`}>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            {p.sold_out ? t("ရောင်းပြီး", "Sold Out") : p.status}
-          </span>
+        {/* Top-left: FOMO badge (replaces plain status) */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          {badge ? (
+            <motion.span
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: (index % 5) * 0.07 + 0.3, type: "spring", stiffness: 260 }}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold backdrop-blur-md border tracking-wide ${badge.bg} ${badge.border} ${badge.text}`}
+            >
+              {badge.label}
+            </motion.span>
+          ) : (
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold backdrop-blur-md uppercase tracking-wider ${
+              p.sold_out
+                ? "bg-pink/20 border border-pink/40 text-pink"
+                : p.status === "In Stock"
+                ? "bg-emerald-dim border border-emerald/20 text-emerald"
+                : "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400"
+            }`}>
+              <span className="w-1 h-1 rounded-full bg-current" />
+              {p.sold_out ? t("ရောင်းပြီး", "Sold Out") : p.status}
+            </span>
+          )}
+          {/* Discount % pill shown alongside badge */}
+          {hasDiscount && !p.sold_out && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/90 text-white border border-amber-400/40 backdrop-blur-md">
+              -{discountPct}%
+            </span>
+          )}
         </div>
 
         {/* Top-right: Wishlist + Size chips */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-          {/* Wishlist button */}
           <button
             onClick={toggleWishlist}
             className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200"
@@ -111,7 +138,6 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
               style={{ color: liked ? "white" : "rgba(255,255,255,0.8)", fill: liked ? "white" : "none", transform: liked ? "scale(1.15)" : "scale(1)" }}
             />
           </button>
-          {/* Size chips */}
           <div className="flex flex-wrap gap-1 justify-end max-w-[80px]">
             {p.sizes.slice(0, 3).map((s) => (
               <span
@@ -148,7 +174,7 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
         </div>
       </div>
 
-      {/* Card info — minimal, magazine-style */}
+      {/* Card info */}
       <div className="p-4 flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -158,7 +184,6 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
             <p className={`text-[11px] mt-0.5 truncate ${textSub}`}>{p.name_en}</p>
           </div>
 
-          {/* Quick view icon */}
           <button
             onClick={() => onQuickView(p as Product)}
             className={`flex-shrink-0 p-1.5 rounded-full border transition-all duration-200 hover:border-pink/40 hover:text-pink ${
@@ -174,14 +199,20 @@ export default function ProductCard({ p, index, onQuickView, large = false }: Pr
 
         <div className="flex items-center justify-between">
           {p.price > 0 ? (
-            <p className="font-mm font-bold text-pink text-sm sm:text-base">
-              {p.price.toLocaleString()} ကျပ်
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="font-mm font-bold text-pink text-sm sm:text-base">
+                {p.price.toLocaleString()} ကျပ်
+              </p>
+              {hasDiscount && (
+                <p className={`font-mm text-xs line-through ${textSub}`}>
+                  {p.original_price!.toLocaleString()}
+                </p>
+              )}
+            </div>
           ) : (
             <p className={`font-mm text-xs ${textSub}`}>{t("ဈေးနှုန်းမေးရန်", "Ask for price")}</p>
           )}
 
-          {/* Category pill */}
           <span className={`editorial-label text-[9px] px-2 py-1 rounded-full border ${
             isDark
               ? "border-[rgba(255,255,255,0.08)] text-[#7A8F7D]"

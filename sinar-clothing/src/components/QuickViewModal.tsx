@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion"
-import { X, MessageCircle, Phone } from "lucide-react"
-import { messengerUrl, viberUrl, whatsappUrl } from "@/config"
+import { X, MessageCircle, Phone, Share2, Check, Eye } from "lucide-react"
+import { useState } from "react"
+import { messengerUrl, viberUrl, whatsappUrl, SITE } from "@/config"
 import type { Product } from "@/lib/supabase"
 import { FALLBACK_IMG } from "@/lib/products"
 
@@ -9,12 +10,36 @@ interface Props {
   onClose: () => void
 }
 
+function pseudoViewers(id: string): number {
+  const n = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0)
+  return (n % 10) + 4
+}
+
 export default function QuickViewModal({ product: p, onClose }: Props) {
+  const [copied, setCopied] = useState(false)
+
   if (!p) return null
 
-  const dmUrl = messengerUrl(p.name_en)
-  const vUrl = viberUrl(p.name_en)
-  const waUrl = whatsappUrl(p.name_en)
+  const prod = p
+  const dmUrl = messengerUrl(prod.name_en)
+  const vUrl = viberUrl(prod.name_en)
+  const waUrl = whatsappUrl(prod.name_en)
+  const viewers = pseudoViewers(String(prod.id))
+  const hasDiscount = prod.original_price && prod.original_price > prod.price
+  const discountPct = hasDiscount ? Math.round((1 - prod.price / prod.original_price!) * 100) : 0
+
+  async function handleShare() {
+    const shareText = `🛍️ Sinar Clothing\n${prod.name_mm} — ${prod.name_en}\n💰 ${prod.price.toLocaleString()} ကျပ်\n\n${SITE.facebookUrl}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Sinar — ${prod.name_mm}`, text: shareText, url: SITE.facebookUrl })
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(shareText)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -41,15 +66,23 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
               {/* Image */}
               <div className="relative aspect-[3/4] sm:aspect-auto sm:w-56 sm:flex-shrink-0 bg-forest overflow-hidden">
                 <img
-                  src={p.image_url || FALLBACK_IMG}
-                  alt={p.name_en}
+                  src={prod.image_url || FALLBACK_IMG}
+                  alt={prod.name_en}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG }}
                 />
-                {p.sold_out && (
+                {prod.sold_out && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                     <span className="bg-pink text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
                       Sold Out
+                    </span>
+                  </div>
+                )}
+                {/* Discount badge on image */}
+                {hasDiscount && !prod.sold_out && (
+                  <div className="absolute top-3 left-3">
+                    <span className="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                      -{discountPct}% OFF
                     </span>
                   </div>
                 )}
@@ -57,26 +90,65 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
 
               {/* Info */}
               <div className="flex-1 p-6 flex flex-col overflow-y-auto">
-                <div className="flex items-start justify-between mb-4">
+                {/* Header row */}
+                <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-serif text-xl text-cream">{p.name_mm}</h3>
-                    <p className="text-xs text-muted mt-0.5">{p.name_en}</p>
+                    <h3 className="font-mm font-serif text-xl text-cream leading-snug">{prod.name_mm}</h3>
+                    <p className="text-xs text-muted mt-0.5">{prod.name_en}</p>
                   </div>
-                  <button
-                    onClick={onClose}
-                    className="p-2 rounded-full bg-forest hover:bg-forest-light text-muted hover:text-cream transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                    {/* Share button */}
+                    <motion.button
+                      onClick={handleShare}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-2 rounded-full bg-forest hover:bg-forest-light text-muted hover:text-cream transition-colors"
+                      title="Share product"
+                    >
+                      {copied
+                        ? <Check className="w-4 h-4 text-emerald-400" />
+                        : <Share2 className="w-4 h-4" />
+                      }
+                    </motion.button>
+                    {/* Close button */}
+                    <button
+                      onClick={onClose}
+                      className="p-2 rounded-full bg-forest hover:bg-forest-light text-muted hover:text-cream transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
+                {/* Viewers count — social proof */}
+                {!prod.sold_out && (
+                  <div className="flex items-center gap-1.5 mb-4">
+                    <Eye className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[11px] text-emerald-400 font-medium">
+                      {viewers} people viewing right now
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                )}
+
                 {/* Price */}
-                {p.price > 0 && (
+                {prod.price > 0 && (
                   <div className="mb-4">
                     <p className="text-xs text-muted uppercase tracking-widest mb-1">Price</p>
-                    <p className="font-mm font-bold text-pink text-2xl">
-                      {p.price.toLocaleString()} ကျပ်
-                    </p>
+                    <div className="flex items-baseline gap-2.5">
+                      <p className="font-mm font-bold text-pink text-2xl">
+                        {prod.price.toLocaleString()} ကျပ်
+                      </p>
+                      {hasDiscount && (
+                        <p className="font-mm text-sm text-muted line-through">
+                          {prod.original_price!.toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                    {hasDiscount && (
+                      <p className="text-[11px] text-amber-400 font-semibold mt-0.5">
+                        You save {(prod.original_price! - prod.price).toLocaleString()} ကျပ် 🎉
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -84,7 +156,7 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                 <div className="mb-5">
                   <p className="text-xs text-muted uppercase tracking-widest mb-2">Sizes</p>
                   <div className="flex flex-wrap gap-2">
-                    {p.sizes.map((s) => (
+                    {prod.sizes.map((s) => (
                       <span
                         key={s}
                         className="px-3 py-1.5 rounded-full border border-hairline text-cream text-xs font-bold hover:border-pink hover:text-pink transition-colors cursor-default"
@@ -98,17 +170,17 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                 {/* Status */}
                 <div className="mb-5">
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                    p.sold_out ? "bg-red-500/20 text-red-400" :
-                    p.status === "In Stock" ? "bg-emerald-dim text-emerald" :
+                    prod.sold_out ? "bg-red-500/20 text-red-400" :
+                    prod.status === "In Stock" ? "bg-emerald-dim text-emerald" :
                     "bg-yellow-500/20 text-yellow-400"
                   }`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                    {p.sold_out ? "Sold Out" : p.status}
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                    {prod.sold_out ? "Sold Out" : prod.status === "Low Stock" ? "⚡ Almost Gone — မှာဖို့ မစောင့်ပါနှင့်" : prod.status}
                   </span>
                 </div>
 
                 {/* Order buttons */}
-                {!p.sold_out && (
+                {!prod.sold_out && (
                   <div className="mt-auto space-y-2.5">
                     <a
                       href={dmUrl}
@@ -141,6 +213,14 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                         <span>WhatsApp</span>
                       </a>
                     </div>
+                    {/* Share row */}
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center justify-center gap-2 w-full bg-forest border border-hairline hover:border-pink/40 text-muted hover:text-cream py-2.5 rounded-xl text-sm transition-colors"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+                      <span className="font-mm">{copied ? "Link ကူးယူပြီးပါပြီ ✓" : "Friend ဆီ Share ရန်"}</span>
+                    </button>
                   </div>
                 )}
               </div>

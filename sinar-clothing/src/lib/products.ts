@@ -16,6 +16,7 @@ export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [
     sold_out: false,
     sort_order: 1,
     price: 18000,
+    badge: "new",
   },
   {
     id: "2",
@@ -27,7 +28,9 @@ export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [
     image_url: "https://images.unsplash.com/photo-1616150638538-3dc7b7d4adf1?w=600&q=80",
     sold_out: false,
     sort_order: 2,
-    price: 25000,
+    price: 20000,
+    original_price: 25000,
+    badge: "sale",
   },
   {
     id: "3",
@@ -40,6 +43,7 @@ export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [
     sold_out: false,
     sort_order: 3,
     price: 28000,
+    badge: "hot",
   },
   {
     id: "4",
@@ -47,11 +51,12 @@ export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [
     name_mm: "High Waist ဂျင်းဘောင်းဘီ",
     category: "Jeans",
     sizes: ["28", "29", "30", "31"],
-    status: "In Stock",
+    status: "Low Stock",
     image_url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
     sold_out: false,
     sort_order: 4,
     price: 22000,
+    badge: "low",
   },
   {
     id: "5",
@@ -76,5 +81,6 @@ export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [
     sold_out: false,
     sort_order: 6,
     price: 32000,
+    badge: "hot",
   },
 ]
