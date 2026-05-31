@@ -2,334 +2,179 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Sparkles, Users, Star, Zap, Trophy, Clock, ArrowRight, ChevronRight } from "lucide-react"
+import { Sparkles, ArrowRight, Camera, Wand2, Share2 } from "lucide-react"
 
-const EXAMPLE_SCORES = [
-  { label: "Style", score: 92, color: "#FF00FF" },
-  { label: "Color Harmony", score: 87, color: "#00E5FF" },
-  { label: "Originality", score: 95, color: "#FFD700" },
-  { label: "Overall Impact", score: 91, color: "#FF00FF" },
+const STYLE_VIBES = [
+  { label: "Cyberpunk Icon", color: "#FF00FF", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&h=400&fit=crop" },
+  { label: "Soft Aesthetic", color: "#FFB3D9", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop" },
+  { label: "Streetwear God", color: "#00E5FF", img: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=300&h=400&fit=crop" },
+  { label: "Dark Academia", color: "#8B6914", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=300&h=400&fit=crop" },
+  { label: "Y2K Royalty", color: "#FFD700", img: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=400&fit=crop" },
 ]
 
-const VIBES = ["Cyberpunk Icon", "Soft Aesthetic", "Streetwear God", "Dark Academia", "Y2K Royalty"]
-
-const STATS = [
-  { value: "50K+", label: "Happy Users" },
-  { value: "1M+", label: "Outfits Rated" },
-  { value: "Top 1%", label: "Top Rated Looks" },
-  { value: "98%", label: "Accuracy Rate" },
+const STEPS = [
+  { icon: <Camera size={28} />, title: "Upload Your Selfie", desc: "A clear face photo is all we need — no styling required", num: "01" },
+  { icon: <Wand2 size={28} />, title: "AI Reads Your Aura", desc: "Our AI analyzes your features, tone, and vibe to build your style DNA", num: "02" },
+  { icon: <Share2 size={28} />, title: "Get Your Looks", desc: "Receive 6 personalized outfit looks generated just for you", num: "03" },
 ]
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D]">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0D0D0D]/80 backdrop-blur-lg">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0D0D0D] overflow-hidden">
+      {/* Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF00FF] to-[#00E5FF] flex items-center justify-center glow-pink">
-              <Sparkles size={14} className="text-white" />
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#FF00FF] to-[#00E5FF] flex items-center justify-center glow-pink">
+              <Sparkles size={16} className="text-white" />
             </div>
-            <span className="font-black text-xl tracking-tight" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              AURA
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
-            <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-            <Link href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</Link>
-            <Link href="#how" className="hover:text-white transition-colors">How It Works</Link>
-            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <span className="font-black text-2xl tracking-tight" style={{ fontFamily: "Montserrat, sans-serif" }}>AURA</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth" className="text-sm text-white/70 hover:text-white transition-colors hidden md:block">
-              Sign In
-            </Link>
-            <Link href="/rate" className="px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-[#FF00FF] to-[#a000a0] text-white glow-pink hover:opacity-90 transition-opacity flex items-center gap-1.5">
-              <Sparkles size={14} />
-              Rate My Outfit
+            <Link href="/pricing" className="text-white/50 text-sm hover:text-white transition-colors hidden md:block">Pricing</Link>
+            <Link href="/discover" className="px-5 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-[#FF00FF] to-[#a000a0] text-white glow-pink hover:opacity-90 transition-opacity flex items-center gap-1.5">
+              <Sparkles size={14} /> Try Free
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#FF00FF]/8 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full bg-[#00E5FF]/8 blur-3xl pointer-events-none" />
+      <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
+        {/* BG blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] rounded-full bg-[#FF00FF]/10 blur-[120px]" />
+          <div className="absolute bottom-1/4 -right-32 w-[600px] h-[600px] rounded-full bg-[#00E5FF]/10 blur-[120px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[#FFD700]/5 blur-[100px]" />
+        </div>
 
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#FF00FF]/30 bg-[#FF00FF]/10 text-[#FF00FF] text-xs font-semibold mb-6">
-              <Sparkles size={12} />
-              AI-POWERED FASHION ANALYSIS
+        <div className="relative max-w-5xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#FF00FF]/30 bg-[#FF00FF]/10 text-[#FF00FF] text-xs font-bold mb-8 tracking-widest">
+              <Sparkles size={12} /> AI PERSONAL STYLIST
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-black leading-tight mb-4" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              AI Outfit Rater.<br />
-              <span className="gradient-text text-glow-pink">Your Aura, Scored.</span>
+            <h1 className="text-6xl md:text-8xl font-black leading-[0.9] mb-6 tracking-tight" style={{ fontFamily: "Montserrat, sans-serif" }}>
+              DISCOVER<br />
+              <span className="gradient-text text-glow-pink">YOUR STYLE</span><br />
+              AURA
             </h1>
 
-            <p className="text-white/60 text-lg mb-8 leading-relaxed">
-              Upload your outfit. Get instant AI scores, style insights, and personalized tips to level up your fashion game.
+            <p className="text-white/50 text-xl md:text-2xl max-w-xl mx-auto mb-10 leading-relaxed">
+              Upload your selfie. AI reads your vibe.<br />
+              Get 6 outfit looks made <em>just for you.</em>
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <Link href="/rate" className="px-6 py-3.5 rounded-full font-bold bg-gradient-to-r from-[#FF00FF] to-[#a000a0] text-white glow-pink hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                <Sparkles size={18} />
-                Rate My Outfit — Free
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/discover"
+                className="group px-8 py-4 rounded-full font-black text-lg bg-gradient-to-r from-[#FF00FF] to-[#a000a0] text-white glow-pink hover:opacity-90 transition-all flex items-center justify-center gap-3"
+              >
+                <Camera size={22} />
+                Upload Your Selfie
+                <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <ArrowRight size={18} />
+                </motion.span>
               </Link>
-              <Link href="/leaderboard" className="px-6 py-3.5 rounded-full font-bold border border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#00E5FF]/10 transition-colors flex items-center justify-center gap-2">
-                <Users size={18} />
-                Join the Community
+              <Link href="/pricing"
+                className="px-8 py-4 rounded-full font-bold text-lg border border-white/15 text-white/70 hover:border-white/30 hover:text-white transition-all flex items-center justify-center gap-2"
+              >
+                View Pricing
               </Link>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {["F", "S", "M", "A"].map((l, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0D0D0D] bg-gradient-to-br from-[#FF00FF]/60 to-[#00E5FF]/60 flex items-center justify-center text-xs font-bold">
-                    {l}
-                  </div>
-                ))}
-              </div>
-              <span className="text-white/50 text-sm">
-                <span className="text-white font-semibold">50K+</span> users already glowing 🤍
-              </span>
-            </div>
+            <p className="text-white/25 text-sm mt-5">Free · No login needed · Results in 10 seconds</p>
           </motion.div>
 
-          {/* Score card preview */}
+          {/* Floating style cards */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="neon-border-pink rounded-2xl p-6 card-glass"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-20 relative"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={14} className="text-[#00E5FF]" />
-              <span className="text-[#00E5FF] text-xs font-bold uppercase tracking-widest">AI Score</span>
-            </div>
-
-            <div className="flex items-end gap-3 mb-2">
-              <span className="text-7xl font-black text-white" style={{ fontFamily: "Montserrat, sans-serif" }}>9.5</span>
-              <span className="text-white/40 text-2xl mb-3">/10</span>
-            </div>
-
-            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[#FF00FF]/20 to-[#00E5FF]/20 border border-[#FF00FF]/30 mb-6">
-              <span className="gradient-text font-bold text-sm">Cyberpunk Vibe ✦</span>
-            </div>
-
-            <div className="space-y-4">
-              {EXAMPLE_SCORES.map((s) => (
-                <div key={s.label}>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-white/60">{s.label}</span>
-                    <span className="font-bold" style={{ color: s.color }}>{s.score}</span>
+            <div className="flex gap-4 overflow-x-auto pb-4 md:justify-center snap-x snap-mandatory scrollbar-hide">
+              {STYLE_VIBES.map((v, i) => (
+                <motion.div
+                  key={v.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + i * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="flex-shrink-0 snap-center w-44 rounded-3xl overflow-hidden border border-white/10 cursor-pointer"
+                  style={{ boxShadow: `0 0 30px ${v.color}20` }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={v.img} alt={v.label} className="w-full h-64 object-cover" />
+                  <div className="p-3 bg-[#161616]">
+                    <div className="text-xs font-bold" style={{ color: v.color }}>{v.label}</div>
                   </div>
-                  <div className="score-bar">
-                    <motion.div
-                      className="score-bar-fill"
-                      style={{ background: s.color }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${s.score}%` }}
-                      transition={{ duration: 1.2, delay: 0.5 }}
-                    />
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-
-            <div className="mt-5 pt-4 border-t border-white/5 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#00E5FF]/20 flex items-center justify-center">
-                <Zap size={12} className="text-[#00E5FF]" />
-              </div>
-              <p className="text-white/50 text-xs">
-                <span className="text-[#00E5FF] font-semibold">AI Tip:</span> Try a silver chain to push this to a 10 🔥
-              </p>
-            </div>
+            <p className="text-white/20 text-xs mt-4 text-center">← Scroll to see style vibes →</p>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-y border-white/5 bg-white/[0.02] py-8">
-        <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {STATS.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 + 0.3 }}
-              className="text-center"
-            >
-              <div className="text-3xl font-black gradient-text" style={{ fontFamily: "Montserrat, sans-serif" }}>{s.value}</div>
-              <div className="text-white/40 text-sm mt-1">{s.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Bento Features */}
-      <section id="features" className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-3" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              Everything you need to <span className="gradient-text">slay</span>
-            </h2>
-            <p className="text-white/40">Powered by AI. Built for fashion lovers.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="md:col-span-2 card-glass rounded-2xl p-6 neon-border-pink group hover:bg-[#FF00FF]/5 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[#FF00FF]/20 flex items-center justify-center text-[#FF00FF]">
-                  <Sparkles size={20} />
-                </div>
-                <h3 className="font-bold text-lg">AI Outfit Scoring</h3>
-              </div>
-              <p className="text-white/50 mb-6">Advanced AI analyzes your outfit across Style, Color Harmony, Originality, and Overall Impact.</p>
-              <div className="flex items-center gap-4">
-                <div className="text-6xl font-black gradient-text" style={{ fontFamily: "Montserrat, sans-serif" }}>9.5</div>
-                <div className="flex-1 space-y-3">
-                  {EXAMPLE_SCORES.slice(0, 3).map(s => (
-                    <div key={s.label} className="flex items-center gap-3">
-                      <span className="text-white/40 text-xs w-20">{s.label}</span>
-                      <div className="flex-1 score-bar">
-                        <div className="score-bar-fill" style={{ background: s.color, width: `${s.score}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
-              className="card-glass rounded-2xl p-6 neon-border-cyan group hover:bg-[#00E5FF]/5 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[#00E5FF]/20 flex items-center justify-center text-[#00E5FF]">
-                  <Zap size={20} />
-                </div>
-                <h3 className="font-bold">Style Insights</h3>
-              </div>
-              <p className="text-white/50 text-sm mb-4">Personalized feedback and tips to improve your look instantly.</p>
-              <div className="p-3 rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/20 text-xs text-white/70">
-                ✦ Try adding a statement accessory to elevate your look!
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.15 }}
-              className="card-glass rounded-2xl p-6 group hover:bg-[#FF00FF]/5 transition-colors border border-white/5"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[#FF00FF]/20 flex items-center justify-center text-[#FF00FF]">
-                  <Users size={20} />
-                </div>
-                <h3 className="font-bold">Community</h3>
-              </div>
-              <p className="text-white/50 text-sm mb-3">Join 10K+ fashion lovers. Share, Glow, and grow together.</p>
-              <div className="flex -space-x-2">
-                {["K","L","M","S","A","R"].map((l,i) => (
-                  <div key={i} className="w-7 h-7 rounded-full border border-[#0D0D0D] bg-gradient-to-br from-[#FF00FF]/60 to-[#00E5FF]/60 flex items-center justify-center text-xs font-bold">
-                    {l}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-              className="card-glass rounded-2xl p-6 group hover:bg-[#FFD700]/5 transition-colors border border-white/5"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[#FFD700]/20 flex items-center justify-center text-[#FFD700]">
-                  <Star size={20} />
-                </div>
-                <h3 className="font-bold">Style DNA</h3>
-              </div>
-              <p className="text-white/50 text-sm mb-3">After 5 ratings, unlock your unique style personality.</p>
-              <div className="flex flex-wrap gap-1.5">
-                {VIBES.slice(0,3).map(v => (
-                  <span key={v} className="px-2 py-0.5 rounded-full bg-[#FFD700]/10 border border-[#FFD700]/20 text-[#FFD700] text-xs">{v}</span>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.25 }}
-              className="card-glass rounded-2xl p-6 group hover:bg-[#00E5FF]/5 transition-colors border border-white/5 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#00E5FF]/20 flex items-center justify-center text-[#00E5FF]">
-                    <Trophy size={20} />
-                  </div>
-                  <h3 className="font-bold">Leaderboard</h3>
-                </div>
-                <p className="text-white/50 text-sm">Compete with top stylers and climb the ranks.</p>
-              </div>
-              <Link href="/leaderboard" className="mt-4 flex items-center gap-1 text-[#00E5FF] text-sm font-semibold group-hover:gap-2 transition-all">
-                View Rankings <ChevronRight size={16} />
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
-              className="card-glass rounded-2xl p-6 group hover:bg-white/5 transition-colors border border-white/5"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white/60">
-                  <Clock size={20} />
-                </div>
-                <h3 className="font-bold">Outfit History</h3>
-              </div>
-              <p className="text-white/50 text-sm">Track your past looks and see your style evolution over time.</p>
-            </motion.div>
-          </div>
         </div>
       </section>
 
       {/* How it works */}
-      <section id="how" className="py-20 px-4 border-t border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-4xl font-black mb-12" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              Get your <span className="gradient-text">aura score</span> in 3 steps
+      <section className="py-24 px-4 border-t border-white/5">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
+            <h2 className="text-5xl font-black mb-4" style={{ fontFamily: "Montserrat, sans-serif" }}>
+              How It <span className="gradient-text">Works</span>
             </h2>
+            <p className="text-white/40 text-lg">3 steps to your perfect wardrobe</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: "01", title: "Upload Your Fit", desc: "Drag & drop or tap to upload your outfit photo. Pick your occasion.", icon: "📸" },
-              { step: "02", title: "AI Analyzes", desc: "Our AI scores your Style, Color Harmony, Originality, and Overall Impact.", icon: "✨" },
-              { step: "03", title: "Share Your Aura", desc: "Get a stunning result card ready for Instagram, TikTok, or Facebook.", icon: "🔥" },
-            ].map((s, i) => (
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {STEPS.map((s, i) => (
               <motion.div
-                key={s.step}
-                initial={{ opacity: 0, y: 20 }}
+                key={s.num}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
-                className="card-glass rounded-2xl p-6 border border-white/5"
+                className="relative card-glass rounded-3xl p-8 border border-white/5 text-center group hover:border-[#FF00FF]/20 transition-colors"
               >
-                <div className="text-4xl mb-4">{s.icon}</div>
-                <div className="text-[#FF00FF] text-xs font-bold mb-2">{s.step}</div>
-                <h3 className="font-bold text-lg mb-2" style={{ fontFamily: "Montserrat, sans-serif" }}>{s.title}</h3>
-                <p className="text-white/50 text-sm">{s.desc}</p>
+                <div className="absolute top-4 right-4 text-6xl font-black text-white/5" style={{ fontFamily: "Montserrat, sans-serif" }}>{s.num}</div>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FF00FF]/20 to-[#00E5FF]/20 flex items-center justify-center text-[#FF00FF] mx-auto mb-5 group-hover:from-[#FF00FF]/30 group-hover:to-[#00E5FF]/30 transition-all">
+                  {s.icon}
+                </div>
+                <h3 className="font-black text-xl mb-3" style={{ fontFamily: "Montserrat, sans-serif" }}>{s.title}</h3>
+                <p className="text-white/50 leading-relaxed">{s.desc}</p>
               </motion.div>
             ))}
           </div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-12">
-            <Link href="/rate" className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-[#FF00FF] to-[#00E5FF] text-black glow-pink hover:opacity-90 transition-opacity">
-              <Sparkles size={20} />
-              Rate My Outfit — It&apos;s Free
-              <ArrowRight size={20} />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-14"
+          >
+            <Link href="/discover"
+              className="inline-flex items-center gap-3 px-10 py-5 rounded-full font-black text-xl bg-gradient-to-r from-[#FF00FF] to-[#00E5FF] text-black glow-pink hover:opacity-90 transition-opacity"
+            >
+              <Camera size={24} />
+              Discover My Style — Free
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Social proof */}
+      <section className="py-16 px-4 border-t border-white/5">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-8 text-center">
+          {[
+            { val: "50K+", label: "Style Profiles Generated" },
+            { val: "98%", label: "Love Their Results" },
+            { val: "6", label: "Unique Looks Per Session" },
+          ].map(s => (
+            <div key={s.label}>
+              <div className="text-4xl font-black gradient-text mb-1" style={{ fontFamily: "Montserrat, sans-serif" }}>{s.val}</div>
+              <div className="text-white/40 text-sm">{s.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -342,13 +187,12 @@ export default function HomePage() {
             </div>
             <span className="font-black" style={{ fontFamily: "Montserrat, sans-serif" }}>AURA</span>
           </div>
-          <div className="flex gap-6 text-white/40 text-sm">
-            <Link href="#" className="hover:text-white transition-colors">About</Link>
+          <div className="flex gap-6 text-white/30 text-sm">
+            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
             <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-white transition-colors">Contact</Link>
           </div>
-          <p className="text-white/20 text-xs">© 2025 AURA. All rights reserved.</p>
+          <p className="text-white/20 text-xs">© 2025 AURA. AI Personal Stylist.</p>
         </div>
       </footer>
     </div>
