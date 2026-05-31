@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, Upload, X, ChevronDown } from "lucide-react"
+import { Sparkles, Upload, X, ChevronDown, Zap, Crown } from "lucide-react"
 
+const FREE_LIMIT = 3
 const OCCASIONS = ["Casual", "Night Out", "Formal", "Street Style", "Date Night", "Work/Office", "Festival", "Wedding Guest"]
 const MODES = [
   { id: "standard", label: "✨ Standard", desc: "Balanced scoring" },
@@ -13,11 +14,32 @@ const MODES = [
   { id: "glam", label: "👑 Glam Check", desc: "Red carpet ready?" },
 ]
 
+function getCredits(): number {
+  if (typeof window === "undefined") return FREE_LIMIT
+  const paid = parseInt(localStorage.getItem("aura_credits") ?? "0")
+  const used = parseInt(localStorage.getItem("aura_free_used") ?? "0")
+  const freeLeft = Math.max(0, FREE_LIMIT - used)
+  return paid + freeLeft
+}
+
+function useCredit() {
+  const used = parseInt(localStorage.getItem("aura_free_used") ?? "0")
+  const paid = parseInt(localStorage.getItem("aura_credits") ?? "0")
+  if (paid > 0) {
+    localStorage.setItem("aura_credits", String(paid - 1))
+  } else {
+    localStorage.setItem("aura_free_used", String(used + 1))
+  }
+}
+
 export default function RatePage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [credits, setCredits] = useState(FREE_LIMIT)
+
+  useEffect(() => { setCredits(getCredits()) }, [])
   const [occasion, setOccasion] = useState("Casual")
   const [mode, setMode] = useState("standard")
   const [dragging, setDragging] = useState(false)
@@ -40,8 +62,10 @@ export default function RatePage() {
 
   const onSubmit = async () => {
     if (!file) return
+    if (credits <= 0) { router.push("/pricing"); return }
     setLoading(true)
     try {
+      useCredit()
       const form = new FormData()
       form.append("image", file)
       form.append("occasion", occasion)
@@ -73,7 +97,23 @@ export default function RatePage() {
           <h1 className="text-4xl font-black mb-3" style={{ fontFamily: "Montserrat, sans-serif" }}>
             Rate Your <span className="gradient-text">Outfit</span>
           </h1>
-          <p className="text-white/50">Upload a photo and get your aura score in seconds — no login needed.</p>
+          <p className="text-white/50 mb-4">Upload a photo and get your aura score in seconds — no login needed.</p>
+          {/* Credit indicator */}
+          {credits > 0 ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm">
+              <Zap size={12} className="text-[#FFD700]" />
+              <span className="text-white/60">{credits} rating{credits !== 1 ? "s" : ""} remaining</span>
+              {credits <= 1 && (
+                <Link href="/pricing" className="text-[#FF00FF] text-xs font-bold hover:underline">Get more →</Link>
+              )}
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF00FF]/10 border border-[#FF00FF]/30 text-sm">
+              <Crown size={12} className="text-[#FF00FF]" />
+              <span className="text-white/70">No credits left —</span>
+              <Link href="/pricing" className="text-[#FF00FF] font-bold hover:underline">Unlock more</Link>
+            </div>
+          )}
         </motion.div>
 
         {/* Upload Zone */}
