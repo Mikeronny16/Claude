@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --pink: #FF00FF;
+  --cyan: #00E5FF;
+  --gold: #FFD700;
+  --bg: #0D0D0D;
+  --card: #161616;
+  --border: #2a2a2a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: #0D0D0D;
+  color: #ffffff;
+  font-family: 'Open Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.glow-pink { box-shadow: 0 0 20px rgba(255,0,255,0.4); }
+.glow-cyan { box-shadow: 0 0 20px rgba(0,229,255,0.4); }
+.glow-gold { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+
+.text-glow-pink { text-shadow: 0 0 20px rgba(255,0,255,0.7); }
+.text-glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.7); }
+
+.neon-border-pink {
+  border: 1px solid rgba(255,0,255,0.4);
+  box-shadow: 0 0 15px rgba(255,0,255,0.15), inset 0 0 15px rgba(255,0,255,0.05);
+}
+
+.neon-border-cyan {
+  border: 1px solid rgba(0,229,255,0.4);
+  box-shadow: 0 0 15px rgba(0,229,255,0.15), inset 0 0 15px rgba(0,229,255,0.05);
+}
+
+.card-glass {
+  background: rgba(22,22,22,0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #FF00FF, #00E5FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.upload-zone {
+  border: 2px dashed rgba(0,229,255,0.4);
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: #00E5FF;
+  background: rgba(0,229,255,0.05);
+  box-shadow: 0 0 30px rgba(0,229,255,0.2);
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0D0D0D; }
+::-webkit-scrollbar-thumb { background: #FF00FF; border-radius: 2px; }
