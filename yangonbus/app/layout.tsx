@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   description:
     "ရန်ကုန် ဘတ်စ်ကား လမ်းညွှန် | Find Yangon bus routes and stops instantly",
   keywords: ["Yangon bus", "YBS", "YRTC", "bus routes", "ဘတ်စ်ကား", "ရန်ကုန်"],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "YBS Guide",
+  },
   openGraph: {
     title: "YBS Guide — Yangon Bus Finder",
     description: "ရန်ကုန် ဘတ်စ်ကား လမ်းညွှန် | Find Yangon bus routes and stops instantly",
@@ -29,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0C0E0F",
+  themeColor: "#E42313",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,

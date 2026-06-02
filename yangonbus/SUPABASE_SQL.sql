@@ -84,3 +84,9 @@ LANGUAGE sql AS $$
   ORDER BY distance_meters
   LIMIT 20;
 $$;
+
+-- ============================================================
+-- Journey Planner optimization indexes (add if not exists)
+-- ============================================================
+CREATE INDEX IF NOT EXISTS route_stops_route_seq_idx ON route_stops(route_id, sequence);
+CREATE INDEX IF NOT EXISTS route_stops_stop_route_idx ON route_stops(stop_id, route_id, sequence);

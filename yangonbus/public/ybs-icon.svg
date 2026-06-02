@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#E42313"/>
+  <!-- Bus body -->
+  <rect x="96" y="160" width="320" height="210" rx="20" fill="white" opacity="0.95"/>
+  <!-- Windows -->
+  <rect x="120" y="185" width="70" height="55" rx="8" fill="#E42313" opacity="0.8"/>
+  <rect x="221" y="185" width="70" height="55" rx="8" fill="#E42313" opacity="0.8"/>
+  <rect x="322" y="185" width="70" height="55" rx="8" fill="#E42313" opacity="0.8"/>
+  <!-- Door -->
+  <rect x="195" y="265" width="60" height="90" rx="6" fill="#E42313" opacity="0.6"/>
+  <!-- Wheels -->
+  <circle cx="160" cy="370" r="30" fill="white"/>
+  <circle cx="160" cy="370" r="16" fill="#252729"/>
+  <circle cx="352" cy="370" r="30" fill="white"/>
+  <circle cx="352" cy="370" r="16" fill="#252729"/>
+  <!-- Front bumper -->
+  <rect x="96" y="355" width="320" height="15" rx="4" fill="white" opacity="0.5"/>
+  <!-- YBS text -->
+  <text x="256" y="475" font-size="62" font-family="Arial,sans-serif" font-weight="900" text-anchor="middle" fill="white" opacity="0.9">YBS</text>
+</svg>

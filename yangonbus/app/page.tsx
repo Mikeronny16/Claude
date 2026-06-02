@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, MapPin, X, Bus, ChevronRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
 const YBSMap = dynamic(() => import('@/components/YBSMap'), {
   ssr: false,
