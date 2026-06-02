@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
+  <defs>
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E6F5C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#13503F;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4A024;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E8901A;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Icon Mark ── -->
+  <!-- Outer rounded square -->
+  <rect x="0" y="0" width="120" height="120" rx="24" fill="url(#docGrad)"/>
+
+  <!-- Document shape (white) -->
+  <rect x="28" y="22" width="56" height="70" rx="6" fill="white" opacity="0.95"/>
+
+  <!-- Corner fold: cut and amber reveal -->
+  <polygon points="62,22 84,22 84,44" fill="#0F3D2E" opacity="0.4"/>
+  <polygon points="62,22 84,44 62,44" fill="url(#sparkGrad)"/>
+
+  <!-- Text lines on document -->
+  <rect x="36" y="52" width="36" height="5" rx="2.5" fill="#1E6F5C" opacity="0.35"/>
+  <rect x="36" y="63" width="28" height="5" rx="2.5" fill="#1E6F5C" opacity="0.35"/>
+  <rect x="36" y="74" width="32" height="5" rx="2.5" fill="#1E6F5C" opacity="0.35"/>
+  <rect x="36" y="85" width="22" height="5" rx="2.5" fill="#1E6F5C" opacity="0.25"/>
+
+  <!-- Amber sparkle star on fold -->
+  <g transform="translate(73, 33)" filter="url(#glow)">
+    <polygon points="0,-7 1.8,-2.5 6.6,-2.2 3,1.2 4.2,6.5 0,3.8 -4.2,6.5 -3,1.2 -6.6,-2.2 -1.8,-2.5"
+      fill="#F4A024" opacity="0.95"/>
+  </g>
+
+  <!-- Small dots: bottom-right of icon — visual rhythm -->
+  <circle cx="96" cy="96" r="4" fill="#F4A024" opacity="0.7"/>
+  <circle cx="107" cy="96" r="3" fill="#F4A024" opacity="0.4"/>
+
+  <!-- ── Wordmark: "klaro" ── -->
+  <!-- k -->
+  <text x="148" y="82"
+    font-family="'Georgia', 'Times New Roman', serif"
+    font-size="62"
+    font-weight="700"
+    letter-spacing="-1"
+    fill="#1A1A1A">klaro</text>
+
+  <!-- Amber dot after klaro (replaces period, signals AI) -->
+  <circle cx="448" cy="70" r="7" fill="url(#sparkGrad)"/>
+
+  <!-- Tagline -->
+  <text x="149" y="102"
+    font-family="'Arial', sans-serif"
+    font-size="13"
+    font-weight="400"
+    letter-spacing="2.5"
+    fill="#5C5C5C">DOCUMENT EXPLAINER</text>
+</svg>
