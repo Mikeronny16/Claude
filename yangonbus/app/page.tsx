@@ -186,13 +186,18 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={toggleLang}
-          className="chip text-xs px-3 py-1.5"
-          aria-label="Toggle language"
-        >
-          {t.langToggle}
-        </button>
+        <div className="flex items-center gap-3">
+          <Link href="/plan" style={{ color: 'var(--muted)' }} className="text-sm font-medium">
+            Plan
+          </Link>
+          <button
+            onClick={toggleLang}
+            className="chip text-xs px-3 py-1.5"
+            aria-label="Toggle language"
+          >
+            {t.langToggle}
+          </button>
+        </div>
       </nav>
 
       <main className="flex-1 flex flex-col">
