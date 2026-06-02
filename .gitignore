@@ -49,3 +49,12 @@ next-env.d.ts
 *.db-shm
 app_spawn_backup/
 dist/
+
+# External data repos (own git repos, not submodules)
+ybs-data/
+
+# Subproject build artifacts
+yangonbus/.next/
+yangonbus/node_modules/
+yangonbus/*.tsbuildinfo
+yangonbus/next-env.d.ts
