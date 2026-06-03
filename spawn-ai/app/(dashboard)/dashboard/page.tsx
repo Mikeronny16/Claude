@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Loader2, MessageCircle, Zap, Gift } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { toast } from "sonner"
 
 type Egg = { id: string; species: string; tier: string; hatchesAt: string; isHatched: boolean; personalitySeeds: { id: string }[] }
@@ -18,16 +18,13 @@ function CircularStat({ value, color, label, size = 72 }: { value: number; color
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox="0 0 60 60">
+        <svg width={size} height={size} viewBox="0 0 60 60" style={{ transform: "rotate(-90deg)" }}>
           <circle cx="30" cy="30" r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="5.5" />
-          <motion.circle
+          <circle
             cx="30" cy="30" r={r} fill="none" stroke={color} strokeWidth="5.5"
             strokeLinecap="round"
             strokeDasharray={`${dash} ${gap}`}
-            transform="rotate(-90 30 30)"
-            initial={{ strokeDasharray: `0 ${circ}` }}
-            animate={{ strokeDasharray: `${dash} ${gap}` }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
+            style={{ transition: "stroke-dasharray 0.9s ease-out" }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -194,9 +191,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Ready to hatch */}
-      <AnimatePresence>
         {readyEggs.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#F59E0B" }}>✨ Ready to Hatch!</p>
             <div className="space-y-2">
               {readyEggs.map(egg => (
@@ -212,9 +208,8 @@ export default function DashboardPage() {
                 </Link>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       {/* Incubating */}
       {incubating.length > 0 && (
