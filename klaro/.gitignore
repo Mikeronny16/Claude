@@ -39,22 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-/app/generated/prisma
-
-# SQLite db files
-*.db
-*.db-journal
-*.db-wal
-*.db-shm
-app_spawn_backup/
-dist/
-
-# External data repos (own git repos, not submodules)
-ybs-data/
-
-# Subproject build artifacts
-yangonbus/.next/
-yangonbus/node_modules/
-yangonbus/*.tsbuildinfo
-yangonbus/next-env.d.ts
