@@ -33,187 +33,218 @@ function Countdown({ hatchesAt, onReady }: { hatchesAt: string; onReady: () => v
   return (
     <div className="text-center">
       {ready ? (
-        <p className="text-xl font-bold text-amber-400">✨ Ready to hatch!</p>
+        <motion.p className="text-xl font-bold text-gold"
+          animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+          ✨ Ready to hatch!
+        </motion.p>
       ) : (
         <>
-          <p className="text-sm text-gray-400">Hatching in</p>
-          <p className="text-2xl font-bold text-white mt-1">{remaining}</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>Hatching in</p>
+          <p className="text-3xl font-black text-white mt-1 tabular-nums">{remaining}</p>
         </>
       )}
     </div>
   )
 }
 
-// ─── Hatching Overlay ─────────────────────────────────────────────────────────
+// ─── Genshin-style Hatching Reveal ───────────────────────────────────────────
 
-const PARTICLE_COLORS = ["#F59E0B","#EF4444","#8B5CF6","#10B981","#F97316","#EC4899","#FBBF24","#A78BFA"]
-const STAGES_EMOJI: Record<string, string> = { dragon: "🐉", cat: "🐱", phoenix: "🦅", unicorn: "🦄", wolf: "🐺", fox: "🦊", bunny: "🐰", panda: "🐼" }
+const PARTICLE_COLORS = ["#F59E0B","#FCD34D","#A78BFA","#C4B5FD","#F97316","#FBBF24","#EF4444","#EC4899"]
+const SPECIES_EMOJI: Record<string, string>  = { dragon: "🐉", cat: "🐱", phoenix: "🦅", unicorn: "🦄", wolf: "🐺", fox: "🦊", bunny: "🐰", panda: "🐼" }
+const SPECIES_TYPE: Record<string, string>   = { dragon: "Flame · Ancient", cat: "Celestial · Lunar", phoenix: "Fire · Reborn", unicorn: "Mystic · Sacred", wolf: "Shadow · Wild", fox: "Trickster · Wise", bunny: "Gentle · Swift", panda: "Serene · Balanced" }
+const TIER_LABEL: Record<string, string>     = { common: "Common", rare: "Rare", epic: "Epic", mythic: "Mythic" }
 
 function Particle({ angle, color, delay }: { angle: number; color: string; delay: number }) {
   const rad = (angle * Math.PI) / 180
-  const dist = 120 + Math.random() * 80
+  const dist = 140 + Math.random() * 100
   return (
     <motion.div
       className="absolute rounded-full"
-      style={{ width: 8 + Math.random() * 8, height: 8 + Math.random() * 8, background: color, top: "50%", left: "50%", x: "-50%", y: "-50%" }}
+      style={{ width: 6 + Math.random() * 8, height: 6 + Math.random() * 8, background: color, top: "50%", left: "50%", x: "-50%", y: "-50%" }}
       initial={{ x: "-50%", y: "-50%", scale: 0, opacity: 1 }}
       animate={{
         x: `calc(-50% + ${dist * Math.cos(rad)}px)`,
         y: `calc(-50% + ${dist * Math.sin(rad)}px)`,
-        scale: [0, 1.5, 0.8, 0],
+        scale: [0, 1.6, 0.8, 0],
         opacity: [0, 1, 1, 0],
       }}
-      transition={{ duration: 1.2, delay, ease: "easeOut" }}
+      transition={{ duration: 1.4, delay, ease: "easeOut" }}
     />
   )
 }
 
-function HatchingOverlay({ species, onDone }: { species: string; onDone: () => void }) {
-  const [phase, setPhase] = useState<"shake" | "crack" | "flash" | "reveal">("shake")
-  const doneRef = useRef(false)
+function GenshinReveal({ species, tier, petName, onDone }: { species: string; tier: string; petName: string; onDone: () => void }) {
+  const [phase, setPhase] = useState<"shake" | "crack" | "flash" | "reveal" | "card">("shake")
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("crack"),  700)
     const t2 = setTimeout(() => setPhase("flash"),  1600)
     const t3 = setTimeout(() => setPhase("reveal"), 2000)
-    const t4 = setTimeout(() => { if (!doneRef.current) { doneRef.current = true; onDone() } }, 3400)
+    const t4 = setTimeout(() => setPhase("card"),   2800)
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4) }
-  }, [onDone])
+  }, [])
 
-  const petEmoji = STAGES_EMOJI[species.toLowerCase()] ?? "🐣"
+  const petEmoji = SPECIES_EMOJI[species.toLowerCase()] ?? "🐣"
+  const typeLabel = SPECIES_TYPE[species.toLowerCase()] ?? "Mystic · Unknown"
+  const tierColors: Record<string, string> = {
+    common: "#F59E0B", rare: "#818CF8", epic: "#A855F7", mythic: "#EC4899"
+  }
+  const tierColor = tierColors[tier] ?? "#F59E0B"
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(15,10,30,0.95)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none"
+      style={{ background: "rgba(5,3,15,0.97)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      onClick={phase === "card" ? onDone : undefined}
     >
-      {/* Flash overlay */}
+      {/* Flash */}
       <AnimatePresence>
         {phase === "flash" && (
-          <motion.div
-            className="absolute inset-0"
-            style={{ background: "white" }}
+          <motion.div className="absolute inset-0" style={{ background: "white" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.9, 0] }}
-            transition={{ duration: 0.5 }}
+            animate={{ opacity: [0, 0.95, 0] }}
+            transition={{ duration: 0.45 }}
           />
         )}
       </AnimatePresence>
 
-      <div className="relative flex flex-col items-center gap-6">
-        {/* Particles (appear at crack phase) */}
-        {(phase === "crack" || phase === "flash" || phase === "reveal") && (
-          <div className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)" }}>
-            {[...Array(18)].map((_, i) => (
-              <Particle
-                key={i}
-                angle={(i / 18) * 360 + Math.random() * 20}
-                color={PARTICLE_COLORS[i % PARTICLE_COLORS.length]}
-                delay={i * 0.03}
-              />
-            ))}
-          </div>
+      {/* Radial gold burst */}
+      {(phase === "reveal" || phase === "card") && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div style={{
+            width: 600, height: 600,
+            background: `radial-gradient(circle, ${tierColor}22 0%, transparent 70%)`,
+            borderRadius: "50%",
+          }} />
+        </div>
+      )}
+
+      {/* Particles */}
+      {(phase === "crack" || phase === "flash" || phase === "reveal") && (
+        <div className="absolute" style={{ top: "45%", left: "50%", transform: "translate(-50%,-50%)" }}>
+          {[...Array(24)].map((_, i) => (
+            <Particle key={i} angle={(i / 24) * 360 + Math.random() * 15}
+              color={PARTICLE_COLORS[i % PARTICLE_COLORS.length]} delay={i * 0.025} />
+          ))}
+        </div>
+      )}
+
+      {/* Glow rings */}
+      {(phase === "crack" || phase === "reveal" || phase === "card") && [...Array(4)].map((_, i) => (
+        <motion.div key={i}
+          className="absolute rounded-full"
+          style={{
+            width: 80 + i * 70, height: 80 + i * 70,
+            top: "45%", left: "50%",
+            border: `2px solid ${tierColor}`,
+            opacity: 0,
+          }}
+          animate={{ scale: [0.4, 2.2], opacity: [0.7, 0] }}
+          transition={{ duration: 1.4, delay: i * 0.18, repeat: phase === "crack" ? Infinity : 0, repeatDelay: 0.2 }}
+        />
+      ))}
+
+      {/* Egg cracking */}
+      <AnimatePresence>
+        {phase !== "reveal" && phase !== "card" && (
+          <motion.div exit={{ scale: 0, opacity: 0 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              animate={
+                phase === "shake"
+                  ? { rotate: [-5, 5, -7, 7, -5, 5, -3, 3, 0], x: [-4, 4, -5, 5, -3, 3, 0] }
+                  : phase === "crack"
+                  ? { rotate: [-10, 10, -12, 12, -9, 9, -6, 6, 0], x: [-6, 6, -7, 7, -5, 5, 0], scale: [1, 1.1, 1, 1.12, 1] }
+                  : { scale: [1, 1.3, 0.1], rotate: 0 }
+              }
+              transition={{ duration: phase === "crack" ? 0.9 : 0.65, ease: "easeInOut" }}>
+              <svg width="160" height="192" viewBox="0 0 100 120"
+                style={{ filter: `drop-shadow(0 0 50px ${tierColor}aa)` }}>
+                <defs>
+                  <radialGradient id="hatch-egg" cx="40%" cy="30%" r="65%">
+                    <stop offset="0%" stopColor="#fef3c7"/>
+                    <stop offset="60%" stopColor="#f59e0b"/>
+                    <stop offset="100%" stopColor="#d97706"/>
+                  </radialGradient>
+                </defs>
+                <ellipse cx="50" cy="65" rx="38" ry="50" fill="url(#hatch-egg)"/>
+                <ellipse cx="38" cy="42" rx="8" ry="5" fill="rgba(255,255,255,0.35)" transform="rotate(-20,38,42)"/>
+                {(phase === "crack" || phase === "flash") && (
+                  <g stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" fill="none">
+                    <motion.path d="M50 30 L44 46 L52 52 L46 68"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.5 }} />
+                    <motion.path d="M50 30 L57 47 L63 58"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.15 }} />
+                    <motion.path d="M44 46 L36 55"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.3 }} />
+                  </g>
+                )}
+              </svg>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Egg + cracks */}
-        <AnimatePresence>
-          {phase !== "reveal" && (
-            <motion.div
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <motion.div
-                animate={
-                  phase === "shake"
-                    ? { rotate: [-4, 4, -6, 6, -4, 4, -3, 3, 0], x: [-3, 3, -4, 4, -2, 2, 0] }
-                    : phase === "crack"
-                    ? { rotate: [-8, 8, -10, 10, -8, 8, -6, 6, 0], x: [-5, 5, -6, 6, -4, 4, 0], scale: [1, 1.08, 1, 1.1, 1] }
-                    : { scale: [1, 1.2, 0.1], rotate: 0 }
-                }
-                transition={{ duration: phase === "crack" ? 0.9 : 0.7, ease: "easeInOut" }}
-              >
-                <svg width="140" height="168" viewBox="0 0 100 120" style={{ filter: "drop-shadow(0 0 40px rgba(245,158,11,0.8))" }}>
-                  <defs>
-                    <radialGradient id="hatch-egg" cx="40%" cy="30%" r="65%">
-                      <stop offset="0%" stopColor="#fef3c7"/>
-                      <stop offset="60%" stopColor="#f59e0b"/>
-                      <stop offset="100%" stopColor="#d97706"/>
-                    </radialGradient>
-                  </defs>
-                  <ellipse cx="50" cy="65" rx="38" ry="50" fill="url(#hatch-egg)"/>
-                  <ellipse cx="38" cy="42" rx="8" ry="5" fill="rgba(255,255,255,0.35)" transform="rotate(-20,38,42)"/>
-                  {/* Crack lines */}
-                  {(phase === "crack" || phase === "flash") && (
-                    <g stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" fill="none">
-                      <motion.path
-                        d="M50 30 L44 46 L52 52 L46 68"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      />
-                      <motion.path
-                        d="M50 30 L57 47 L63 58"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 0.4, delay: 0.15 }}
-                      />
-                      <motion.path
-                        d="M44 46 L36 55"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.3 }}
-                      />
-                    </g>
-                  )}
-                </svg>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Pet reveal */}
-        <AnimatePresence>
-          {phase === "reveal" && (
-            <motion.div
-              className="flex flex-col items-center gap-4"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: [0, 1.4, 1], opacity: 1 }}
-              transition={{ duration: 0.7, type: "spring", bounce: 0.4 }}
-            >
-              <motion.div
-                className="text-8xl"
-                animate={{ rotate: [-8, 8, -4, 4, 0] }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                {petEmoji}
-              </motion.div>
-              <motion.div
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <p className="text-2xl font-black text-white">It&apos;s hatching!</p>
-                <p className="text-amber-400 text-sm mt-1">Your new companion is here ✨</p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Glow rings */}
-        {(phase === "crack" || phase === "reveal") && [...Array(3)].map((_, i) => (
+      {/* Full reveal card — Genshin 5-star style */}
+      <AnimatePresence>
+        {(phase === "reveal" || phase === "card") && (
           <motion.div
-            key={i}
-            className="absolute rounded-full border border-amber-400"
-            style={{ width: 80 + i * 60, height: 80 + i * 60, top: "50%", left: "50%", x: "-50%", y: "-50%", opacity: 0 }}
-            animate={{ scale: [0.5, 1.8], opacity: [0.6, 0] }}
-            transition={{ duration: 1.2, delay: i * 0.2, repeat: phase === "crack" ? Infinity : 0, repeatDelay: 0.3 }}
-          />
-        ))}
-      </div>
+            className="flex flex-col items-center gap-5 relative z-10 px-6 w-full max-w-sm"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}>
+            {/* Tier label */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-xs font-black tracking-[0.4em] uppercase"
+              style={{ color: tierColor }}>
+              ✦ {TIER_LABEL[tier] ?? "Rare"} Companion ✦
+            </motion.div>
+
+            {/* Big emoji */}
+            <motion.div className="text-9xl"
+              animate={{ rotate: [-8, 8, -4, 4, 0] }}
+              transition={{ duration: 0.8, delay: 0.2 }}>
+              {petEmoji}
+            </motion.div>
+
+            {/* Name + type */}
+            <motion.div className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}>
+              <p className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: "var(--muted)" }}>
+                NEW COMPANION
+              </p>
+              <p className="text-4xl font-black text-white mb-2">{petName}</p>
+              <p className="text-sm font-medium" style={{ color: tierColor }}>{typeLabel}</p>
+            </motion.div>
+
+            {/* Tap hint */}
+            <AnimatePresence>
+              {phase === "card" && (
+                <motion.p
+                  className="text-xs mt-4"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.6, 0.35] }}
+                  transition={{ duration: 2, repeat: Infinity }}>
+                  Tap anywhere to continue
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -231,10 +262,11 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
   const [lastReaction, setLastReaction] = useState("")
   const [sending, setSending] = useState(false)
   const [hatching, setHatching] = useState(false)
-  const [showAnimation, setShowAnimation] = useState(false)
+  const [showReveal, setShowReveal] = useState(false)
   const [petId, setPetId] = useState<string | null>(null)
   const [petName, setPetName] = useState("")
   const [showNameInput, setShowNameInput] = useState(false)
+  const [hatchedName, setHatchedName] = useState("")
 
   useEffect(() => {
     async function loadEgg() {
@@ -287,7 +319,8 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
       const data = await res.json()
       if (data.pet) {
         setPetId(data.pet.id)
-        setShowAnimation(true)
+        setHatchedName(petName.trim())
+        setShowReveal(true)
       } else {
         toast.error(data.error ?? "Couldn't hatch egg")
         setHatching(false)
@@ -296,10 +329,6 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
       toast.error("Failed to hatch")
       setHatching(false)
     }
-  }
-
-  function handleAnimationDone() {
-    if (petId) router.push(`/pet/${petId}`)
   }
 
   if (loading) {
@@ -315,8 +344,13 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
   return (
     <>
       <AnimatePresence>
-        {showAnimation && (
-          <HatchingOverlay species={egg.species} onDone={handleAnimationDone} />
+        {showReveal && (
+          <GenshinReveal
+            species={egg.species}
+            tier={egg.tier}
+            petName={hatchedName}
+            onDone={() => { if (petId) router.push(`/pet/${petId}`) }}
+          />
         )}
       </AnimatePresence>
 
@@ -324,25 +358,23 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
         className="flex flex-col items-center space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+        transition={{ duration: 0.5 }}>
+
         <div className="w-full flex items-center gap-2">
           <Link href="/dashboard" className="text-gray-400 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-lg font-bold text-white capitalize">{egg.species} Egg</h1>
           <span className="ml-auto text-xs px-2 py-1 rounded-full capitalize"
-            style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.3)" }}>
+            style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.3)" }}>
             {egg.tier}
           </span>
         </div>
 
         {/* Egg visual */}
-        <motion.div
-          className={isReady ? "wiggle" : "float"}
-          whileHover={{ scale: 1.05 }}
-        >
-          <svg width="120" height="144" viewBox="0 0 100 120" style={{ filter: isReady ? "drop-shadow(0 0 30px rgba(245,158,11,0.7))" : "drop-shadow(0 0 20px rgba(139,92,246,0.5))" }}>
+        <motion.div className={isReady ? "wiggle" : "float"} whileHover={{ scale: 1.05 }}>
+          <svg width="140" height="168" viewBox="0 0 100 120"
+            style={{ filter: isReady ? "drop-shadow(0 0 35px rgba(245,158,11,0.75))" : "drop-shadow(0 0 25px rgba(124,58,237,0.55))" }}>
             <defs>
               <radialGradient id="egg-main" cx="40%" cy="30%" r="65%">
                 {isReady
@@ -352,10 +384,11 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
               </radialGradient>
             </defs>
             <ellipse cx="50" cy="65" rx="38" ry="50" fill="url(#egg-main)"/>
+            <ellipse cx="38" cy="42" rx="8" ry="5" fill="rgba(255,255,255,0.3)" transform="rotate(-20,38,42)"/>
             {isReady && <>
-              <ellipse cx="35" cy="45" rx="6" ry="8" fill="rgba(255,255,255,0.15)"/>
-              <line x1="48" y1="30" x2="42" y2="50" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
-              <line x1="55" y1="28" x2="55" y2="48" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+              <ellipse cx="35" cy="45" rx="6" ry="8" fill="rgba(255,255,255,0.12)"/>
+              <line x1="48" y1="30" x2="42" y2="50" stroke="rgba(255,255,255,0.25)" strokeWidth="2"/>
+              <line x1="55" y1="28" x2="55" y2="48" stroke="rgba(255,255,255,0.25)" strokeWidth="2"/>
             </>}
           </svg>
         </motion.div>
@@ -366,33 +399,30 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
         {/* Whisper reaction */}
         <AnimatePresence>
           {lastReaction && (
-            <motion.div
-              className="text-center"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
+            <motion.div className="text-center"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <p className="text-sm text-purple-300 italic">{lastReaction}</p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Whisper count */}
         {whisperCount > 0 && (
-          <p className="text-xs text-gray-500">{whisperCount} whisper{whisperCount !== 1 ? "s" : ""} sent today</p>
+          <p className="text-xs" style={{ color: "var(--muted)" }}>
+            {whisperCount} whisper{whisperCount !== 1 ? "s" : ""} sent
+          </p>
         )}
 
-        {/* Hatch section */}
+        {/* Hatch / Whisper section */}
         {isReady ? (
-          <motion.div
-            className="w-full space-y-3"
+          <motion.div className="w-full space-y-3"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", bounce: 0.4 }}
-          >
+            transition={{ type: "spring", bounce: 0.4 }}>
             {showNameInput ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-300 text-center">Give your pet a name</p>
+                <p className="text-sm text-center" style={{ color: "rgba(240,237,255,0.7)" }}>
+                  Give your companion a name
+                </p>
                 <input
                   type="text"
                   value={petName}
@@ -401,54 +431,45 @@ export default function IncubatorPage({ params }: { params: Promise<{ id: string
                   placeholder="What's their name?"
                   maxLength={20}
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-amber-500"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(245,158,11,0.4)" }}
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(245,158,11,0.4)" }}
                 />
                 <motion.button
                   onClick={hatchEgg}
                   disabled={hatching || !petName.trim()}
-                  className="w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, #D97706, #F59E0B)" }}
-                  whileTap={{ scale: 0.97 }}
-                  whileHover={{ opacity: 0.92 }}
-                >
+                  className="btn-gold w-full py-4 rounded-2xl text-base flex items-center justify-center gap-2 disabled:opacity-50"
+                  whileTap={{ scale: 0.96 }}>
                   {hatching ? <Loader2 className="w-5 h-5 animate-spin" /> : "✨ Hatch!"}
                 </motion.button>
               </div>
             ) : (
               <motion.button
                 onClick={() => setShowNameInput(true)}
-                className="w-full py-4 rounded-2xl text-white font-bold text-lg"
-                style={{ background: "linear-gradient(135deg, #D97706, #F59E0B)", boxShadow: "0 0 30px rgba(245,158,11,0.4)" }}
+                className="btn-gold w-full py-4 rounded-2xl text-base"
                 whileTap={{ scale: 0.95 }}
-                whileHover={{ boxShadow: "0 0 50px rgba(245,158,11,0.6)" }}
-                animate={{ boxShadow: ["0 0 30px rgba(245,158,11,0.4)", "0 0 50px rgba(245,158,11,0.7)", "0 0 30px rgba(245,158,11,0.4)"] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
+                animate={{ boxShadow: ["0 0 30px rgba(245,158,11,0.4)", "0 0 55px rgba(245,158,11,0.7)", "0 0 30px rgba(245,158,11,0.4)"] }}
+                transition={{ duration: 2, repeat: Infinity }}>
                 🥚 Hatch Now!
               </motion.button>
             )}
           </motion.div>
         ) : (
           <div className="w-full space-y-3">
-            <p className="text-sm text-gray-400 text-center">
-              Whisper to your egg while it incubates.<br/>
-              <span className="text-purple-400">Your words shape its personality.</span>
+            <p className="text-sm text-center" style={{ color: "var(--muted)" }}>
+              Whisper to your egg while it incubates.<br />
+              <span style={{ color: "#A78BFA" }}>Your words shape its personality.</span>
             </p>
             <form onSubmit={sendWhisper} className="flex gap-2">
               <input
                 value={whisper}
                 onChange={e => setWhisper(e.target.value)}
                 placeholder="Whisper something sweet..."
-                className="flex-1 px-4 py-3 rounded-xl text-sm text-white outline-none focus:ring-1 focus:ring-purple-500"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(139,92,246,0.25)" }}
+                className="flex-1 px-4 py-3 rounded-xl text-sm text-white outline-none"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(124,58,237,0.25)" }}
               />
-              <button
-                type="submit"
-                disabled={sending || !whisper.trim()}
-                className="px-4 py-3 rounded-xl disabled:opacity-40 transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)" }}
-              >
+              <button type="submit" disabled={sending || !whisper.trim()}
+                className="px-4 py-3 rounded-xl disabled:opacity-40 transition-all"
+                style={{ background: "linear-gradient(135deg,#5B21B6,#7C3AED)" }}>
                 {sending ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Send className="w-4 h-4 text-white" />}
               </button>
             </form>
