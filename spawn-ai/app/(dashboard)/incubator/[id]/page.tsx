@@ -73,6 +73,8 @@ function Particle({ angle, color, delay }: { angle: number; color: string; delay
   )
 }
 
+const TIER_STARS: Record<string, number> = { common: 1, rare: 3, epic: 4, mythic: 5 }
+
 function GenshinReveal({ species, tier, petName, onDone }: { species: string; tier: string; petName: string; onDone: () => void }) {
   const [phase, setPhase] = useState<"shake" | "crack" | "flash" | "reveal" | "card">("shake")
 
@@ -90,15 +92,29 @@ function GenshinReveal({ species, tier, petName, onDone }: { species: string; ti
     common: "#F59E0B", rare: "#818CF8", epic: "#A855F7", mythic: "#EC4899"
   }
   const tierColor = tierColors[tier] ?? "#F59E0B"
+  const starCount = TIER_STARS[tier] ?? 3
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center select-none"
       style={{ background: "rgba(5,3,15,0.97)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       onClick={phase === "card" ? onDone : undefined}
     >
+      {/* Skip button */}
+      {phase === "card" && (
+        <motion.button
+          className="absolute top-5 right-5 z-20 text-xs px-3 py-1.5 rounded-full"
+          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={onDone}
+        >
+          Skip →
+        </motion.button>
+      )}
+
       {/* Flash */}
       <AnimatePresence>
         {phase === "flash" && (
@@ -110,12 +126,18 @@ function GenshinReveal({ species, tier, petName, onDone }: { species: string; ti
         )}
       </AnimatePresence>
 
-      {/* Radial gold burst */}
+      {/* Radial burst */}
       {(phase === "reveal" || phase === "card") && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div style={{
             width: 600, height: 600,
-            background: `radial-gradient(circle, ${tierColor}22 0%, transparent 70%)`,
+            background: `radial-gradient(circle, ${tierColor}2A 0%, transparent 70%)`,
+            borderRadius: "50%",
+          }} />
+          {/* Star burst rays */}
+          <div className="absolute" style={{
+            width: 500, height: 500,
+            background: `conic-gradient(from 0deg, transparent 0deg, ${tierColor}0A 10deg, transparent 20deg, ${tierColor}0A 30deg, transparent 40deg, ${tierColor}0A 50deg, transparent 60deg, ${tierColor}0A 70deg, transparent 80deg, ${tierColor}0A 90deg, transparent 100deg, ${tierColor}0A 110deg, transparent 120deg, ${tierColor}0A 130deg, transparent 140deg, ${tierColor}0A 150deg, transparent 160deg, ${tierColor}0A 170deg, transparent 180deg, ${tierColor}0A 190deg, transparent 200deg, ${tierColor}0A 210deg, transparent 220deg, ${tierColor}0A 230deg, transparent 240deg, ${tierColor}0A 250deg, transparent 260deg, ${tierColor}0A 270deg, transparent 280deg, ${tierColor}0A 290deg, transparent 300deg, ${tierColor}0A 310deg, transparent 320deg, ${tierColor}0A 330deg, transparent 340deg, ${tierColor}0A 350deg, transparent 360deg)`,
             borderRadius: "50%",
           }} />
         </div>
@@ -124,9 +146,9 @@ function GenshinReveal({ species, tier, petName, onDone }: { species: string; ti
       {/* Particles */}
       {(phase === "crack" || phase === "flash" || phase === "reveal") && (
         <div className="absolute" style={{ top: "45%", left: "50%", transform: "translate(-50%,-50%)" }}>
-          {[...Array(24)].map((_, i) => (
-            <Particle key={i} angle={(i / 24) * 360 + Math.random() * 15}
-              color={PARTICLE_COLORS[i % PARTICLE_COLORS.length]} delay={i * 0.025} />
+          {[...Array(28)].map((_, i) => (
+            <Particle key={i} angle={(i / 28) * 360 + Math.random() * 13}
+              color={PARTICLE_COLORS[i % PARTICLE_COLORS.length]} delay={i * 0.022} />
           ))}
         </div>
       )}
@@ -192,51 +214,94 @@ function GenshinReveal({ species, tier, petName, onDone }: { species: string; ti
         )}
       </AnimatePresence>
 
-      {/* Full reveal card — Genshin 5-star style */}
+      {/* Full reveal card */}
       <AnimatePresence>
         {(phase === "reveal" || phase === "card") && (
           <motion.div
-            className="flex flex-col items-center gap-5 relative z-10 px-6 w-full max-w-sm"
+            className="flex flex-col items-center gap-4 relative z-10 px-6 w-full max-w-sm"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}>
-            {/* Tier label */}
+
+            {/* Stars */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              className="flex gap-1"
+              initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-xs font-black tracking-[0.4em] uppercase"
-              style={{ color: tierColor }}>
-              ✦ {TIER_LABEL[tier] ?? "Rare"} Companion ✦
+              transition={{ delay: 0.2 }}>
+              {[...Array(5)].map((_, i) => (
+                <motion.span key={i}
+                  style={{ fontSize: 22, color: i < starCount ? "#F59E0B" : "rgba(255,255,255,0.12)", filter: i < starCount ? `drop-shadow(0 0 6px #F59E0B99)` : "none" }}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.25 + i * 0.08, type: "spring", bounce: 0.6 }}>
+                  ★
+                </motion.span>
+              ))}
             </motion.div>
 
-            {/* Big emoji */}
-            <motion.div className="text-9xl"
-              animate={{ rotate: [-8, 8, -4, 4, 0] }}
-              transition={{ duration: 0.8, delay: 0.2 }}>
-              {petEmoji}
-            </motion.div>
+            {/* Ornate card frame */}
+            <motion.div
+              className="relative w-full"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}>
+              {/* Corner ornaments */}
+              {[["top-0 left-0", "rotate-0"], ["top-0 right-0", "rotate-90"], ["bottom-0 right-0", "rotate-180"], ["bottom-0 left-0", "rotate-270"]].map(([pos, rot], ci) => (
+                <div key={ci} className={`absolute ${pos} w-6 h-6`} style={{ transform: `rotate(${rot})` }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 2 L10 2 L2 10" stroke={tierColor} strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="2" cy="2" r="1.5" fill={tierColor}/>
+                  </svg>
+                </div>
+              ))}
 
-            {/* Name + type */}
-            <motion.div className="text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}>
-              <p className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: "var(--muted)" }}>
-                NEW COMPANION
-              </p>
-              <p className="text-4xl font-black text-white mb-2">{petName}</p>
-              <p className="text-sm font-medium" style={{ color: tierColor }}>{typeLabel}</p>
+              <div className="mx-3 my-3 p-5 rounded-2xl flex flex-col items-center gap-3"
+                style={{
+                  background: `linear-gradient(160deg, rgba(20,14,40,0.95) 0%, rgba(10,7,25,0.98) 100%)`,
+                  border: `1px solid ${tierColor}44`,
+                  boxShadow: `0 0 40px ${tierColor}22, inset 0 1px 0 rgba(255,255,255,0.06)`,
+                }}>
+
+                {/* Tier label */}
+                <p className="text-xs font-black tracking-[0.35em] uppercase" style={{ color: tierColor }}>
+                  ✦ {TIER_LABEL[tier] ?? "Rare"} Companion ✦
+                </p>
+
+                {/* Big emoji */}
+                <motion.div className="text-8xl leading-none"
+                  animate={{ rotate: [-8, 8, -4, 4, 0] }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  style={{ filter: `drop-shadow(0 0 24px ${tierColor}88)` }}>
+                  {petEmoji}
+                </motion.div>
+
+                {/* Divider */}
+                <div className="w-full flex items-center gap-2">
+                  <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, transparent, ${tierColor}55)` }}/>
+                  <span style={{ color: tierColor, fontSize: 10 }}>✦</span>
+                  <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${tierColor}55, transparent)` }}/>
+                </div>
+
+                {/* Name + type */}
+                <div className="text-center">
+                  <p className="text-xs uppercase tracking-[0.25em] mb-1" style={{ color: "var(--muted)" }}>
+                    NEW COMPANION
+                  </p>
+                  <p className="text-3xl font-black text-white mb-1">{petName}</p>
+                  <p className="text-xs font-medium" style={{ color: tierColor }}>{typeLabel}</p>
+                </div>
+              </div>
             </motion.div>
 
             {/* Tap hint */}
             <AnimatePresence>
               {phase === "card" && (
                 <motion.p
-                  className="text-xs mt-4"
-                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  className="text-xs"
+                  style={{ color: "rgba(255,255,255,0.3)" }}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 0.6, 0.35] }}
+                  animate={{ opacity: [0, 0.7, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity }}>
                   Tap anywhere to continue
                 </motion.p>

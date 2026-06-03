@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
@@ -12,42 +12,56 @@ const ADMIN_EMAIL = "mikeronny18@gmail.com"
 const EGGS = [
   {
     tier: "common", species: "cat", label: "Common",
-    price: "Free", amount: 0,
+    price: "Free", coins: 0,
     desc: "A warm little creature. Perfect first companion.",
     top: "#fef9c3", mid: "#fbbf24", bot: "#d97706", glow: "#fbbf24",
-    priceColor: "#10B981", borderColor: "rgba(245,158,11,0.3)",
+    priceColor: "#10B981", borderColor: "rgba(245,158,11,0.35)",
     glowClass: "glow-common",
+    stars: 1,
   },
   {
     tier: "rare", species: "dragon", label: "Rare",
-    price: "$3", amount: 3,
+    price: "$3", coins: 1000,
     desc: "A proud dragon spirit. Fierce and loyal.",
     top: "#c7d2fe", mid: "#818cf8", bot: "#4f46e5", glow: "#818cf8",
-    priceColor: "#818CF8", borderColor: "rgba(129,140,248,0.3)",
+    priceColor: "#818CF8", borderColor: "rgba(129,140,248,0.35)",
     glowClass: "glow-rare",
+    stars: 3,
   },
   {
     tier: "epic", species: "phoenix", label: "Epic",
-    price: "$7", amount: 7,
+    price: "$7", coins: 3000,
     desc: "Born from flame. Rises with every bond.",
     top: "#f5d0fe", mid: "#a855f7", bot: "#7c3aed", glow: "#a855f7",
-    priceColor: "#A855F7", borderColor: "rgba(168,85,247,0.35)",
+    priceColor: "#A855F7", borderColor: "rgba(168,85,247,0.4)",
     glowClass: "glow-epic",
+    stars: 4,
   },
   {
     tier: "mythic", species: "unicorn", label: "Mythic",
-    price: "$15", amount: 15,
+    price: "$15", coins: 7500,
     desc: "Rarest of all. A once-in-a-lifetime creature.",
     top: "#fbcfe8", mid: "#ec4899", bot: "#6d28d9", glow: "#ec4899",
-    priceColor: "#F59E0B", borderColor: "rgba(236,72,153,0.35)",
+    priceColor: "#F59E0B", borderColor: "rgba(236,72,153,0.4)",
     glowClass: "glow-mythic",
+    stars: 5,
   },
 ]
+
+function StarRow({ count, color }: { count: number; color: string }) {
+  return (
+    <div className="flex gap-0.5">
+      {[...Array(5)].map((_, i) => (
+        <span key={i} style={{ color: i < count ? color : "rgba(255,255,255,0.15)", fontSize: 10 }}>★</span>
+      ))}
+    </div>
+  )
+}
 
 function EggSVG({ egg, size = 80 }: { egg: typeof EGGS[0]; size?: number }) {
   const uid = `shop-${egg.tier}`
   return (
-    <div className="float" style={{ filter: `drop-shadow(0 0 16px ${egg.glow}66)` }}>
+    <div className="float" style={{ filter: `drop-shadow(0 0 18px ${egg.glow}77)` }}>
       <svg width={size} height={size * 1.2} viewBox="0 0 100 120">
         <defs>
           <radialGradient id={`g-${uid}`} cx="38%" cy="28%" r="65%">
@@ -110,16 +124,11 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="space-y-6 pb-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard" className="text-gray-400 hover:text-white">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-white">Egg Shop</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>Each egg carries a unique soul</p>
-        </div>
+      <div className="text-center pt-2">
+        <h1 className="text-3xl font-black text-white tracking-tight">SHOP</h1>
+        <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>Discover magical eggs!</p>
       </div>
 
       {/* 2x2 Grid */}
@@ -127,53 +136,83 @@ export default function ShopPage() {
         {EGGS.map((egg, i) => (
           <motion.div
             key={egg.tier}
-            className={`clay-card ${egg.glowClass} rounded-2xl p-4 flex flex-col items-center text-center gap-3`}
+            className={`clay-card ${egg.glowClass} rounded-2xl p-4 flex flex-col items-center text-center gap-2`}
             style={{ border: `1px solid ${egg.borderColor}` }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
             whileHover={{ scale: 1.02 }}
           >
-            {/* Rarity badge */}
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-bold self-end"
-              style={{ background: `${egg.glow}22`, color: egg.priceColor, border: `1px solid ${egg.glow}44` }}>
-              {egg.label}
-            </span>
+            {/* Stars + rarity */}
+            <div className="flex flex-col items-center gap-1 self-stretch">
+              <StarRow count={egg.stars} color={egg.priceColor} />
+              <span className="text-xs font-bold"
+                style={{ color: egg.priceColor }}>
+                {egg.label}
+              </span>
+            </div>
 
             {/* Egg */}
-            <EggSVG egg={egg} size={76} />
+            <EggSVG egg={egg} size={72} />
 
             {/* Description */}
             <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{egg.desc}</p>
 
-            {/* Gold pill price button */}
+            {/* Coin price button */}
             <motion.button
               onClick={() => buyEgg(egg)}
               disabled={loading === egg.tier}
               className="w-full py-2.5 rounded-full text-sm font-bold transition-all disabled:opacity-50"
               style={egg.tier === "common"
                 ? { background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.4)", color: "#10B981" }
-                : { background: "linear-gradient(135deg,#D97706,#F59E0B)", color: "#1A0800" }
+                : { background: "linear-gradient(135deg,#92400E,#D97706,#F59E0B)", color: "#FFF8E7", border: "1px solid rgba(245,158,11,0.5)" }
               }
               whileTap={{ scale: 0.94 }}
             >
               {loading === egg.tier
                 ? <Loader2 className="w-4 h-4 animate-spin inline" />
-                : egg.tier === "common" ? "Get Free" : egg.price
+                : egg.tier === "common"
+                  ? "Get Free"
+                  : `🪙 ${egg.coins.toLocaleString()}`
               }
             </motion.button>
           </motion.div>
         ))}
       </div>
 
+      {/* Legend tier card */}
+      <motion.div
+        className="clay-card rounded-2xl p-4 flex flex-col items-center text-center gap-3"
+        style={{ border: "1px solid rgba(236,72,153,0.3)", background: "rgba(15,10,35,0.9)" }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.36 }}
+      >
+        <div className="flex gap-0.5">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} style={{ color: "#F59E0B", fontSize: 14 }}>★</span>
+          ))}
+        </div>
+        <div className="float text-5xl">🌟</div>
+        <div>
+          <p className="text-xs font-black tracking-widest uppercase" style={{ color: "#EC4899" }}>Legend</p>
+          <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>Exclusive. Beyond rarity.</p>
+        </div>
+        <Link href="/pricing"
+          className="w-full py-2.5 rounded-full text-sm font-bold text-center"
+          style={{ background: "linear-gradient(135deg,#6D28D9,#EC4899)", color: "#fff" }}>
+          🪙 15,000 — View Plans
+        </Link>
+      </motion.div>
+
       {/* Payment note */}
       <div className="p-4 rounded-2xl text-center clay-card">
         <p className="text-xs" style={{ color: "var(--muted)" }}>
-          Paid eggs → Gmail opens → Admin confirms → Egg appears in your nest 🥚
+          🪙 Coins = real currency equivalent · Admin confirms orders manually
         </p>
-        <Link href="/pricing" className="text-xs text-purple-400 hover:text-purple-300 mt-1 inline-block">
-          View plans for bulk eggs →
-        </Link>
+        <p className="text-xs mt-1" style={{ color: "rgba(167,139,250,0.7)" }}>
+          1,000 coins ≈ $1 USD
+        </p>
       </div>
     </div>
   )
