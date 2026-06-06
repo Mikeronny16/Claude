@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
-import { supabase, isConfigured, type Product } from "@/lib/supabase"
+import { supabase, isConfigured, type Product, type ProductColor } from "@/lib/supabase"
 import { SITE } from "@/config"
 import { FALLBACK_IMG } from "@/lib/products"
 import { getLocalAnalytics, getLast7Days, getTodayVisits, getTotalVisits } from "@/lib/analytics"
@@ -28,13 +28,114 @@ type FormData = {
   image_url: string
   sold_out: boolean
   sort_order: number
+  colors: ProductColor[]
 }
 
 const CATEGORIES = ["Tops", "Cardigans", "Dresses", "Jeans", "Sweaters"]
 const STATUSES = ["In Stock", "Low Stock", "Out of Stock"]
 
+const PRESET_COLORS: ProductColor[] = [
+  { hex: "#1a1a1a", name: "Black" },
+  { hex: "#f5f5f5", name: "White" },
+  { hex: "#f5f0e8", name: "Cream" },
+  { hex: "#d4b896", name: "Beige" },
+  { hex: "#c4a882", name: "Camel" },
+  { hex: "#8b5e3c", name: "Brown" },
+  { hex: "#9ca3af", name: "Gray" },
+  { hex: "#1e2a4a", name: "Navy" },
+  { hex: "#3b82f6", name: "Blue" },
+  { hex: "#2d6a4f", name: "Green" },
+  { hex: "#ff6b9d", name: "Pink" },
+  { hex: "#FF1F6E", name: "Hot Pink" },
+  { hex: "#e53e3e", name: "Red" },
+  { hex: "#f59e0b", name: "Yellow" },
+  { hex: "#f97316", name: "Orange" },
+  { hex: "#7c3aed", name: "Purple" },
+]
+
 const inp = "w-full bg-[#0A1A0F] border border-[#1C3020] focus:border-[#FF1F6E] rounded-xl px-4 py-2.5 text-sm text-[#F5F0E8] placeholder-[#4A6350] focus:outline-none transition-colors"
 const lbl = "text-[10px] font-semibold text-[#7A8F7D] uppercase tracking-widest block mb-1.5"
+
+// ─── Color Picker ─────────────────────────────────────────────────────────────
+function ColorPicker({ value, onChange }: {
+  value: ProductColor[]
+  onChange: (colors: ProductColor[]) => void
+}) {
+  const [customHex, setCustomHex] = useState("#000000")
+  const [customName, setCustomName] = useState("")
+
+  function toggle(color: ProductColor) {
+    const exists = value.some((c) => c.hex === color.hex)
+    if (exists) onChange(value.filter((c) => c.hex !== color.hex))
+    else onChange([...value, color])
+  }
+
+  function addCustom() {
+    const name = customName.trim() || customHex
+    if (value.some((c) => c.hex === customHex)) return
+    onChange([...value, { hex: customHex, name }])
+    setCustomName("")
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Preset swatches */}
+      <div className="flex flex-wrap gap-2">
+        {PRESET_COLORS.map((c) => {
+          const selected = value.some((v) => v.hex === c.hex)
+          return (
+            <button
+              key={c.hex}
+              type="button"
+              title={c.name}
+              onClick={() => toggle(c)}
+              className="relative w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
+              style={{
+                background: c.hex,
+                borderColor: selected ? "#FF1F6E" : "rgba(255,255,255,0.12)",
+                boxShadow: selected ? "0 0 0 2px #FF1F6E44" : "none",
+              }}
+            >
+              {selected && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white drop-shadow" style={{ fontSize: 13, lineHeight: 1, textShadow: "0 1px 3px #000" }}>✓</span>
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Selected tags */}
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {value.map((c) => (
+            <span key={c.hex}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-[#1C3020] text-[#F5F0E8]"
+              style={{ background: `${c.hex}22` }}>
+              <span className="w-3 h-3 rounded-full flex-shrink-0 border border-white/20" style={{ background: c.hex }} />
+              {c.name}
+              <button type="button" onClick={() => toggle(c)} className="ml-0.5 text-[#7A8F7D] hover:text-[#FF1F6E]">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Custom color */}
+      <div className="flex gap-2 items-center">
+        <input type="color" value={customHex} onChange={(e) => setCustomHex(e.target.value)}
+          className="w-9 h-9 rounded-lg cursor-pointer border-0 bg-transparent p-0.5" />
+        <input value={customName} onChange={(e) => setCustomName(e.target.value)}
+          placeholder="Color name (e.g. Dusty Rose)"
+          className={inp + " flex-1 text-xs"} />
+        <button type="button" onClick={addCustom}
+          className="px-3 py-2 rounded-xl text-xs font-semibold border border-[#1C3020] text-[#7A8F7D] hover:text-[#FF1F6E] hover:border-[#FF1F6E]/40 transition-colors whitespace-nowrap">
+          + Add
+        </button>
+      </div>
+    </div>
+  )
+}
 
 // ─── Product Form Modal ───────────────────────────────────────────────────────
 function ProductForm({ initial, onClose, onSave }: {
@@ -42,7 +143,7 @@ function ProductForm({ initial, onClose, onSave }: {
   onClose: () => void
   onSave: (data: FormData & { id?: string }) => Promise<void>
 }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm<FormData>({
     defaultValues: initial ? {
       name_mm: initial.name_mm, name_en: initial.name_en,
       category: initial.category, price: initial.price,
@@ -51,8 +152,10 @@ function ProductForm({ initial, onClose, onSave }: {
       sizes: initial.sizes.join(", "), status: initial.status,
       image_url: initial.image_url, sold_out: initial.sold_out,
       sort_order: initial.sort_order,
-    } : { status: "In Stock", sold_out: false, sort_order: 99, price: 0, original_price: null, badge: "" },
+      colors: initial.colors ?? [],
+    } : { status: "In Stock", sold_out: false, sort_order: 99, price: 0, original_price: null, badge: "", colors: [] },
   })
+  const selectedColors = watch("colors")
 
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState(initial?.image_url || "")
@@ -170,6 +273,11 @@ function ProductForm({ initial, onClose, onSave }: {
           </div>
 
           <div>
+            <label className={lbl}>Available Colors အရောင်များ</label>
+            <ColorPicker value={selectedColors} onChange={(c) => setValue("colors", c)} />
+          </div>
+
+          <div>
             <label className={lbl}>Sizes (comma separated)</label>
             <input {...register("sizes")} placeholder="S, M, L, XL or 28, 29, 30" className={inp} />
           </div>
@@ -264,6 +372,7 @@ export default function Admin() {
       const row = {
         ...payload,
         sizes,
+        colors: payload.colors ?? [],
         original_price: payload.original_price || null,
         badge: payload.badge || null,
       }
@@ -502,7 +611,7 @@ export default function Admin() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-[#1C3020]">
-                        {["ပုံ", "ပစ္စည်း", "Category", "ဈေးနှုန်း", "Sizes", "Status", "Sold Out", ""].map((h) => (
+                        {["ပုံ", "ပစ္စည်း", "Category", "ဈေးနှုန်း", "Colors", "Sizes", "Status", "Sold Out", ""].map((h) => (
                           <th key={h} className="text-left px-5 py-3.5 text-[10px] font-bold text-[#4A6350] uppercase tracking-widest whitespace-nowrap">
                             {h}
                           </th>
@@ -528,6 +637,19 @@ export default function Admin() {
                             <span className="font-mm font-bold text-sm text-[#FF1F6E]">
                               {p.price > 0 ? `${p.price.toLocaleString()} ကျပ်` : "—"}
                             </span>
+                          </td>
+                          <td className="px-5 py-3">
+                            {(p.colors ?? []).length > 0 ? (
+                              <div className="flex gap-1 flex-wrap max-w-[80px]">
+                                {(p.colors ?? []).map((c) => (
+                                  <span key={c.hex} title={c.name}
+                                    className="w-5 h-5 rounded-full border border-white/15 flex-shrink-0"
+                                    style={{ background: c.hex }} />
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-[10px] text-[#4A6350]">—</span>
+                            )}
                           </td>
                           <td className="px-5 py-3">
                             <div className="flex gap-1 flex-wrap max-w-[80px]">

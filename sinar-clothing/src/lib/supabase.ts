@@ -10,12 +10,15 @@ export const supabase = createClient(
   key || "placeholder-key"
 )
 
+export type ProductColor = { hex: string; name: string }
+
 export type Product = {
   id: string
   name_en: string
   name_mm: string
   category: string
   sizes: string[]
+  colors: ProductColor[]
   status: string
   image_url: string
   sold_out: boolean

@@ -152,6 +152,25 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                   </div>
                 )}
 
+                {/* Colors */}
+                {(prod.colors ?? []).length > 0 && (
+                  <div className="mb-5">
+                    <p className="text-xs text-muted uppercase tracking-widest mb-2">Available Colors</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(prod.colors ?? []).map((c) => (
+                        <div key={c.hex} className="flex flex-col items-center gap-1">
+                          <span
+                            className="w-8 h-8 rounded-full border-2 border-white/10 hover:border-pink transition-colors cursor-default"
+                            style={{ background: c.hex }}
+                            title={c.name}
+                          />
+                          <span className="text-[9px] text-muted">{c.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Sizes */}
                 <div className="mb-5">
                   <p className="text-xs text-muted uppercase tracking-widest mb-2">Sizes</p>
