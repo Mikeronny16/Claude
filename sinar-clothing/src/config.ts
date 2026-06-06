@@ -4,7 +4,7 @@ export const SITE = {
   facebookPageId: "61584569241849",
   facebookUrl: "https://www.facebook.com/profile.php?id=61584569241849",
   phone: "+959790543312",
-  viber: "+959790543312",
+  viber: "+959896208413",
   whatsapp: "+959790543312",
 }
 
