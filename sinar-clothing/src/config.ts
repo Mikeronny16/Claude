@@ -14,7 +14,8 @@ export function messengerUrl(productName: string) {
 }
 
 export function openMessenger(_productName: string) {
-  window.location.href = `fb-messenger://user-thread/${SITE.facebookPageId}`
+  // m.me opens existing conversation (not new thread)
+  window.open(`https://m.me/${SITE.facebookPageId}`, "_blank")
 }
 
 export function viberUrl(productName: string) {
