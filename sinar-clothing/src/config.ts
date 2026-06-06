@@ -1,8 +1,8 @@
 export const SITE = {
   name: "Sinar",
   tagline: "ချစ်စရာ ဝတ်စုံလေးများ",
-  facebookPageId: "14anQs8AyMd",
-  facebookUrl: "https://www.facebook.com/share/14anQs8AyMd/",
+  facebookPageId: "61584569241849",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61584569241849",
   phone: "+959790543312",
   viber: "+959790543312",
   whatsapp: "+959790543312",
