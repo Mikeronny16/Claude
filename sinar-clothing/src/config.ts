@@ -19,8 +19,8 @@ export function openMessenger(_productName: string) {
 }
 
 export function viberUrl(_productName: string) {
-  const num = encodeURIComponent(SITE.viber)
-  return `viber://chat?number=${num}`
+  const num = SITE.viber.replace(/\D/g, "")
+  return `https://msng.link/o/?${num}=vi`
 }
 
 export function whatsappUrl(productName: string) {
