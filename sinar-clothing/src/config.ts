@@ -20,8 +20,7 @@ export function openMessenger(_productName: string) {
 
 export function viberUrl(productName: string) {
   const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
-  const num = SITE.viber.replace(/\D/g, "")
-  return `viber://chat?number=${num}&text=${msg}`
+  return `viber://chat?number=${SITE.viber}&text=${msg}`
 }
 
 export function whatsappUrl(productName: string) {
