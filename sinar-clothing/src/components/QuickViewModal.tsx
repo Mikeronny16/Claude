@@ -201,8 +201,7 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                 {!prod.sold_out && (
                   <div className="mt-auto space-y-2.5">
                     <a
-                      href={SITE.facebookUrl}
-                      target="_blank"
+                      href={`fb-messenger://user-thread/${SITE.facebookPageId}`}
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full bg-pink text-white py-3 rounded-xl text-sm font-semibold hover:shadow-pink transition-shadow"
                     >
