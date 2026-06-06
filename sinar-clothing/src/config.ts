@@ -18,9 +18,8 @@ export function openMessenger(_productName: string) {
   window.open(`https://m.me/${SITE.facebookPageId}`, "_blank")
 }
 
-export function viberUrl(productName: string) {
-  const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
-  return `viber://chat?number=${SITE.viber}&text=${msg}`
+export function viberUrl(_productName: string) {
+  return `viber://chat?number=${SITE.viber}`
 }
 
 export function whatsappUrl(productName: string) {
