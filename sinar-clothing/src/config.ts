@@ -14,10 +14,7 @@ export function messengerUrl(productName: string) {
 }
 
 export function openMessenger(_productName: string) {
-  const appUrl = `fb-messenger://user-thread/${SITE.facebookPageId}`
-  const webUrl = `https://www.facebook.com/messages/t/${SITE.facebookPageId}`
-  window.location.href = appUrl
-  setTimeout(() => { window.open(webUrl, "_blank") }, 600)
+  window.location.href = `fb-messenger://user-thread/${SITE.facebookPageId}`
 }
 
 export function viberUrl(productName: string) {
