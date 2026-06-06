@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { X, MessageCircle, Phone, Share2, Check, Eye } from "lucide-react"
 import { useState } from "react"
-import { openMessenger, viberUrl, whatsappUrl, SITE } from "@/config"
+import { viberUrl, whatsappUrl, SITE } from "@/config"
 import type { Product } from "@/lib/supabase"
 import { FALLBACK_IMG } from "@/lib/products"
 
@@ -200,13 +200,15 @@ export default function QuickViewModal({ product: p, onClose }: Props) {
                 {/* Order buttons */}
                 {!prod.sold_out && (
                   <div className="mt-auto space-y-2.5">
-                    <button
-                      onClick={() => openMessenger(prod.name_en)}
+                    <a
+                      href={`https://m.me/${SITE.facebookPageId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full bg-pink text-white py-3 rounded-xl text-sm font-semibold hover:shadow-pink transition-shadow"
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span className="font-mm">Messenger မှ မှာရန်</span>
-                    </button>
+                    </a>
                     <div className="grid grid-cols-2 gap-2">
                       <a
                         href={vUrl}
