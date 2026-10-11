@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, Share2, Check, ArrowLeft, RefreshCw } from "lucide-react"
 import { SITE } from "@/config"
-import { useTheme } from "@/lib/theme"
+import { Link } from "react-router-dom"
 
 interface StyleResult {
   type: string
@@ -106,18 +106,17 @@ function getStyleForName(name: string): StyleResult {
 }
 
 export default function StyleQuiz() {
-  const { isDark } = useTheme()
   const [name, setName] = useState("")
   const [result, setResult] = useState<StyleResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const bg = isDark ? "bg-[#0A1A0F]" : "bg-[#FAF7F2]"
-  const textMain = isDark ? "text-[#F5F0E8]" : "text-[#1A2E1F]"
-  const textMuted = isDark ? "text-[#7A8F7D]" : "text-[#3D5A45]"
-  const cardBg = isDark ? "bg-[#122B19]" : "bg-white"
-  const border = isDark ? "border-[rgba(255,255,255,0.08)]" : "border-[rgba(45,90,61,0.12)]"
-  const inputBg = isDark ? "bg-[#0F2415] border-[#1C3020] text-[#F5F0E8] placeholder-[#4A6350]" : "bg-white border-[rgba(45,90,61,0.20)] text-[#1A2E1F] placeholder-[#7A8F7D]"
+  const bg = "bg-candy-bg"
+  const textMain = "text-candy-ink"
+  const textMuted = "text-candy-muted"
+  const cardBg = "bg-white"
+  const border = "border-candy-line"
+  const inputBg = "bg-candy-bg border-candy-line text-candy-ink placeholder-candy-muted/70"
 
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault()
@@ -145,9 +144,9 @@ export default function StyleQuiz() {
     <div className={`min-h-screen ${bg} flex flex-col items-center px-4 py-8 transition-colors duration-300`}>
       {/* Back link */}
       <div className="w-full max-w-md mb-6">
-        <a href="/" className={`inline-flex items-center gap-1.5 text-sm ${textMuted} hover:text-pink transition-colors`}>
+        <Link to="/" className={`inline-flex h-11 items-center gap-1.5 font-mm text-sm font-semibold ${textMuted}`}>
           <ArrowLeft className="w-4 h-4" /> Sinar သို့ ပြန်သွားရန်
-        </a>
+        </Link>
       </div>
 
       {/* Header */}
@@ -156,8 +155,8 @@ export default function StyleQuiz() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8 max-w-md"
       >
-        <div className="text-4xl mb-3">👗</div>
-        <h1 className={`font-serif text-2xl sm:text-3xl font-bold ${textMain} mb-2`}>
+        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-[22px] bg-candy-pink text-white shadow-cta"><Sparkles className="h-7 w-7" /></div>
+        <h1 className={`font-display text-2xl sm:text-3xl font-bold ${textMain} mb-2`}>
           မင်းရဲ့ Fashion Style
         </h1>
         <p className={`text-sm ${textMuted} font-mm`}>
@@ -174,7 +173,7 @@ export default function StyleQuiz() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             onSubmit={handleGenerate}
-            className={`w-full max-w-md ${cardBg} rounded-2xl border ${border} p-6 shadow-lg`}
+            className={`w-full max-w-md ${cardBg} rounded-[26px] border-2 ${border} p-6 shadow-candy`}
           >
             <label className={`text-xs font-semibold uppercase tracking-widest ${textMuted} block mb-2`}>
               မင်းနာမည်
@@ -183,13 +182,13 @@ export default function StyleQuiz() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ဥပမာ — သူဇာ, မိုက်, Aye Aye..."
-              className={`w-full border rounded-xl px-4 py-3 text-base font-mm focus:outline-none focus:border-pink transition-colors mb-4 ${inputBg}`}
+              className={`w-full h-14 border-2 rounded-2xl px-4 text-base font-mm focus:outline-none focus:border-candy-pink transition-colors mb-4 ${inputBg}`}
               autoFocus
             />
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="w-full bg-pink text-white py-3.5 rounded-xl font-mm font-semibold text-sm flex items-center justify-center gap-2 hover:shadow-pink transition-all disabled:opacity-50"
+              className="w-full h-14 bg-candy-pink text-white rounded-full font-mm font-bold text-[15px] flex items-center justify-center gap-2 shadow-cta transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -218,8 +217,8 @@ export default function StyleQuiz() {
           >
             {/* Result card */}
             <div
-              className={`relative rounded-2xl border overflow-hidden ${border}`}
-              style={{ background: isDark ? "#0F2415" : "#fff", boxShadow: `0 0 40px ${result.glowColor}` }}
+              className="relative rounded-[26px] overflow-hidden"
+              style={{ background: "#fff", boxShadow: `0 0 40px ${result.glowColor}` }}
             >
               {/* Gradient top bar */}
               <div className={`h-1.5 w-full bg-gradient-to-r ${result.gradient.replace("from-", "from-").replace("/40", "").replace("/30", "")}`}
@@ -241,7 +240,7 @@ export default function StyleQuiz() {
                     style={{ color: result.colors[0] }}>
                     မင်းရဲ့ Fashion Style
                   </p>
-                  <h2 className={`font-serif text-2xl font-bold ${textMain} mb-1`}>{result.type}</h2>
+                  <h2 className={`font-display text-2xl font-bold ${textMain} mb-1`}>{result.type}</h2>
                   <p className={`font-mm text-sm ${textMuted}`}>{result.tagline}</p>
                 </div>
 
@@ -276,12 +275,12 @@ export default function StyleQuiz() {
                   <p className={`font-mm text-sm font-semibold ${textMain}`}>
                     {result.categoryMM} — {result.category} collection
                   </p>
-                  <a
-                    href="/#products"
-                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-pink hover:underline"
+                  <Link
+                    to={`/shop?cat=${result.category}`}
+                    className="inline-flex h-10 items-center gap-1.5 mt-1 font-mm text-sm font-bold text-candy-pink"
                   >
                     ကြည့်ရှုမည် →
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -290,21 +289,22 @@ export default function StyleQuiz() {
             <div className="flex gap-3">
               <button
                 onClick={handleShare}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-pink/30 bg-pink/10 text-pink font-mm text-sm font-semibold hover:bg-pink/20 transition-colors"
+                className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-candy-pink text-white font-mm text-sm font-bold shadow-cta"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
                 {copied ? "Link ကူးပြီး ✓" : "Friends ဆီ Share"}
               </button>
               <button
                 onClick={() => { setResult(null); setName("") }}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border ${border} ${textMuted} hover:text-pink transition-colors`}
+                aria-label="Try again"
+                className={`flex h-12 w-12 items-center justify-center rounded-full border-2 bg-white ${border} ${textMuted}`}
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
 
             <p className={`text-center text-[11px] ${textMuted}`}>
-              Powered by <span className="text-pink font-semibold">Sinar</span> Style AI
+              Powered by <span className="text-candy-pink font-semibold">Sinar</span> Style AI
             </p>
           </motion.div>
         )}

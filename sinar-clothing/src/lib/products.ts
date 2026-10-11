@@ -2,6 +2,14 @@ import type { Product } from "./supabase"
 
 export type Category = "Tops" | "Cardigans" | "Dresses" | "Jeans" | "Sweaters"
 
+export const CATEGORIES: { key: Category; mm: string; en: string }[] = [
+  { key: "Tops", mm: "ရှပ်အကျီ", en: "Tops" },
+  { key: "Dresses", mm: "ဝတ်စုံ", en: "Dresses" },
+  { key: "Cardigans", mm: "ကာဒီဂင်", en: "Cardigans" },
+  { key: "Jeans", mm: "ဂျင်း", en: "Jeans" },
+  { key: "Sweaters", mm: "ဆွယ်တာ", en: "Sweaters" },
+]
+
 export const FALLBACK_IMG = "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&q=80"
 
 export const FALLBACK_PRODUCTS: Omit<Product, "created_at" | "updated_at">[] = [

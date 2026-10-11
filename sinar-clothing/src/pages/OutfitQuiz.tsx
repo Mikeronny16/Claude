@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, RefreshCw, MessageCircle, Sparkles, ChevronRight } from "lucide-react"
-import { supabase, isConfigured, type Product } from "@/lib/supabase"
-import { FALLBACK_PRODUCTS, FALLBACK_IMG } from "@/lib/products"
-import { messengerUrl } from "@/config"
-import { useTheme } from "@/lib/theme"
+import { Link } from "react-router-dom"
+import { FALLBACK_IMG } from "@/lib/products"
+import { useProducts } from "@/lib/useProducts"
+import { formatKs } from "@/lib/order"
 
 const QUESTIONS = [
   {
@@ -77,21 +76,12 @@ function getPersonality(answers: Record<string, string>): { title: string; desc:
 }
 
 export default function OutfitQuiz() {
-  const { isDark } = useTheme()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [done, setDone] = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
 
-  const { data: allProducts = [] } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      if (!isConfigured) return FALLBACK_PRODUCTS as unknown as Product[]
-      const { data, error } = await supabase.from("products").select("*").order("sort_order")
-      if (error || !data?.length) return FALLBACK_PRODUCTS as unknown as Product[]
-      return data as Product[]
-    },
-  })
+  const { products: allProducts } = useProducts()
 
   const categories = done ? getCategories(answers) : []
   const recommended = done
@@ -125,30 +115,28 @@ export default function OutfitQuiz() {
     setSelected(null)
   }
 
-  const bg = isDark
-    ? "min-h-screen bg-[#0A1A0F]"
-    : "min-h-screen bg-[#FAF7F2]"
+  const bg = "min-h-screen bg-candy-bg"
 
   return (
     <div className={bg}>
       {/* Header */}
-      <div className={`sticky top-0 z-40 border-b backdrop-blur-xl ${isDark ? "bg-[#0A1A0F]/90 border-white/5" : "bg-[#FAF7F2]/90 border-green-brand/10"}`}>
+      <div className={`sticky top-0 z-40 border-b backdrop-blur-xl bg-candy-bg/90 border-candy-line`}>
         <div className="max-w-lg mx-auto px-5 h-14 flex items-center justify-between">
-          <a href="/" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isDark ? "text-cream/60 hover:text-cream" : "text-green-brand/60 hover:text-green-brand"}`}>
+          <Link to="/" className="-ml-2 flex h-11 items-center gap-2 px-2 text-sm font-semibold text-candy-muted">
             <ArrowLeft className="w-4 h-4" />
             Back
-          </a>
+          </Link>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-pink" />
-            <span className={`text-sm font-semibold ${isDark ? "text-cream" : "text-green-brand"}`}>Outfit Finder</span>
+            <Sparkles className="w-4 h-4 text-candy-pink" />
+            <span className={`font-display text-base font-semibold text-candy-ink`}>Outfit Finder</span>
           </div>
           {!done && (
-            <span className={`text-xs font-bold ${isDark ? "text-cream/40" : "text-green-brand/40"}`}>
+            <span className={`text-xs font-bold text-candy-muted`}>
               {step + 1} / {QUESTIONS.length}
             </span>
           )}
           {done && (
-            <button onClick={restart} className="flex items-center gap-1 text-xs text-pink font-semibold">
+            <button onClick={restart} className="-mr-2 flex h-11 items-center gap-1 px-2 text-xs text-candy-pink font-bold">
               <RefreshCw className="w-3.5 h-3.5" />
               Retry
             </button>
@@ -168,9 +156,9 @@ export default function OutfitQuiz() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Progress bar */}
-              <div className={`w-full h-1 rounded-full mb-8 ${isDark ? "bg-white/10" : "bg-green-brand/10"}`}>
+              <div className={`w-full h-2 rounded-full mb-8 bg-candy-soft`}>
                 <motion.div
-                  className="h-full bg-pink rounded-full"
+                  className="h-full bg-candy-pink rounded-full"
                   initial={{ width: `${(step / QUESTIONS.length) * 100}%` }}
                   animate={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}
                   transition={{ duration: 0.4 }}
@@ -179,13 +167,13 @@ export default function OutfitQuiz() {
 
               {/* Question */}
               <div className="mb-8 text-center">
-                <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${isDark ? "text-pink/70" : "text-pink/80"}`}>
+                <p className={`text-xs font-bold uppercase tracking-widest mb-2 text-candy-pink`}>
                   Question {step + 1}
                 </p>
-                <h1 className={`font-mm text-2xl font-bold mb-1 ${isDark ? "text-cream" : "text-green-brand"}`}>
+                <h1 className={`font-mm text-2xl font-bold mb-1 text-candy-ink`}>
                   {QUESTIONS[step].question}
                 </h1>
-                <p className={`text-sm ${isDark ? "text-cream/40" : "text-green-brand/50"}`}>
+                <p className={`text-sm text-candy-muted`}>
                   {QUESTIONS[step].subtitle}
                 </p>
               </div>
@@ -201,26 +189,24 @@ export default function OutfitQuiz() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.07 }}
                       onClick={() => pick(opt.value)}
-                      className={`relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 text-left ${
+                      className={`relative flex flex-col items-center gap-3 p-5 rounded-[24px] border-2 transition-all duration-200 text-left ${
                         isSelected
-                          ? "border-pink bg-pink/10 scale-95"
-                          : isDark
-                          ? "border-white/8 bg-[#0F2415] hover:border-pink/40 hover:bg-[#122B19] active:scale-95"
-                          : "border-green-brand/10 bg-white hover:border-pink/40 hover:shadow-md active:scale-95"
+                          ? "border-candy-pink bg-candy-soft scale-95"
+                          : "border-candy-line bg-white shadow-soft active:scale-95"
                       }`}
                     >
                       <span className="text-3xl">{opt.emoji}</span>
                       <div>
-                        <p className={`text-sm font-bold text-center ${isDark ? "text-cream" : "text-green-brand"}`}>
+                        <p className={`text-sm font-bold text-center text-candy-ink`}>
                           {opt.label}
                         </p>
-                        <p className={`font-mm text-xs text-center mt-0.5 ${isDark ? "text-cream/40" : "text-green-brand/50"}`}>
+                        <p className={`font-mm text-xs text-center mt-0.5 text-candy-muted`}>
                           {opt.mm}
                         </p>
                       </div>
                       {isSelected && (
                         <motion.div
-                          className="absolute inset-0 rounded-2xl border-2 border-pink"
+                          className="absolute inset-0 rounded-[24px] border-2 border-candy-pink"
                           initial={{ scale: 0.9, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ duration: 0.15 }}
@@ -243,27 +229,27 @@ export default function OutfitQuiz() {
               className="space-y-6"
             >
               {/* Personality banner */}
-              <div className="bg-gradient-to-br from-pink/20 to-pink/5 border border-pink/20 rounded-2xl p-5 text-center">
-                <p className={`text-xs uppercase tracking-widest font-bold mb-2 ${isDark ? "text-pink/70" : "text-pink"}`}>
+              <div className="bg-candy-lilac rounded-[26px] p-5 text-center">
+                <p className={`text-xs uppercase tracking-widest font-bold mb-2 text-[#4B2BB8]`}>
                   မင်းရဲ့ Style Personality
                 </p>
-                <h2 className={`font-mm text-xl font-bold mb-1 ${isDark ? "text-cream" : "text-green-brand"}`}>
+                <h2 className={`font-display text-2xl font-semibold mb-1 text-candy-ink`}>
                   {personality.title}
                 </h2>
-                <p className={`font-mm text-sm ${isDark ? "text-cream/60" : "text-green-brand/70"}`}>
+                <p className={`font-mm text-sm text-candy-muted`}>
                   {personality.desc}
                 </p>
               </div>
 
               {/* Recommended products */}
               <div>
-                <p className={`text-xs uppercase tracking-widest font-bold mb-4 ${isDark ? "text-cream/40" : "text-green-brand/50"}`}>
+                <p className={`text-xs uppercase tracking-widest font-bold mb-4 text-candy-muted`}>
                   မင်းအတွက် ကိုက်ညီမဲ့ outfits ✨
                 </p>
 
                 {recommended.length === 0 ? (
-                  <div className={`rounded-2xl border p-8 text-center ${isDark ? "border-white/8 bg-[#0F2415]" : "border-green-brand/10 bg-white"}`}>
-                    <p className={`font-mm text-sm ${isDark ? "text-cream/50" : "text-green-brand/50"}`}>
+                  <div className={`rounded-[24px] p-8 text-center bg-white shadow-soft`}>
+                    <p className={`font-mm text-sm text-candy-muted`}>
                       ပစ္စည်းများ load မရသေးပါ — ခေတ္တစောင့်ပါ
                     </p>
                   </div>
@@ -275,10 +261,10 @@ export default function OutfitQuiz() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 + 0.2 }}
-                        className={`flex gap-4 rounded-2xl border overflow-hidden ${isDark ? "bg-[#0F2415] border-white/8" : "bg-white border-green-brand/10"}`}
+                        className={`flex gap-4 rounded-[24px] overflow-hidden bg-white p-2 shadow-soft`}
                       >
                         {/* Image */}
-                        <div className="w-24 h-24 flex-shrink-0 overflow-hidden bg-[#0F2415]">
+                        <div className="w-24 h-28 flex-shrink-0 overflow-hidden rounded-2xl bg-candy-soft">
                           <img
                             src={p.image_url || FALLBACK_IMG}
                             alt={p.name_en}
@@ -290,30 +276,28 @@ export default function OutfitQuiz() {
                         {/* Info */}
                         <div className="flex-1 py-3 pr-3 flex flex-col justify-between min-w-0">
                           <div>
-                            <p className={`font-mm font-semibold text-sm truncate ${isDark ? "text-cream" : "text-green-brand"}`}>
+                            <p className={`font-mm font-semibold text-sm truncate text-candy-ink`}>
                               {p.name_mm}
                             </p>
-                            <p className={`text-xs truncate mt-0.5 ${isDark ? "text-cream/40" : "text-green-brand/50"}`}>
+                            <p className={`text-xs truncate mt-0.5 text-candy-muted`}>
                               {p.name_en}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="font-mm font-bold text-pink text-sm">
-                                {p.price > 0 ? `${p.price.toLocaleString()} ကျပ်` : "ဈေးမေးရန်"}
+                              <span className="font-mm font-extrabold text-candy-pink text-sm">
+                                {p.price > 0 ? formatKs(p.price) : "ဈေးမေးရန်"}
                               </span>
-                              <span className={`text-[9px] px-2 py-0.5 rounded-full border ${isDark ? "border-white/10 text-cream/40" : "border-green-brand/10 text-green-brand/50"}`}>
+                              <span className={`text-[9px] px-2 py-0.5 rounded-full border border-candy-line text-candy-muted`}>
                                 {p.category}
                               </span>
                             </div>
                           </div>
-                          <a
-                            href={messengerUrl(p.name_en)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-2 inline-flex items-center gap-1.5 bg-pink text-white text-xs font-semibold px-3 py-1.5 rounded-full self-start"
+                          <Link
+                            to={`/p/${p.id}`}
+                            className="mt-2 inline-flex h-10 items-center gap-1.5 bg-candy-pink text-white text-xs font-bold px-4 rounded-full self-start"
                           >
-                            <MessageCircle className="w-3 h-3" />
-                            <span className="font-mm">မှာရန်</span>
-                          </a>
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span className="font-mm">ကြည့်ပြီး မှာမယ်</span>
+                          </Link>
                         </div>
                       </motion.div>
                     ))}
@@ -322,18 +306,18 @@ export default function OutfitQuiz() {
               </div>
 
               {/* Browse all CTA */}
-              <a
-                href="/#shop"
-                className="flex items-center justify-center gap-2 w-full border border-pink/30 text-pink py-3.5 rounded-2xl text-sm font-semibold hover:bg-pink/5 transition-colors"
+              <Link
+                to="/shop"
+                className="flex h-14 items-center justify-center gap-2 w-full bg-candy-ink text-white rounded-full font-mm text-sm font-bold"
               >
                 ပစ္စည်းအားလုံး ကြည့်ရန်
                 <ChevronRight className="w-4 h-4" />
-              </a>
+              </Link>
 
               {/* Retry */}
               <button
                 onClick={restart}
-                className={`flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm transition-colors ${isDark ? "text-cream/40 hover:text-cream" : "text-green-brand/40 hover:text-green-brand"}`}
+                className={`flex h-12 items-center justify-center gap-2 w-full rounded-full font-mm text-sm font-semibold text-candy-muted`}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 ပြန်စပြီး ထပ်ကြိုးကြည့်ရန်

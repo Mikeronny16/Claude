@@ -8,23 +8,15 @@ export const SITE = {
   whatsapp: "+959790543312",
 }
 
-export function messengerUrl(productName: string) {
-  const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
-  return `https://m.me/${SITE.facebookPageId}?text=${msg}`
-}
+// msng.link opens the Messenger app on iOS + Android (m.me with ?text= caused send errors)
+export const MESSENGER_URL = `https://msng.link/o/?${SITE.facebookPageId}=fm`
 
-export function openMessenger(_productName: string) {
-  // m.me opens existing conversation (not new thread)
-  window.open(`https://m.me/${SITE.facebookPageId}`, "_blank")
-}
+export const VIBER_URL = `https://msng.link/o/?${SITE.viber.replace(/\D/g, "")}=vi`
 
-export function viberUrl(_productName: string) {
-  const num = SITE.viber.replace(/\D/g, "")
-  return `https://msng.link/o/?${num}=vi`
-}
+export const PHONE_URL = `tel:${SITE.phone}`
 
-export function whatsappUrl(productName: string) {
-  const msg = encodeURIComponent(`မင်္ဂလာပါ! "${productName}" အကြောင်း မေးမြန်းချင်ပါတယ် 🛍️`)
+// WhatsApp is the only app that reliably accepts pre-filled text
+export function whatsappUrl(text: string) {
   const num = SITE.whatsapp.replace(/\D/g, "")
-  return `https://wa.me/${num}?text=${msg}`
+  return `https://wa.me/${num}?text=${encodeURIComponent(text)}`
 }

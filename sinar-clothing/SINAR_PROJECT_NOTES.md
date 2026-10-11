@@ -1,5 +1,5 @@
 # SINAR CLOTHING — Project Notes
-Last updated: 2026-05-30
+Last updated: 2026-10-11
 
 ---
 
@@ -85,95 +85,81 @@ File: `src/config.ts`
 
 ## ✅ Features Implemented
 
-### Shop / Product Cards
-- FOMO badges: ✨ New / 🔥 Hot Item / 💸 Sale / ⚡ Almost Gone
-- Discount % pill (top-right of card)
-- Crossed-out original price display
-- Wishlist / Heart button (saved to localStorage)
-- Size chips on card image
-- Quick View button
-- Hover: Order + Quick View slide-up buttons
+### 🎨 Design — "Sweet Shop" phone-app style (Oct 2026 redesign)
+- Bright candy palette: pink `#E0115F`, blush bg `#FFF1F5`, ink `#2A1320`, sun `#FFC83D`
+- Fonts: Fredoka (headings) + Plus Jakarta Sans (body) + Noto Sans Myanmar
+- Works like a phone app: bottom tab bar, bottom sheets, sticky order button
+- On desktop the app shows as a centered phone-width column
+- Language toggle MM ↔ EN (Home header pill + Me tab)
+- Dark mode, loading screen and cursor follower were removed
 
-### Quick View Modal
-- Product detail popup (slide up on mobile, centered on desktop)
-- Live viewer count ("4 people viewing right now 🟢")
-- Share button (native share on mobile / clipboard fallback)
-- Discount savings display ("You save X ကျပ် 🎉")
-- Status: Low Stock → "⚡ Almost Gone — မှာဖို့ မစောင့်ပါနှင့်"
-- Order via: Messenger / Viber / WhatsApp
+### Bottom tabs
+| Tab | Route | What it does |
+|---|---|---|
+| Home | `/` | Pink header + search, flash sale card (live countdown to midnight), category bubbles, Outfit Finder banner, Hot right now grid, New in row, reviews |
+| Shop | `/shop` | Search, category chips, sort. Filters live in the URL (`?q=`, `?cat=`, `?sort=`) |
+| 💬 (middle) | — | Chat sheet: Messenger, Viber, WhatsApp, phone, Facebook |
+| Saved | `/saved` | Wishlist (hearts). Same localStorage keys as the old site, so old saves still show |
+| Me | `/me` | Language, "Add to Home Screen" steps, how to order, size guide, contact, about, Admin link |
 
-### Flash Sale Banner
-- Pink countdown banner above product grid
-- Counts down to midnight every day automatically
-- File: `src/components/FlashSaleBanner.tsx`
+### Product page (`/p/:id`)
+- Big photo, back / share / heart, wobbling "-20%" sticker on sale items
+- Flash sale strip with countdown (sale items only)
+- Price + "you save", live "X people viewing", stock chip (In stock / Almost gone / Sold out)
+- Colour + size pickers. Tapping Order without a size shakes the size row
+- Sticky bar: Add to bag + "Messenger နဲ့ မှာမယ်" (copies the order text, then opens Messenger)
+- Viber / WhatsApp buttons (WhatsApp gets the order text pre-filled)
+- How to order steps + "You may also like" (same category)
+- Share uses the product link, so friends land on the right item
 
-### Social Proof Ticker
-- Floating notification bottom-left: "မေမြတ်နိုး (ရန်ကုန်) မှာလိုက်သည် 🛍️"
-- Appears every 30–45 seconds with random Myanmar names + cities
-- File: `src/components/SocialProofTicker.tsx`
+### Order bag
+- "+" on any card or the bag button on the product page adds the item
+- Bag sheet: change size, quantity, remove, total
+- "Order on Messenger" copies the whole order list so the customer just pastes it
+- Stored in localStorage `sinar_bag`
 
-### Navbar
-- Desktop: Shop / About / Contact links + Style Quiz + Outfit Finder + Facebook
-- Mobile: Hamburger drawer with all links
-- Dark mode toggle (Sun/Moon)
-- Language toggle (MM/EN)
-- Scroll-triggered glass blur effect
+### Install as app (PWA)
+- `public/manifest.webmanifest` + icons (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`)
+- Android Chrome: "Install app" button on Me tab. iPhone: Share → Add to Home Screen steps
+- Home shows a dismissible "Add Sinar to your phone" banner
+- No service worker (avoids old cached versions after deploys)
 
-### Style Quiz (`/style`)
-- 5 questions → 6 personality types
-- Fashion personality result with description
-- File: `src/pages/StyleQuiz.tsx`
-
-### Outfit Finder (`/outfit`)
-- 3 questions: Occasion → Vibe → Color
-- Recommends real products from Supabase by category
-- Shows personality title (e.g. "Romantic Dreamer 🌸", "Power Dresser 💼")
-- Direct Messenger "မှာရန်" button per recommended product
-- File: `src/pages/OutfitQuiz.tsx`
-
-### Other
-- Dark mode / Light mode (full site)
-- Language toggle: MM ↔ EN
-- Full-screen hero with animated text (framer-motion)
-- Marquee strip
-- Customer reviews section
-- About section
-- Footer with Facebook / Messenger / Phone links
-- Loading screen animation
-- Cursor follower (desktop)
+### Kept from before
+- Social proof pop-up ("… မှာလိုက်သည်") — now floats above the tab bar
+- Style Quiz (`/style`) and Outfit Finder (`/outfit`) — restyled to the new palette
+- Admin panel + login unchanged (still dark forest style)
 
 ---
 
 ## 📁 Key Files
 ```
 sinar-clothing/
+├── public/manifest.webmanifest, icon-*.png, favicon.svg
 ├── src/
-│   ├── config.ts                    ← phone, facebook, site config
+│   ├── config.ts                    ← phone, Facebook, Messenger / Viber / WhatsApp links
 │   ├── lib/
 │   │   ├── supabase.ts              ← DB client + Product type
-│   │   ├── products.ts              ← fallback products (when DB empty)
-│   │   ├── lang.tsx                 ← MM/EN language context
-│   │   └── theme.tsx                ← dark/light mode context
+│   │   ├── products.ts              ← fallback products + CATEGORIES
+│   │   ├── useProducts.ts           ← shared products query + discount helpers
+│   │   ├── store.ts                 ← wishlist + order bag (localStorage)
+│   │   ├── order.ts                 ← order message text + copy-to-clipboard
+│   │   ├── useCountdown.ts          ← flash sale timer (to midnight)
+│   │   ├── install.ts               ← Add to Home Screen helpers
+│   │   ├── content.ts               ← reviews, order steps, about text
+│   │   └── lang.tsx                 ← MM/EN language context
 │   ├── pages/
-│   │   ├── Home.tsx                 ← main page
-│   │   ├── Admin.tsx                ← admin dashboard
-│   │   ├── Auth.tsx                 ← admin login
+│   │   ├── Home.tsx / Shop.tsx / Saved.tsx / Me.tsx / ProductPage.tsx
 │   │   ├── StyleQuiz.tsx            ← /style
-│   │   └── OutfitQuiz.tsx           ← /outfit
+│   │   ├── OutfitQuiz.tsx           ← /outfit
+│   │   ├── Admin.tsx + Auth.tsx     ← admin (unchanged)
 │   └── components/
-│       ├── Navbar.tsx
-│       ├── Hero.tsx
-│       ├── Products.tsx             ← shop section
-│       ├── ProductCard.tsx          ← individual product card
-│       ├── QuickViewModal.tsx       ← product detail popup
-│       ├── FlashSaleBanner.tsx      ← countdown timer
-│       ├── SocialProofTicker.tsx    ← "just ordered" notifications
-│       ├── CustomerReviews.tsx
-│       ├── About.tsx
-│       ├── Footer.tsx
-│       ├── Logo.tsx
-│       ├── LoadingScreen.tsx
-│       └── CursorFollower.tsx
+│       ├── Logo.tsx                 ← used by admin
+│       └── app/
+│           ├── AppShell.tsx         ← app frame, tab bar, shared sheets
+│           ├── TabBar.tsx, Sheet.tsx, BagSheet.tsx, ChatSheet.tsx, SizeGuide.tsx
+│           ├── ProductCard.tsx, MiniCard.tsx
+│           ├── Garment.tsx          ← drawn clothes for categories / empty states
+│           └── SocialProofTicker.tsx
 └── vercel.json
 ```
 
@@ -195,8 +181,8 @@ sinar-clothing/
 ---
 
 ## 💡 Future Feature Ideas (not yet built)
-- Wishlist page at `/wishlist`
 - "Notify me when back in stock" for sold-out items
 - Product share card (IG Stories format)
-- Product detail pages with SEO
+- Several photos per product (needs an `images` column in Supabase)
+- Per-product SEO tags (needs server rendering or prerender)
 - Real analytics via Supabase `page_visits` table
