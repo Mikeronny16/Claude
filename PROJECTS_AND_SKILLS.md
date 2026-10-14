@@ -26,7 +26,8 @@
 | 13 | **ClinicAI Myanmar** | `/clinicai` | Clinic automation platform (Burmese) | Built |
 | 14 | **YBS Guide** | `/yangonbus` | Yangon bus finder (YBS routes) | Built |
 | 15 | **Portfolio** | `/portfolio` | Mike Ronny developer portfolio | Built |
-| 16 | **Sinar Clothing** | `/sinar-clothing` | ⚠️ Client ဆီ ပေးပြီး — **မထိရ** | Locked 🔒 |
+| 16 | **NEXORA** | `/nexora` | Teen (12–15) 3D floating-island world builder + AI creation (demo mode without key) | Prototype |
+| 17 | **Sinar Clothing** | `/sinar-clothing` | ⚠️ Client ဆီ ပေးပြီး — **မထိရ** | Locked 🔒 |
 
 ### Project Details (အရေးကြီးတာတွေ)
 
