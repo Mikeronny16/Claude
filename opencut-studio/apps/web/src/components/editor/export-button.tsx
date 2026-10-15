@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { create } from "zustand";
 import { TransitionTopIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -43,8 +44,18 @@ function isExportQuality(value: string): value is ExportQuality {
 	return EXPORT_QUALITY_VALUES.some((qualityValue) => qualityValue === value);
 }
 
+/** Open state of the export popover, so other controls (Orbit Navigation) can open it. */
+export const useExportPopoverStore = create<{
+	isOpen: boolean;
+	setOpen: (isOpen: boolean) => void;
+}>()((set) => ({
+	isOpen: false,
+	setOpen: (isOpen) => set({ isOpen }),
+}));
+
 export function ExportButton() {
-	const [isExportPopoverOpen, setIsExportPopoverOpen] = useState(false);
+	const isExportPopoverOpen = useExportPopoverStore((state) => state.isOpen);
+	const setIsExportPopoverOpen = useExportPopoverStore((state) => state.setOpen);
 	const editor = useEditor();
 	const activeProject = useEditor((e) => e.project.getActiveOrNull());
 	const hasProject = !!activeProject;

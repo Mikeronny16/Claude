@@ -25,6 +25,7 @@ import Image from "next/image";
 import { cn } from "@/utils/ui";
 import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 import { frameRateToFloat } from "@/fps/utils";
+import { useExitProject } from "@/project/use-exit-project";
 
 export function EditorHeader() {
 	return (
@@ -51,25 +52,10 @@ function ProjectDropdown() {
 	const [openDialog, setOpenDialog] = useState<
 		"delete" | "rename" | "shortcuts" | null
 	>(null);
-	const [isExiting, setIsExiting] = useState(false);
+	const { exitProject: handleExit, isExiting } = useExitProject();
 	const router = useRouter();
 	const editor = useEditor();
 	const activeProject = useEditor((e) => e.project.getActive());
-
-	const handleExit = async () => {
-		if (isExiting) return;
-		setIsExiting(true);
-
-		try {
-			await editor.project.prepareExit();
-			editor.project.closeProject();
-		} catch (error) {
-			console.error("Failed to prepare project exit:", error);
-		} finally {
-			editor.project.closeProject();
-			router.push("/projects");
-		}
-	};
 
 	const handleSaveProjectName = async (newName: string) => {
 		if (

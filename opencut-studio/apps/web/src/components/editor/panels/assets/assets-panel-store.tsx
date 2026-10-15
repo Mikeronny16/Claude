@@ -59,6 +59,7 @@ export const tabs = {
 	transitions: {
 		icon: createHugeiconsIcon({ icon: ArrowRightDoubleIcon }),
 		label: "Transitions",
+		comingSoon: true,
 	},
 	captions: {
 		icon: createHugeiconsIcon({ icon: ClosedCaptionIcon }),
@@ -67,6 +68,7 @@ export const tabs = {
 	adjustment: {
 		icon: createHugeiconsIcon({ icon: SlidersHorizontalIcon }),
 		label: "Adjustment",
+		comingSoon: true,
 	},
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),
@@ -74,7 +76,11 @@ export const tabs = {
 	},
 } satisfies Record<
 	Tab,
-	{ icon: ElementType<{ className?: string }>; label: string }
+	{
+		icon: ElementType<{ className?: string }>;
+		label: string;
+		comingSoon?: boolean;
+	}
 >;
 
 export type MediaViewMode = "grid" | "list";

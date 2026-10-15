@@ -7,6 +7,7 @@ import {
 	ResizableHandle,
 } from "@/components/ui/resizable";
 import { AssetsPanel } from "@/components/editor/panels/assets";
+import { TabBar } from "@/components/editor/panels/assets/tabbar";
 import { PropertiesPanel } from "@/components/editor/panels/properties";
 import { Timeline } from "@/timeline/components";
 import { PreviewPanel } from "@/preview/components";
@@ -42,11 +43,14 @@ export default function Editor() {
 	return (
 		<MobileGate>
 			<EditorProvider projectId={projectId}>
-				<div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
+				<div className="flex h-screen w-screen flex-col overflow-hidden">
 					<DegradedRendererBanner />
 					<EditorHeader />
-					<div className="min-h-0 min-w-0 flex-1">
-						<EditorLayout />
+					<div className="flex min-h-0 min-w-0 flex-1 pb-3 pl-1.5">
+						<TabBar />
+						<div className="min-h-0 min-w-0 flex-1">
+							<EditorLayout />
+						</div>
 					</div>
 					<Onboarding />
 					<MigrationDialog />
@@ -148,7 +152,7 @@ function EditorLayout() {
 			>
 				<ResizablePanelGroup
 					direction="horizontal"
-					className="size-full gap-[0.19rem] px-3"
+					className="size-full gap-[0.19rem] pr-3 pl-1.5"
 					onLayout={(sizes) => {
 						setPanel({ panel: "tools", size: sizes[0] ?? panels.tools });
 						setPanel({ panel: "preview", size: sizes[1] ?? panels.preview });
@@ -200,7 +204,7 @@ function EditorLayout() {
 				defaultSize={panels.timeline}
 				minSize={15}
 				maxSize={70}
-				className="min-h-0 px-3 pb-3"
+				className="min-h-0 pr-3 pl-1.5"
 			>
 				<Timeline />
 			</ResizablePanel>
