@@ -175,9 +175,10 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	await expect(timelineClips(page)).toHaveCount(1);
 	await expect(page.getByText("00:00:03:00")).toBeVisible();
 
-	// Preview shows the clip's test pattern, not an empty canvas.
+	// Preview shows the clip's test pattern, not an empty canvas, once the
+	// first frame has rendered.
 	const preview = page.getByLabel("Preview canvas");
-	expect(await distinctColors(app, preview)).toBeGreaterThan(100);
+	await expect.poll(() => distinctColors(app, preview)).toBeGreaterThan(100);
 
 	// Effect thumbnails draw on the GPU too; opening the Effects panel must not
 	// replace the preview with the thumbnail's sample photo.
@@ -188,6 +189,21 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	await page.getByRole("button", { name: "Media", exact: true }).first().click();
 	await page.waitForTimeout(500);
 	expect(meanAbsoluteDifference(previewBefore, await regionThumbnail(app, preview))).toBeLessThan(8);
+
+	// Titanium Dial: arrow keys turn the selected clip's opacity without
+	// moving the playhead, and each key press is one undo step.
+	await timelineClips(page).first().click();
+	const dial = page.getByRole("slider", { name: "Opacity" });
+	await expect(dial).toHaveAttribute("aria-valuenow", "100");
+	await dial.focus();
+	await page.keyboard.press("ArrowDown");
+	await page.keyboard.press("ArrowDown");
+	await expect(dial).toHaveAttribute("aria-valuenow", "98");
+	await expect(playheadTime(page)).toHaveText("00:00:00:00");
+	await page.keyboard.press("Control+z");
+	await expect(dial).toHaveAttribute("aria-valuenow", "99");
+	await page.keyboard.press("Control+z");
+	await expect(dial).toHaveAttribute("aria-valuenow", "100");
 
 	// Playback moves the playhead.
 	await expect(playheadTime(page)).toHaveText("00:00:00:00");
@@ -244,7 +260,9 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	await page.goto(projectUrl);
 	await expect(timelineClips(page)).toHaveCount(1);
 	await expect(page.getByTitle(CLIP_NAME).first()).toBeVisible();
-	expect(await distinctColors(app, page.getByLabel("Preview canvas"))).toBeGreaterThan(100);
+	await expect
+		.poll(() => distinctColors(app, page.getByLabel("Preview canvas")))
+		.toBeGreaterThan(100);
 
 	await app.close();
 });

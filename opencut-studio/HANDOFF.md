@@ -40,11 +40,12 @@ No env vars, accounts, database or cloud services are needed.
 ## Checks
 
 ```bash
-bun test                              # from opencut-studio/: 215/219 pass
+bun test                              # from opencut-studio/: 221/225 pass
 cd apps/web && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bun run build && bun run test:e2e      # Linux headless: xvfb-run -a bun run test:e2e
 cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default: light,dark)
+BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev:web, no build
 ```
 
 - Windows: Bun from winget (`Oven-sh.Bun`) has no `bunx` on PATH; use `bun x`.
@@ -59,7 +60,8 @@ cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default:
   1 feeds fractional ticks to `mediaTime` (`src/timeline/placement/__tests__/resolve.test.ts`).
 - e2e (`apps/studio/e2e/editor-flow.e2e.ts`) drives the built app: create
   project, import, add to timeline, preview pixels, Effects panel doesn't hijack
-  the preview, play, undo/redo, MP4 export checked with ffprobe, Manrope UI
+  the preview, Titanium Dial keys + undo, play, undo/redo, MP4 export
+  checked with ffprobe, Manrope UI
   font loaded, relaunch with project/thumbnail/timeline intact. Passes on
   Linux under Xvfb and on Windows 11. Needs `ffmpeg`/`ffprobe` on PATH; so
   does `screenshots`.
@@ -101,8 +103,28 @@ cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default:
    recreates them inside `build/server`).
 10. Design chosen by Mike: Ocean palette + Manrope + Round corners, now the
    only design. Picker, `src/design/` and the other palettes/fonts removed.
-   Tokens: `:root` and the closing Ocean section of `globals.css`; timeline
-   clip and bookmark colours in `src/timeline/components/theme.ts`.
+   (Superseded by 11.)
+11. Orbit / Titanium design from Mike's brief (locked choices: Orbit
+   Workspace, Orbit Navigation, Titanium Dial, Spatial Orbit Timeline,
+   Spatial Lift, Floating Cinema, Orbital Architecture, Minimal Premium
+   Titanium, Orbital Signature; lighting Soft Cinematic Titanium):
+   - Tokens: `--ti-*` on `:root` and the closing Titanium section of
+     `globals.css`; silver is the one accent; muted text #8a929c (the brief's
+     #777f89 is under 4.5:1 on panels). Dark is the default theme.
+   - Orbital Architecture: edge rings on `.dark body`; `.orbit-rings` helper.
+   - Orbital Signature: `public/logos/opencut-studio/logo.svg` (emblem) and
+     `icon.svg` (app icon; favicon, `public/icons/*`, and
+     `apps/studio/assets/icon.png` are rendered from it). Header wordmark and
+     format chip; projects header; branded loading screens.
+   - Orbit Navigation: `components/editor/panels/assets/tabbar.tsx`, now a
+     full-height column in the editor page; Projects (`useExitProject`) and
+     Export (`useExportPopoverStore`) at the ends.
+   - Floating Cinema: bezel + stage in `preview/components/index.tsx`;
+     fit-to-view margin in `preview-viewport.tsx`.
+   - Spatial Lift: `.spatial-lift` on selected clips (`timeline-element.tsx`).
+   - Titanium Dial: `src/titanium-dial/` (math + tests, targets, control,
+     panel beside the timeline). Focused sliders keep arrow/Page/Home/End
+     keys (`actions/use-keybindings.ts`).
 
 ## Known limitations
 
@@ -116,7 +138,15 @@ cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default:
 - The Rust source in `rust/crates/compositor/src/frame.rs` still has the
   snake_case `SceneEffect` field; a local WASM rebuild must keep it (or change
   `wasm-compositor.ts` with it).
-- Logo is a placeholder.
+- Titanium Dial: shown at xl widths (1280px+); below that use the Inspector.
+  No Speed on the dial (retime isn't a param yet).
+- Light mode keeps the classic surfaces with a graphite accent; the Titanium
+  design is dark-first.
+- Transitions and Adjustment sections are placeholders (marked "coming soon").
+- Spatial Orbit Timeline is styled through tokens, lift and colours; track
+  rows are unchanged (no perspective, by design of the brief's accuracy rule).
+- Design backlog from the mockups (not built): size presets on new project,
+  drag-and-drop to start a project, Myanmar fonts, AI Copilot panel UI.
 
 ## Next steps, in order
 
