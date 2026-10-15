@@ -19,6 +19,7 @@
     "build": "bun run build:web && bun run build:server && bun run build:main",
     "start": "electron .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "screenshots": "node scripts/screenshot-tour.mjs"
   }
 }

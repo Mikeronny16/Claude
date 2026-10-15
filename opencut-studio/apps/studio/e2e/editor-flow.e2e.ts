@@ -77,6 +77,28 @@ async function distinctColors(app: ElectronApplication, region: Locator): Promis
 	});
 }
 
+/** A 32x18 RGB thumbnail of a window region, for comparing two captures. */
+async function regionThumbnail(app: ElectronApplication, region: Locator): Promise<number[]> {
+	const box = await region.boundingBox();
+	if (!box) throw new Error("region is not visible");
+	return app.evaluate(async ({ BrowserWindow }, rect) => {
+		const image = await BrowserWindow.getAllWindows()[0].webContents.capturePage(rect);
+		const bitmap = image.resize({ width: 32, height: 18, quality: "good" }).toBitmap();
+		const rgb: number[] = [];
+		for (let i = 0; i < bitmap.length; i += 4) rgb.push(bitmap[i], bitmap[i + 1], bitmap[i + 2]);
+		return rgb;
+	}, {
+		x: Math.round(box.x),
+		y: Math.round(box.y),
+		width: Math.round(box.width),
+		height: Math.round(box.height),
+	});
+}
+
+function meanAbsoluteDifference(a: number[], b: number[]): number {
+	return a.reduce((sum, value, index) => sum + Math.abs(value - b[index]), 0) / a.length;
+}
+
 function timelineClips(page: Page): Locator {
 	return page.locator('[data-element-id][data-element-type="video"]');
 }
@@ -156,6 +178,16 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	// Preview shows the clip's test pattern, not an empty canvas.
 	const preview = page.getByLabel("Preview canvas");
 	expect(await distinctColors(app, preview)).toBeGreaterThan(100);
+
+	// Effect thumbnails draw on the GPU too; opening the Effects panel must not
+	// replace the preview with the thumbnail's sample photo.
+	const previewBefore = await regionThumbnail(app, preview);
+	await page.getByRole("button", { name: "Effects", exact: true }).first().click();
+	await expect(page.getByTitle("Blur").first()).toBeVisible();
+	await page.waitForTimeout(500);
+	await page.getByRole("button", { name: "Media", exact: true }).first().click();
+	await page.waitForTimeout(500);
+	expect(meanAbsoluteDifference(previewBefore, await regionThumbnail(app, preview))).toBeLessThan(8);
 
 	// Playback moves the playhead.
 	await expect(playheadTime(page)).toHaveText("00:00:00:00");

@@ -4,6 +4,7 @@ import {
 	initializeGpu,
 } from "opencut-wasm";
 import type { EffectPass, EffectUniformValue } from "@/effects/types";
+import { wasmCompositor } from "./compositor/wasm-compositor";
 
 let gpuAvailable = false;
 let initPromise: Promise<void> | null = null;
@@ -43,12 +44,14 @@ export const gpuRenderer = {
 			return source;
 		}
 
-		return applyEffectPasses({
+		const result = applyEffectPasses({
 			source,
 			width,
 			height,
 			passes: serializeEffectPasses(passes),
 		});
+		wasmCompositor.markSharedCanvasUsed();
+		return result;
 	},
 
 	applyMaskFeather({
@@ -66,12 +69,14 @@ export const gpuRenderer = {
 			return maskCanvas;
 		}
 
-		return applyMaskFeatherWasm({
+		const result = applyMaskFeatherWasm({
 			mask: maskCanvas,
 			width,
 			height,
 			feather,
 		});
+		wasmCompositor.markSharedCanvasUsed();
+		return result;
 	},
 };
 

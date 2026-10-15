@@ -19,6 +19,7 @@ import { frameRateToFloat } from "@/fps/utils";
 import type { RootNode } from "./nodes/root-node";
 import type { ExportFormat, ExportQuality } from "@/export";
 import { CanvasRenderer } from "./canvas-renderer";
+import { wasmCompositor } from "./compositor/wasm-compositor";
 
 type ExportParams = {
 	width: number;
@@ -80,6 +81,18 @@ export class SceneExporter extends EventEmitter<SceneExporterEvents> {
 	}
 
 	async export({
+		rootNode,
+	}: {
+		rootNode: RootNode;
+	}): Promise<ArrayBuffer | null> {
+		try {
+			return await this.renderAndEncode({ rootNode });
+		} finally {
+			wasmCompositor.markSharedCanvasUsed();
+		}
+	}
+
+	private async renderAndEncode({
 		rootNode,
 	}: {
 		rootNode: RootNode;

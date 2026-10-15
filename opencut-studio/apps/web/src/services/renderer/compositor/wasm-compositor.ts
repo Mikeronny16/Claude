@@ -43,6 +43,7 @@ class WasmCompositor {
 	private canvas: HTMLCanvasElement | null = null;
 	private initializedSize: { width: number; height: number } | null = null;
 	private cache = new Map<string, RenderedCacheEntry | ExternalCacheEntry>();
+	private sharedCanvasGeneration = 0;
 
 	ensureInitialized({ width, height }: { width: number; height: number }) {
 		if (!this.canvas) {
@@ -55,11 +56,28 @@ class WasmCompositor {
 		if (
 			!this.initializedSize ||
 			this.initializedSize.width !== width ||
-			this.initializedSize.height !== height
+			this.initializedSize.height !== height ||
+			// Resized by another GPU job sharing the canvas (see markSharedCanvasUsed).
+			this.canvas.width !== width ||
+			this.canvas.height !== height
 		) {
 			resizeCompositor(width, height);
 			this.initializedSize = { width, height };
 		}
+	}
+
+	/**
+	 * On the WebGL backend the GPU context has exactly one canvas, and it is
+	 * this compositor's output, mounted in the preview. Other GPU jobs (effect
+	 * thumbnails, exports) draw on it too. They call this so the preview knows
+	 * its pixels were replaced and renders the current frame again.
+	 */
+	markSharedCanvasUsed(): void {
+		this.sharedCanvasGeneration++;
+	}
+
+	getSharedCanvasGeneration(): number {
+		return this.sharedCanvasGeneration;
 	}
 
 	getCanvas(): HTMLCanvasElement {
