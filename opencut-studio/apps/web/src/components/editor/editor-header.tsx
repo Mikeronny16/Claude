@@ -12,6 +12,8 @@ import { RenameProjectDialog } from "@/project/components/rename-project-dialog"
 import { DeleteProjectDialog } from "@/project/components/delete-project-dialog";
 import { useRouter } from "next/navigation";
 import { ExportButton } from "./export-button";
+import { Sparkles } from "lucide-react";
+import { useCopilotStore } from "@/copilot/copilot-store";
 import { FeedbackPopover } from "@/feedback/components/feedback-popover";
 import { isFeedbackEnabled } from "@/feedback/config";
 import { ThemeToggle } from "../theme-toggle";
@@ -41,6 +43,7 @@ export function EditorHeader() {
 			<nav className="flex items-center gap-2">
 				<ProjectFormatButton />
 				{isFeedbackEnabled && <FeedbackPopover />}
+				<CopilotButton />
 				<ExportButton />
 				<ThemeToggle />
 			</nav>
@@ -151,6 +154,24 @@ function ProjectDropdown() {
 				onOpenChange={(isOpen) => setOpenDialog(isOpen ? "shortcuts" : null)}
 			/>
 		</>
+	);
+}
+
+/** Opens the AI Copilot in place of the Inspector. */
+function CopilotButton() {
+	const isOpen = useCopilotStore((state) => state.isOpen);
+	const setOpen = useCopilotStore((state) => state.setOpen);
+	return (
+		<Button
+			variant="outline"
+			size="sm"
+			aria-pressed={isOpen}
+			onClick={() => setOpen(!isOpen)}
+			className={cn("gap-1.5 text-xs", isOpen && "bg-accent text-primary")}
+		>
+			<Sparkles className="size-3.5" aria-hidden />
+			Copilot
+		</Button>
 	);
 }
 

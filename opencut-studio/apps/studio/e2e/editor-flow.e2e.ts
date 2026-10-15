@@ -45,6 +45,8 @@ function launchApp(): Promise<ElectronApplication> {
 			...process.env,
 			OPENCUT_STUDIO_USER_DATA_DIR: userDataDir,
 			OPENCUT_STUDIO_EXPORT_DIR: exportDir,
+			// Keep the Copilot in demo mode: deterministic and free.
+			ANTHROPIC_API_KEY: "",
 		},
 	});
 }
@@ -228,6 +230,23 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	);
 	await page.keyboard.press("Enter");
 	await expect(page.getByRole("button", { name: "Hide Video 1" })).toBeVisible();
+
+	// AI Copilot (demo mode): the plan changes nothing until applied, and
+	// applying it is one undo step.
+	await timelineClips(page).first().click();
+	await page.getByRole("button", { name: "Copilot" }).click();
+	const copilot = page.getByRole("region", { name: "AI Copilot" });
+	await expect(copilot.getByText("Demo", { exact: true })).toBeVisible();
+	await copilot.getByRole("textbox", { name: "Ask the Copilot" }).fill("opacity 40%");
+	await page.keyboard.press("Enter");
+	await expect(copilot.getByText(`Set opacity of “${CLIP_NAME}” to 40%`)).toBeVisible();
+	await copilot.getByRole("button", { name: "Apply 1 change" }).click();
+	await expect(copilot.getByText("Applied as one step. Ctrl+Z undoes it.")).toBeVisible();
+	await timelineClips(page).first().click();
+	await expect(dial).toHaveAttribute("aria-valuenow", "40");
+	await page.keyboard.press("Control+z");
+	await expect(dial).toHaveAttribute("aria-valuenow", "100");
+	await page.getByRole("button", { name: "Close Copilot" }).click();
 
 	// Export as MP4 through the export popover.
 	await page.getByRole("button", { name: "Export" }).first().click();

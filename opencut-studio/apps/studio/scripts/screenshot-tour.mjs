@@ -105,6 +105,13 @@ async function tour(theme) {
 	}
 	await page.getByRole("button", { name: "Media", exact: true }).first().click();
 
+	await page.getByRole("button", { name: "Copilot" }).click();
+	await page.getByRole("button", { name: "Add title Hello" }).click();
+	await page.getByRole("button", { name: "Preview", exact: true }).click();
+	await shot("05-panel-copilot");
+	await page.getByRole("button", { name: "Discard", exact: true }).click();
+	await page.getByRole("button", { name: "Close Copilot" }).click();
+
 	await page.getByRole("button", { name: "Export" }).first().click();
 	await shot("06-export");
 	await page.keyboard.press("Escape");

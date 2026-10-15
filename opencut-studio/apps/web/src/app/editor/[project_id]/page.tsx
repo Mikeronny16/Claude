@@ -9,6 +9,8 @@ import {
 import { AssetsPanel } from "@/components/editor/panels/assets";
 import { TabBar } from "@/components/editor/panels/assets/tabbar";
 import { PropertiesPanel } from "@/components/editor/panels/properties";
+import { CopilotPanel } from "@/copilot/components/copilot-panel";
+import { useCopilotStore } from "@/copilot/copilot-store";
 import { Timeline } from "@/timeline/components";
 import { TitaniumDialPanel } from "@/titanium-dial/components/dial-panel";
 import { PreviewPanel } from "@/preview/components";
@@ -86,6 +88,7 @@ function DegradedRendererBanner() {
 function EditorLayout() {
 	usePasteMedia();
 	const { panels, setPanel } = usePanelStore();
+	const isCopilotOpen = useCopilotStore((state) => state.isOpen);
 	const activeScene = useEditor((editor) =>
 		editor.scenes.getActiveSceneOrNull(),
 	);
@@ -194,7 +197,7 @@ function EditorLayout() {
 						maxSize={40}
 						className="min-w-0"
 					>
-						<PropertiesPanel />
+						{isCopilotOpen ? <CopilotPanel /> : <PropertiesPanel />}
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ResizablePanel>

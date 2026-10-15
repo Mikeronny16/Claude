@@ -40,7 +40,7 @@ No env vars, accounts, database or cloud services are needed.
 ## Checks
 
 ```bash
-bun test                              # from opencut-studio/: 223/227 pass
+bun test                              # from opencut-studio/: 232/236 pass
 cd apps/web && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bun run build && bun run test:e2e      # Linux headless: xvfb-run -a bun run test:e2e
@@ -60,7 +60,8 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
   1 feeds fractional ticks to `mediaTime` (`src/timeline/placement/__tests__/resolve.test.ts`).
 - e2e (`apps/studio/e2e/editor-flow.e2e.ts`) drives the built app: create
   project, import, add to timeline, preview pixels, Effects panel doesn't hijack
-  the preview, Titanium Dial keys + undo, track toggle by Enter, play,
+  the preview, Titanium Dial keys + undo, track toggle by Enter, Copilot
+  (demo) plan → apply → one undo, play,
   undo/redo, MP4 export
   checked with ffprobe, Manrope UI
   font loaded, relaunch with project/thumbnail/timeline intact. Passes on
@@ -134,6 +135,22 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
    - Enter presses a focused button/tab/link instead of the global "go to
      start" shortcut (Home still does that), so every control works from the
      keyboard. Space stays play/pause.
+12. AI Copilot (`src/copilot/`, panel opened by the header's Copilot button
+   in place of the Inspector). A request becomes a plan of steps
+   (split_clips, delete_clips, set_clip_param, add_text) shown as a
+   checklist; Preview runs it on the live timeline with no history,
+   Discard restores the saved tracks, Apply records one
+   `TracksSnapshotCommand` so one Ctrl+Z undoes the whole plan.
+   - Claude: `app/api/copilot/route.ts` (server side, `@anthropic-ai/sdk`,
+     model `claude-opus-4-8` with adaptive thinking, strict tools in
+     `copilot/claude.ts`). On when `ANTHROPIC_API_KEY` is set: dev in
+     `apps/web/.env.local`; desktop inherits the user's environment
+     (`setx ANTHROPIC_API_KEY sk-ant-…` on Windows, then restart the app).
+   - Demo mode without a key (`copilot/demo-planner.ts`): "split at
+     playhead", "delete selected", "opacity 50%", "rotate 15", "scale 120%",
+     "volume -6 dB", "add title …", chained with "and"/"then".
+   - Tests: steps, demo planner and Claude-reply parsing (unit); demo plan →
+     apply → undo (e2e, which blanks the key).
 
 ## Known limitations
 
@@ -166,8 +183,12 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
 3. **Windows installer**: electron-builder; ship `build/server` as
    extraResources (keep its relative symlinks), code signing later.
 4. **FFmpeg sidecar** for AAC export and HEVC/ProRes import (LGPL notices).
-5. **AI Copilot / Autopilot**: AI proposes commands, the UI previews them,
-   they run only on approval as one `BatchCommand` so one Ctrl+Z undoes them.
+5. ~~AI Copilot~~ — v1 done (Done 12). Not yet: the Claude path has not run
+   against the real API (no key on this machine); key entry in Settings
+   instead of an environment variable; more tools (remove silences via
+   audio analysis, captions via the existing Whisper transcription, move
+   and trim, music); editing the timeline while a plan is previewed isn't
+   guarded.
 
 ## Working agreement
 

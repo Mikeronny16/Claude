@@ -31,6 +31,9 @@ const webEnvSchema = z.object({
 	MARBLE_WORKSPACE_KEY: z.string().optional(),
 	FREESOUND_CLIENT_ID: z.string().optional(),
 	FREESOUND_API_KEY: z.string().optional(),
+	// AI Copilot plans edits with Claude when this is set; otherwise it runs
+	// in demo mode. Server-side only.
+	ANTHROPIC_API_KEY: z.string().optional(),
 });
 
 export type WebEnv = z.infer<typeof webEnvSchema>;
