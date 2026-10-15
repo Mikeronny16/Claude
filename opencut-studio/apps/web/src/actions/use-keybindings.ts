@@ -4,6 +4,17 @@ import { useEditor } from "@/editor/use-editor";
 import { useKeybindingsStore } from "@/actions/keybindings-store";
 import { isTypableDOMElement } from "@/utils/browser";
 
+const SLIDER_KEYS = new Set([
+	"ArrowUp",
+	"ArrowDown",
+	"ArrowLeft",
+	"ArrowRight",
+	"PageUp",
+	"PageDown",
+	"Home",
+	"End",
+]);
+
 /**
  * a composable that hooks to the caller component's
  * lifecycle and hooks to the keyboard events to fire
@@ -33,6 +44,11 @@ export function useKeybindingsListener() {
 			const isTextInput =
 				activeElement instanceof HTMLElement &&
 				isTypableDOMElement({ element: activeElement });
+			// A focused slider (e.g. the Titanium Dial) handles these keys itself.
+			const isSliderKey =
+				activeElement instanceof HTMLElement &&
+				activeElement.getAttribute("role") === "slider" &&
+				SLIDER_KEYS.has(ev.key);
 			const boundAction = binding ? keybindings.get(binding) : undefined;
 
 			if (normalizedKey === "escape" && isTextInput) {
@@ -43,7 +59,7 @@ export function useKeybindingsListener() {
 			if (!binding) return;
 			if (!boundAction) return;
 
-			if (isTextInput) return;
+			if (isTextInput || isSliderKey) return;
 			if (boundAction === "paste-copied") {
 				if (!editor.clipboard.hasEntry()) return;
 				ev.preventDefault();

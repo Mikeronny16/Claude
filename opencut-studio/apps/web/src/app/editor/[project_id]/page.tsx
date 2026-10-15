@@ -10,6 +10,7 @@ import { AssetsPanel } from "@/components/editor/panels/assets";
 import { TabBar } from "@/components/editor/panels/assets/tabbar";
 import { PropertiesPanel } from "@/components/editor/panels/properties";
 import { Timeline } from "@/timeline/components";
+import { TitaniumDialPanel } from "@/titanium-dial/components/dial-panel";
 import { PreviewPanel } from "@/preview/components";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorProvider } from "@/components/providers/editor-provider";
@@ -206,7 +207,12 @@ function EditorLayout() {
 				maxSize={70}
 				className="min-h-0 pr-3 pl-1.5"
 			>
-				<Timeline />
+				<div className="flex size-full gap-[0.19rem]">
+					<div className="min-w-0 flex-1">
+						<Timeline />
+					</div>
+					<TitaniumDialPanel />
+				</div>
 			</ResizablePanel>
 		</ResizablePanelGroup>
 	);
