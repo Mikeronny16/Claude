@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "build:studio": "cd apps/studio && bun run build",
     "build:tools": "turbo run build --filter=@opencut/tools",
     "build:wasm": "wasm-pack build rust/wasm --target bundler --out-dir pkg",
     "build:web": "turbo run build --filter=@opencut/web",
@@ -19,8 +20,10 @@
     "lint:web:fix": "eslint apps/web/src --ext .ts,.tsx --fix",
     "preview:web": "turbo run preview --filter=@opencut/web",
     "publish:wasm": "bun run build:wasm && npm publish rust/wasm/pkg --access public",
+    "start:studio": "cd apps/studio && bun run start",
     "start:tools": "turbo run start --filter=@opencut/tools",
-    "test": "bun test"
+    "test": "bun test",
+    "test:e2e": "cd apps/studio && bun run test:e2e"
   },
   "dependencies": {
     "@types/react": "^19.2.10",
@@ -45,6 +48,7 @@
     "typescript-eslint": "^8.59.0"
   },
   "trustedDependencies": [
-    "@tailwindcss/oxide"
+    "@tailwindcss/oxide",
+    "electron"
   ]
 }

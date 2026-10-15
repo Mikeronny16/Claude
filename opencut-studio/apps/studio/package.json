@@ -1,0 +1,24 @@
+{
+  "name": "@opencut/studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenCut Studio desktop app (Electron shell around the editor)",
+  "type": "module",
+  "devDependencies": {
+    "electron": "44.5.1",
+    "@playwright/test": "1.63.0",
+    "typescript": "^5.8.3",
+    "@types/node": "^24.2.1"
+  },
+  "main": "dist/main.js",
+  "scripts": {
+    "postinstall": "install-electron",
+    "build:web": "cd ../web && bun run build",
+    "build:server": "bun run scripts/prepare-server.ts",
+    "build:main": "bun build src/main.ts --outdir dist --target node --format esm --external electron",
+    "build": "bun run build:web && bun run build:server && bun run build:main",
+    "start": "electron .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:e2e": "playwright test"
+  }
+}
