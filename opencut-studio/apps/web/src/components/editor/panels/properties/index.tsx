@@ -1,13 +1,6 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useEditor } from "@/editor/use-editor";
 import { useElementSelection } from "@/timeline/hooks/element/use-element-selection";
 import { usePropertiesStore } from "./stores/properties-store";
@@ -24,19 +17,19 @@ export function PropertiesPanel() {
 
 	if (selectedElements.length === 0) {
 		return (
-			<div className="panel bg-background flex h-full flex-col items-center justify-center overflow-hidden rounded-sm border">
+			<InspectorFrame>
 				<EmptyView />
-			</div>
+			</InspectorFrame>
 		);
 	}
 
 	if (selectedElements.length > 1) {
 		return (
-			<div className="panel bg-background flex h-full flex-col items-center justify-center overflow-hidden rounded-sm border">
-				<p className="text-muted-foreground text-sm">
-					{selectedElements.length} elements selected.0
+			<InspectorFrame>
+				<p className="text-muted-foreground grid h-full place-items-center p-4 text-center text-sm">
+					{selectedElements.length} clips selected. Select one to edit it.
 				</p>
-			</div>
+			</InspectorFrame>
 		);
 	}
 
@@ -62,39 +55,72 @@ export function PropertiesPanel() {
 	if (!activeTab) return null;
 
 	return (
-		<div className="panel bg-background flex h-full overflow-hidden rounded-sm border">
-			<TooltipProvider delayDuration={0}>
-				<div className="flex shrink-0 flex-col gap-0.5 border-r p-1 scrollbar-hidden overflow-y-auto">
-					{visibleTabs.map((tab) => (
-						<Tooltip key={tab.id}>
-							<TooltipTrigger asChild>
-								<Button
-									variant={tab.id === activeTab.id ? "secondary" : "ghost"}
-									size="icon"
-									onClick={() =>
-										setActiveTab({
-											elementType: element.type,
-											tabId: tab.id,
-										})
-									}
-									aria-label={tab.label}
-									className={cn(
-										"shrink-0",
-										"h-8 w-8",
-										tab.id !== activeTab.id && "text-muted-foreground",
-									)}
-								>
-									{tab.icon}
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent side="right">{tab.label}</TooltipContent>
-						</Tooltip>
-					))}
-				</div>
-			</TooltipProvider>
-			<ScrollArea className="flex-1 scrollbar-hidden">
+		<InspectorFrame title={element.name}>
+			<div
+				role="tablist"
+				aria-label="Clip settings"
+				className="scrollbar-hidden flex shrink-0 gap-0.5 overflow-x-auto border-b px-1.5"
+			>
+				{visibleTabs.map((tab) => {
+					const isActive = tab.id === activeTab.id;
+					return (
+						<button
+							key={tab.id}
+							type="button"
+							role="tab"
+							aria-selected={isActive}
+							onClick={() =>
+								setActiveTab({
+									elementType: element.type,
+									tabId: tab.id,
+								})
+							}
+							className={cn(
+								"text-muted-foreground relative flex min-w-[3.4rem] flex-1 flex-col items-center gap-1 px-1 pt-2 pb-1.5 text-[0.65rem] leading-none font-medium transition-colors duration-150",
+								"hover:text-foreground focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none focus-visible:ring-inset",
+								"[&_svg]:size-4",
+								isActive && "text-primary",
+							)}
+						>
+							{tab.icon}
+							{tab.label}
+							{isActive && (
+								<span
+									aria-hidden
+									className="bg-primary absolute right-2 bottom-0 left-2 h-0.5 rounded-full"
+								/>
+							)}
+						</button>
+					);
+				})}
+			</div>
+			<ScrollArea role="tabpanel" className="min-h-0 flex-1 scrollbar-hidden">
 				{activeTab.content({ trackId: track.id })}
 			</ScrollArea>
-		</div>
+		</InspectorFrame>
+	);
+}
+
+/** The Inspector's panel with its title row. */
+function InspectorFrame({
+	title,
+	children,
+}: {
+	title?: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<section
+			aria-label="Inspector"
+			className="panel bg-background flex h-full flex-col overflow-hidden rounded-sm border"
+		>
+			<header className="flex shrink-0 items-center justify-between gap-3 border-b px-3 py-2">
+				<span className="text-xs font-semibold">Inspector</span>
+				{title && (
+					<span className="text-muted-foreground truncate text-xs">{title}</span>
+				)}
+			</header>
+			<div className="flex min-h-0 flex-1 flex-col">{children}</div>
+		</section>
 	);
 }

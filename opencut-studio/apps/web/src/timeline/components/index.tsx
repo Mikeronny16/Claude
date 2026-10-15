@@ -87,6 +87,7 @@ import { DragLine } from "./drag-line";
 import { invokeAction } from "@/actions";
 import { resolveTimelineElementIntersections } from "./selection-hit-testing";
 import { cn } from "@/utils/ui";
+import { getTrackLabels } from "./track-labels";
 
 const TRACKS_CONTAINER_MAX_HEIGHT = 800;
 const FALLBACK_CONTAINER_WIDTH = 1000;
@@ -633,6 +634,7 @@ function TrackLabelsPanel({
 			),
 		[tracks, expandedElementIds],
 	);
+	const trackLabels = useMemo(() => getTrackLabels({ tracks }), [tracks]);
 
 	return (
 		<div
@@ -653,6 +655,8 @@ function TrackLabelsPanel({
 							{tracks.map((track, index) => {
 								const expandedRows = trackExpandedRowsMap[index];
 								const baseHeight = getTrackHeight({ type: track.type });
+								const label = trackLabels.get(track.id);
+								const trackName = label?.name ?? track.name;
 
 								return (
 									<div
@@ -667,12 +671,20 @@ function TrackLabelsPanel({
 										}}
 									>
 										<div
-											className="flex shrink-0 items-center justify-end gap-2 px-3"
+											className="flex shrink-0 items-center gap-1.5 pr-2.5 pl-3"
 											style={{ height: `${baseHeight}px` }}
 										>
+											<TrackIcon track={track} />
+											<span className="text-foreground text-[0.7rem] font-semibold tabular-nums">
+												{label?.code}
+											</span>
+											<span className="text-muted-foreground min-w-0 flex-1 truncate text-[0.7rem]">
+												{trackName}
+											</span>
 											{canTrackHaveAudio(track) && (
 												<TrackToggleIcon
 													isOff={track.muted}
+													label={`${track.muted ? "Unmute" : "Mute"} ${trackName}`}
 													icons={{
 														on: VolumeHighIcon,
 														off: VolumeOffIcon,
@@ -687,6 +699,7 @@ function TrackLabelsPanel({
 											{canTrackBeHidden(track) && (
 												<TrackToggleIcon
 													isOff={track.hidden}
+													label={`${track.hidden ? "Show" : "Hide"} ${trackName}`}
 													icons={{
 														on: ViewIcon,
 														off: ViewOffSlashIcon,
@@ -698,7 +711,6 @@ function TrackLabelsPanel({
 													}
 												/>
 											)}
-											<TrackIcon track={track} />
 										</div>
 										{expandedRows.length > 0 && (
 											<PropertyTree rows={expandedRows} />
@@ -905,10 +917,12 @@ function TrackIcon({ track }: { track: TimelineTrack }) {
 
 function TrackToggleIcon({
 	isOff,
+	label,
 	icons,
 	onClick,
 }: {
 	isOff: boolean;
+	label: string;
 	icons: {
 		on: IconSvgElement;
 		off: IconSvgElement;
@@ -916,21 +930,22 @@ function TrackToggleIcon({
 	onClick: () => void;
 }) {
 	return (
-		<>
-			{isOff ? (
-				<HugeiconsIcon
-					icon={icons.off}
-					className="text-destructive size-4 cursor-pointer"
-					onClick={onClick}
-				/>
-			) : (
-				<HugeiconsIcon
-					icon={icons.on}
-					className="text-muted-foreground size-4 cursor-pointer"
-					onClick={onClick}
-				/>
-			)}
-		</>
+		<button
+			type="button"
+			aria-label={label}
+			aria-pressed={isOff}
+			title={label}
+			onClick={onClick}
+			className="grid size-5 shrink-0 cursor-pointer place-items-center rounded-sm focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none"
+		>
+			<HugeiconsIcon
+				icon={isOff ? icons.off : icons.on}
+				className={cn(
+					"size-4",
+					isOff ? "text-destructive" : "text-muted-foreground hover:text-foreground",
+				)}
+			/>
+		</button>
 	);
 }
 

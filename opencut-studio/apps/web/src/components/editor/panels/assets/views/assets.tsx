@@ -59,6 +59,15 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
+const MEDIA_FILTERS = [
+	{ id: "all", label: "All" },
+	{ id: "video", label: "Video" },
+	{ id: "audio", label: "Audio" },
+	{ id: "image", label: "Images" },
+] as const;
+
+type MediaFilter = (typeof MEDIA_FILTERS)[number]["id"];
+
 export function MediaView() {
 	const editor = useEditor();
 	const mediaFiles = useEditor((e) => e.media.getAssets());
@@ -148,8 +157,15 @@ export function MediaView() {
 		}
 	};
 
+	const [typeFilter, setTypeFilter] = useState<MediaFilter>("all");
+	const projectMedia = useMemo(
+		() => mediaFiles.filter((item) => !item.ephemeral),
+		[mediaFiles],
+	);
 	const filteredMediaItems = useMemo(() => {
-		const filtered = mediaFiles.filter((item) => !item.ephemeral);
+		const filtered = projectMedia.filter(
+			(item) => typeFilter === "all" || item.type === typeFilter,
+		);
 
 		filtered.sort((a, b) => {
 			let valueA: string | number;
@@ -182,7 +198,7 @@ export function MediaView() {
 		});
 
 		return filtered;
-	}, [mediaFiles, mediaSortBy, mediaSortOrder]);
+	}, [projectMedia, typeFilter, mediaSortBy, mediaSortOrder]);
 	const orderedMediaIds = useMemo(() => {
 		return filteredMediaItems.map((item) => item.id);
 	}, [filteredMediaItems]);
@@ -208,7 +224,30 @@ export function MediaView() {
 				contentClassName="h-full"
 				{...dragProps}
 			>
-				{isDragOver || filteredMediaItems.length === 0 ? (
+				{projectMedia.length > 0 && !isDragOver && (
+					<div role="group" aria-label="Filter media" className="mb-2 flex gap-1">
+						{MEDIA_FILTERS.map((filter) => (
+							<button
+								key={filter.id}
+								type="button"
+								aria-pressed={typeFilter === filter.id}
+								onClick={() => setTypeFilter(filter.id)}
+								className={cn(
+									"text-muted-foreground h-7 rounded-md px-2.5 text-xs font-medium transition-colors duration-150",
+									"hover:bg-accent hover:text-foreground focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none",
+									typeFilter === filter.id && "bg-accent text-primary",
+								)}
+							>
+								{filter.label}
+							</button>
+						))}
+					</div>
+				)}
+				{!isDragOver && projectMedia.length > 0 && filteredMediaItems.length === 0 ? (
+					<p className="text-muted-foreground px-1 py-6 text-center text-xs">
+						No {MEDIA_FILTERS.find((filter) => filter.id === typeFilter)?.label.toLowerCase()} in this project.
+					</p>
+				) : isDragOver || filteredMediaItems.length === 0 ? (
 					<MediaDragOverlay
 						isVisible={true}
 						isProcessing={isProcessing}
