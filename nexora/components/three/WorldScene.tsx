@@ -6,8 +6,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { THEMES } from "@/lib/catalog";
 import type { ObjectPatch } from "@/lib/store";
-import type { Creation, Quality, Vec3, World, WorldObject } from "@/lib/types";
-import { Island, SkyDome } from "./Island";
+import { tileTop } from "@/lib/terrain";
+import type { Creation, GroundTool, Quality, Vec3, World, WorldObject } from "@/lib/types";
+import { Explorer } from "./Explorer";
+import { Clouds, Islets, SkyDome, TileIsland } from "./Island";
 import { AssetModel, CreationModel, MissingModel, phaseFromId } from "./models";
 
 export type TransformMode = "translate" | "rotate" | "scale";
@@ -27,6 +29,11 @@ export interface WorldSceneProps {
   reducedMotion: boolean;
   quality: Quality;
   snap?: boolean;
+  /** Ground editing: taps paint/raise/lower/add/remove tiles instead of selecting objects. */
+  groundTool?: GroundTool | null;
+  onGroundTool?: (x: number, z: number) => void;
+  /** The player's explorer character (sigil colors). Omitted on showcase islands. */
+  explorer?: { from: string; to: string } | null;
 }
 
 function SelectionRing({ animate }: { animate: boolean }) {
@@ -183,6 +190,9 @@ export default function WorldScene({
   reducedMotion,
   quality,
   snap = false,
+  groundTool = null,
+  onGroundTool,
+  explorer = null,
 }: WorldSceneProps) {
   const theme = THEMES[world.theme];
   const animate = !reducedMotion;
@@ -190,6 +200,18 @@ export default function WorldScene({
   const editable = mode === "edit";
   const creationMap = useMemo(() => new Map(creations.map((c) => [c.id, c])), [creations]);
   const ghost = useRef<THREE.Mesh>(null);
+  const cursor = useRef<THREE.Group>(null);
+  const grounding = editable && !!groundTool;
+  const showCursor = (x: number, y: number, z: number, color: string) => {
+    const c = cursor.current;
+    if (!c) return;
+    c.visible = true;
+    c.position.set(x, y + 0.03, z);
+    c.children.forEach((m) => ((m as THREE.Mesh).material as THREE.MeshBasicMaterial).color.set(color));
+  };
+  const hideCursor = () => {
+    if (cursor.current) cursor.current.visible = false;
+  };
   const lastGizmoUse = useRef(0);
   const markGizmo = () => {
     lastGizmoUse.current = performance.now();
@@ -210,14 +232,14 @@ export default function WorldScene({
       }}
     >
       <SkyDome top={theme.sky} bottom={theme.fog} glow={theme.accent} />
-      <fog attach="fog" args={[theme.fog, 26, 80]} />
-      <Stars radius={70} depth={25} count={shadows ? 1800 : 700} factor={3.2} saturation={0.4} fade speed={animate ? 0.5 : 0} />
-      <hemisphereLight args={["#c7d2fe", "#1e1b4b", 1.1]} />
-      <ambientLight intensity={0.35} />
+      <fog attach="fog" args={[theme.fog, 32, 100]} />
+      {world.theme === "twilight" && <Stars radius={70} depth={25} count={shadows ? 700 : 300} factor={2.4} saturation={0.2} fade speed={animate ? 0.4 : 0} />}
+      <hemisphereLight args={["#fff4fb", theme.rock, 1.35]} />
+      <ambientLight intensity={0.45} />
       <directionalLight
         position={[8, 14, 6]}
-        intensity={2.2}
-        color="#fff1e0"
+        intensity={2.6}
+        color="#fff4e0"
         castShadow={shadows}
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-9}
@@ -226,38 +248,53 @@ export default function WorldScene({
         shadow-camera-bottom={-9}
         shadow-bias={-0.0005}
       />
-      <directionalLight position={[-9, 5, -7]} intensity={0.9} color={theme.accent} />
+      <directionalLight position={[-9, 5, -7]} intensity={0.8} color={theme.accent} />
+      <Clouds color={theme.cloud} animate={animate} />
+      <Islets theme={theme} animate={animate} />
 
       <FloatGroup animate={animate && !editable}>
-        <Island
+        <TileIsland
+          tiles={world.tiles}
           theme={theme}
           animate={animate}
           shadows={shadows}
-          onGroundClick={
+          addMode={grounding && groundTool === "add"}
+          handlers={
             editable
-              ? (local) => {
-                  if (placing) onPlace?.([local.x, 0, local.z]);
-                  else onSelect?.(null);
-                }
-              : undefined
-          }
-          onGroundHover={
-            editable && placing
-              ? (local) => {
-                  if (!ghost.current) return;
-                  ghost.current.visible = !!local;
-                  if (local) ghost.current.position.set(local.x, 0.05, local.z);
+              ? {
+                  onTileClick: (tile, point) => {
+                    if (grounding) onGroundTool?.(tile.x, tile.z);
+                    else if (placing) onPlace?.([point.x, tileTop(tile), point.z]);
+                    else onSelect?.(null);
+                  },
+                  onTileHover: (tile, point) => {
+                    if (grounding) {
+                      if (tile && groundTool !== "add") showCursor(tile.x, tileTop(tile), tile.z, groundTool === "remove" ? "#fb7185" : "#fde68a");
+                      else hideCursor();
+                    }
+                    if (placing && ghost.current) {
+                      ghost.current.visible = !!tile;
+                      if (tile && point) ghost.current.position.set(point.x, tileTop(tile) + 0.05, point.z);
+                    }
+                  },
+                  onEmptyClick: (x, z) => onGroundTool?.(x, z),
+                  onEmptyHover: (cell) => {
+                    const ghost = cell && world.tiles.find((t) => Math.abs(t.x - cell[0]) + Math.abs(t.z - cell[1]) === 1);
+                    if (cell) showCursor(cell[0], ghost ? ghost.h * 0.5 : 0, cell[1], "#67e8f9");
+                    else hideCursor();
+                  },
                 }
               : undefined
           }
         />
+        {explorer && <Explorer tiles={world.tiles} from={explorer.from} to={explorer.to} animate={animate} />}
         {world.objects.map((obj) => (
           <SceneObject
             key={obj.id}
             obj={obj}
             creation={obj.creationId ? creationMap.get(obj.creationId) : undefined}
             selected={obj.id === selectedId}
-            editable={editable}
+            editable={editable && !grounding}
             animate={animate}
             shadows={shadows}
             transformMode={transformMode}
@@ -272,6 +309,22 @@ export default function WorldScene({
             <ringGeometry args={[0.55, 0.8, 32]} />
             <meshBasicMaterial color="#fbbf24" transparent opacity={0.8} toneMapped={false} depthWrite={false} />
           </mesh>
+        )}
+        {grounding && (
+          <group ref={cursor} visible={false}>
+            {/* Square tile outline */}
+            {[
+              [0, 0.47, 1, 0.06],
+              [0, -0.47, 1, 0.06],
+              [0.47, 0, 0.06, 1],
+              [-0.47, 0, 0.06, 1],
+            ].map(([x, z, w, d], i) => (
+              <mesh key={i} position={[x, 0, z]} raycast={() => null}>
+                <boxGeometry args={[w, 0.05, d]} />
+                <meshBasicMaterial color="#fde68a" toneMapped={false} />
+              </mesh>
+            ))}
+          </group>
         )}
       </FloatGroup>
 

@@ -1,21 +1,20 @@
-import { ASSET_MAP, ISLAND_RADIUS, MAX_OBJECTS, THEMES } from "./catalog";
+import { ASSET_MAP, GRID_LIMIT, MAX_OBJECTS, THEMES } from "./catalog";
 import { sanitizeSpec } from "./ai/spec";
 import { validateName } from "./safety";
+import { generateTiles, sanitizeTiles, settleObjects } from "./terrain";
 import type { AssetKind, Creation, IslandTheme, Vec3, World, WorldObject } from "./types";
 
 const HEX = /^#[0-9a-f]{6}$/i;
-export const MAX_HEIGHT = 8;
 export const MIN_SCALE = 0.3;
 export const MAX_SCALE = 3;
-const EDGE = ISLAND_RADIUS - 0.35;
 
 const finite = (v: unknown, fallback = 0) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
+const clampN = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-/** Keep objects on (or above) the island: inside the rim and below the clouds. */
-export function clampPosition([x, y, z]: Vec3): Vec3 {
-  const r = Math.hypot(x, z);
-  const k = r > EDGE ? EDGE / r : 1;
-  return [x * k, Math.min(MAX_HEIGHT, Math.max(0, y)), z * k];
+/** Coarse bounds check; settleObjects() then puts objects onto real tiles. */
+function boundPosition([x, y, z]: Vec3): Vec3 {
+  const lim = GRID_LIMIT + 0.5;
+  return [clampN(x, -lim, lim), clampN(y, -1, 12), clampN(z, -lim, lim)];
 }
 
 export function snap(v: number, step = 0.5): number {
@@ -43,7 +42,7 @@ export function sanitizeObject(raw: unknown): WorldObject | null {
     id: typeof o.id === "string" && o.id.length <= 40 ? o.id : `o${Math.random().toString(36).slice(2, 10)}`,
     kind,
     ...(kind === "custom" ? { creationId: String(o.creationId).slice(0, 40) } : {}),
-    position: clampPosition([finite(pos[0]), finite(pos[1]), finite(pos[2])]),
+    position: boundPosition([finite(pos[0]), finite(pos[1]), finite(pos[2])]),
     rotation: [wrapAngle(finite(rot[0])), wrapAngle(finite(rot[1])), wrapAngle(finite(rot[2]))],
     scale: clampScale(finite(o.scale, 1)),
     color: typeof o.color === "string" && HEX.test(o.color) ? o.color.toLowerCase() : kind === "custom" ? "#ffffff" : ASSET_MAP[kind].defaultColor,
@@ -64,7 +63,9 @@ export function sanitizeWorld(raw: unknown, fallbackName = "My Island"): World |
   }
   const name = typeof w.name === "string" && validateName(w.name, { max: 28 }).ok ? w.name.trim() : fallbackName;
   const theme = typeof w.theme === "string" && w.theme in THEMES ? (w.theme as IslandTheme) : "twilight";
-  return { name, theme, objects, updatedAt: finite(w.updatedAt, Date.now()) };
+  // Worlds saved before tiles existed get a starter island.
+  const tiles = sanitizeTiles(w.tiles) ?? generateTiles(1);
+  return { name, theme, tiles, objects: settleObjects(objects, tiles), updatedAt: finite(w.updatedAt, Date.now()) };
 }
 
 export function sanitizeCreation(raw: unknown): Creation | null {

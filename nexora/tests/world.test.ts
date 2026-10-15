@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { ISLAND_RADIUS } from "@/lib/catalog";
-import { clampPosition, exportWorldFile, parseWorldFile, sanitizeWorld } from "@/lib/world";
+import { exportWorldFile, parseWorldFile, sanitizeWorld } from "@/lib/world";
 
 describe("world helpers", () => {
-  it("keeps positions on the island", () => {
-    const [x, y, z] = clampPosition([100, -5, 0]);
-    expect(Math.hypot(x, z)).toBeLessThan(ISLAND_RADIUS);
-    expect(y).toBe(0);
+  it("gives old worlds (saved before tiles) a starter island and settles objects onto it", () => {
+    const w = sanitizeWorld({ name: "Old Isle", theme: "aurora", objects: [{ id: "a", kind: "pine", position: [90, -9, 0], rotation: [0, 0, 0], scale: 1, color: "#22d3ee" }] })!;
+    expect(w.tiles.length).toBeGreaterThan(40);
+    const o = w.objects[0];
+    expect(w.tiles.some((t) => t.x === Math.round(o.position[0]) && t.z === Math.round(o.position[2]))).toBe(true);
   });
 
   it("drops unknown kinds and repairs bad fields", () => {

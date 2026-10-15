@@ -1,3 +1,4 @@
+import { generateTiles, settleObjects, type IslandRecipe } from "./terrain";
 import type { AssetKind, IslandTheme, Vec3, World, WorldObject } from "./types";
 
 export interface ShowcaseWorld {
@@ -22,7 +23,11 @@ function ring(kind: AssetKind, count: number, radius: number, color: string, sca
   });
 }
 
-const world = (name: string, theme: IslandTheme, objects: WorldObject[]): World => ({ name, theme, objects, updatedAt: 0 });
+/** Builds a showcase world: generated ground, objects settled onto dry land. */
+function world(name: string, theme: IslandTheme, seed: number, recipe: IslandRecipe, objects: WorldObject[]): World {
+  const tiles = generateTiles(seed, recipe);
+  return { name, theme, tiles, objects: settleObjects(objects, tiles, { avoidWater: true }), updatedAt: 0 };
+}
 
 /**
  * Hand-built example worlds. In this prototype Explore only shows these
@@ -33,25 +38,24 @@ export const SHOWCASE: ShowcaseWorld[] = [
     id: "lantern-harbor",
     title: "Lantern Harbor",
     author: "NEXORA Team",
-    blurb: "A sleepy fishing village where lanterns guide sky-ships home.",
+    blurb: "A sleepy village where lanterns guide sky-ships home.",
     tags: ["cozy", "village"],
-    world: world("Lantern Harbor", "ember", [
-      o("lighthouse", [4.4, 0, -1.2], "#f87171", 1.2),
-      o("cottage", [-1.2, 0, 1.4], "#f59e0b", 1, 0.4),
-      o("cottage", [1.4, 0, 2.2], "#fb923c", 0.9, -0.3),
-      o("cottage", [-2.6, 0, -1], "#fbbf24", 1.1, 1.2),
-      o("lantern", [0.2, 0, 0.4], "#fcd34d"),
-      o("lantern", [2.6, 0, 0.2], "#fcd34d"),
-      o("lantern", [-2.4, 0, 1.8], "#fcd34d"),
-      o("campfire", [0, 0, -1.6], "#fb923c"),
+    world: world("Lantern Harbor", "ember", 11, { radius: 5.4, hill: [-3, -2], pond: [3, 2] }, [
+      o("lighthouse", [-3, 2, -2], "#f05252", 1.1),
+      o("cottage", [-0.6, 0, 1.2], "#e0673f", 1, 0.4),
+      o("cottage", [1.2, 0, -1.4], "#fb923c", 0.9, -0.3),
+      o("cottage", [-2.4, 0, 1.4], "#e0673f", 1.05, 1.2),
+      o("lantern", [0.6, 0, 0.2], "#fcd34d"),
+      o("lantern", [-1.6, 0, 2.6], "#fcd34d"),
+      o("campfire", [0.2, 0, -0.4], "#fb923c"),
       o("fence", [-3.6, 0, 0.8], "#d6a46b", 1, 1.4),
-      o("fence", [-3.2, 0, 2.2], "#d6a46b", 1, 0.9),
-      o("pine", [-4, 0, -2.6], "#34d399", 1.2),
-      o("pine", [-1, 0, -3.8], "#34d399"),
-      o("roundTree", [2.4, 0, -3], "#fbbf24"),
-      o("flowers", [0.9, 0, 3.6], "#f472b6"),
-      o("flag", [3.2, 0, 1.6], "#8b5cf6"),
-      o("wisp", [4.4, 3.8, -1.2], "#fde68a", 0.7),
+      o("pine", [-4, 0, -0.4], "#3fae6a", 1.2),
+      o("pine", [-1, 0, -3.6], "#3fae6a"),
+      o("palm", [3.4, 0, -0.6], "#8fcf4a"),
+      o("pumpkins", [1.8, 0, 3.4], "#f59e0b"),
+      o("flag", [2.2, 0, 0.2], "#8b5cf6"),
+      o("fox", [0.9, 0, 1.2], "#f08a3c", 1, 0.8),
+      o("wisp", [-3, 3.6, -2], "#fde68a", 0.7),
     ]),
   },
   {
@@ -60,16 +64,16 @@ export const SHOWCASE: ShowcaseWorld[] = [
     author: "NEXORA Team",
     blurb: "A ring of humming crystals around an ancient portal.",
     tags: ["magic", "glow"],
-    world: world("Crystal Hollow", "aurora", [
-      o("portal", [0, 0, 0], "#c084fc", 1.3),
-      ...ring("crystal", 6, 2.6, "#22d3ee", 0.9),
+    world: world("Crystal Hollow", "aurora", 23, { radius: 5.3, hill: [0, 0], pond: [3, -3] }, [
+      o("portal", [0, 0, 0], "#c084fc", 1.2),
+      ...ring("crystal", 6, 2.7, "#22d3ee", 0.9),
       ...ring("wisp", 4, 3.8, "#67e8f9", 0.8, 1.6, 0.4),
-      o("runestone", [-3.8, 0, 2.4], "#fbbf24", 1.1),
-      o("runestone", [3.6, 0, -2.6], "#fbbf24"),
-      o("boulder", [4.2, 0, 1.8], "#94a3b8", 1.3),
-      o("boulder", [-4.4, 0, -1.4], "#94a3b8"),
-      o("pine", [-2, 0, -4.4], "#60a5fa", 1.1),
-      o("pine", [1.6, 0, 4.4], "#60a5fa"),
+      o("runestone", [-3.8, 0, 2.2], "#fbbf24", 1.1),
+      o("runestone", [3.4, 0, 2.4], "#fbbf24"),
+      o("boulder", [-1.4, 0, -4], "#a8a3bd", 1.3),
+      o("slime", [1.6, 0, 3.6], "#5eead4"),
+      o("pine", [-2.4, 0, -3.6], "#3fae6a", 1.1),
+      o("pine", [-4, 0, -1.2], "#3fae6a"),
     ]),
   },
   {
@@ -78,17 +82,18 @@ export const SHOWCASE: ShowcaseWorld[] = [
     author: "NEXORA Team",
     blurb: "Giant mushrooms, wildflowers and a windmill that never stops.",
     tags: ["nature", "colorful"],
-    world: world("Mushroom Meadow", "verdant", [
-      o("windmill", [-2.6, 0, -2], "#fde68a", 1.2, 0.6),
-      o("mushroom", [1.6, 0, -1.2], "#f472b6", 1.6),
-      o("mushroom", [2.8, 0, 0.6], "#a78bfa", 1.1),
-      o("mushroom", [0.6, 0, 1.8], "#fb923c", 0.8),
-      ...ring("flowers", 7, 4.2, "#fbbf24", 1, 0, 0.2),
-      o("roundTree", [-1.2, 0, 2.6], "#34d399", 1.2),
-      o("roundTree", [3.4, 0, -3], "#f472b6"),
-      o("cottage", [-3.6, 0, 1.6], "#f59e0b", 0.9, 1.1),
-      o("lantern", [-2.4, 0, 2.6], "#fcd34d"),
-      o("boulder", [0, 0, -3.8], "#94a3b8"),
+    world: world("Mushroom Meadow", "verdant", 37, { radius: 5.4, hill: [-3, -2], pond: [2, 3] }, [
+      o("windmill", [-3, 0, -2], "#fde68a", 1.1, 0.6),
+      o("mushroom", [1.6, 0, -1.2], "#ef5b6b", 1.6),
+      o("mushroom", [3, 0, 0.4], "#a78bfa", 1.1),
+      o("mushroom", [0.4, 0, 1.4], "#fb923c", 0.8),
+      ...ring("flowers", 6, 4.3, "#fbbf24", 1, 0, 0.9),
+      o("roundTree", [-1.6, 0, 2.4], "#7cc35a", 1.2),
+      o("roundTree", [3.2, 0, -3], "#f472b6"),
+      o("bunny", [-0.4, 0, -0.2], "#f5f0ff", 1, 0.6),
+      o("bunny", [0.8, 0, -2.6], "#fbcfe8", 0.9, -0.4),
+      o("pumpkins", [-3.4, 0, 1.4], "#f59e0b"),
+      o("boulder", [0, 0, -4], "#a8a3bd"),
     ]),
   },
   {
@@ -97,21 +102,22 @@ export const SHOWCASE: ShowcaseWorld[] = [
     author: "NEXORA Team",
     blurb: "Wizard towers, banners and stepping stones floating in the clouds.",
     tags: ["epic", "castle"],
-    world: world("Sky Citadel", "twilight", [
-      o("tower", [0, 0, 0], "#818cf8", 1.6),
-      o("tower", [-2.6, 0, 1.6], "#a78bfa", 1.1),
-      o("tower", [2.6, 0, 1.6], "#a78bfa", 1.1),
-      o("flag", [-1.2, 0, 2.8], "#fbbf24"),
-      o("flag", [1.2, 0, 2.8], "#fbbf24"),
-      o("boulder", [3.4, 1.8, -2.4], "#94a3b8", 0.8),
-      o("boulder", [4.2, 3, -0.6], "#94a3b8", 0.7),
-      o("crystal", [4.2, 3.6, -0.6], "#22d3ee", 0.6),
-      o("wisp", [-3, 3.2, -2.6], "#67e8f9"),
-      o("runestone", [0, 0, -3.2], "#fbbf24", 1.2),
-      o("lantern", [-1.6, 0, -1.8], "#fcd34d"),
-      o("lantern", [1.6, 0, -1.8], "#fcd34d"),
-      o("pine", [-4.2, 0, -1.4], "#34d399"),
-      o("pine", [4.6, 0, 1.2], "#34d399"),
+    world: world("Sky Citadel", "twilight", 51, { radius: 5.6, hill: [0, -1], pond: [-3, 3] }, [
+      o("tower", [0, 0, -1], "#7c6cf0", 1.5),
+      o("tower", [-2.6, 0, 1.2], "#a78bfa", 1.05),
+      o("tower", [2.6, 0, 1.2], "#a78bfa", 1.05),
+      o("flag", [-1.2, 0, 2.4], "#fbbf24"),
+      o("flag", [1.2, 0, 2.4], "#fbbf24"),
+      o("boulder", [3.4, 2.6, -2.4], "#a8a3bd", 0.8),
+      o("boulder", [4.2, 3.6, -0.6], "#a8a3bd", 0.7),
+      o("crystal", [4.2, 4.3, -0.6], "#22d3ee", 0.6),
+      o("wisp", [-3, 3.4, -2.6], "#67e8f9"),
+      o("owl", [1.4, 0, 0.4], "#a7825a", 1, -0.5),
+      o("runestone", [0, 0, 3.4], "#fbbf24", 1.1),
+      o("lantern", [-1.6, 0, -2.4], "#fcd34d"),
+      o("lantern", [1.6, 0, -2.4], "#fcd34d"),
+      o("pine", [-4.2, 0, -1.4], "#3fae6a"),
+      o("pine", [4.4, 0, 1.6], "#3fae6a"),
     ]),
   },
 ];

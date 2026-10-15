@@ -1,4 +1,4 @@
-import { Box, Castle, Cloud, Compass, Flame, House, Lightbulb, Palette, Save, Sparkles, Trees, WandSparkles } from "lucide-react";
+import { Box, Castle, Cloud, Compass, Flame, House, Lightbulb, Mountain, Palette, PawPrint, Save, Shovel, Sparkles, Trees, WandSparkles } from "lucide-react";
 import type { QuestIcon as QuestIconName } from "@/lib/quests";
 
 const MAP = {
@@ -14,6 +14,9 @@ const MAP = {
   compass: Compass,
   castle: Castle,
   cloud: Cloud,
+  shovel: Shovel,
+  mountain: Mountain,
+  paw: PawPrint,
 } as const;
 
 export function QuestIcon({ name, size = 20 }: { name: QuestIconName; size?: number }) {

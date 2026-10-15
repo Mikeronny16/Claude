@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { levelFromXp, levelProgress, xpForLevel } from "@/lib/levels";
 import { dailyQuest, questById, questStatus, QUESTS, type QuestContext } from "@/lib/quests";
-import type { Progress, WorldObject } from "@/lib/types";
+import type { Progress, Tile, WorldObject } from "@/lib/types";
 
 const progress = (p: Partial<Progress> = {}): Progress => ({
-  xp: 0, claimed: [], placedTotal: 0, aiCreations: 0, saves: 0, explored: [], reactions: {}, reports: [], ...p,
+  xp: 0, claimed: [], placedTotal: 0, tilesPainted: 0, aiCreations: 0, saves: 0, explored: [], reactions: {}, reports: [], ...p,
 });
 const obj = (kind: WorldObject["kind"], position: WorldObject["position"] = [0, 0, 0], color = "#ffffff"): WorldObject => ({
   id: Math.random().toString(36), kind, position, rotation: [0, 0, 0], scale: 1, color,
 });
-const ctx = (objects: WorldObject[], p: Partial<Progress> = {}): QuestContext => ({ objects, progress: progress(p), creations: [] });
+/** A flat 9x9 island from -4 to 4. */
+const TILES: Tile[] = [];
+for (let x = -4; x <= 4; x++) for (let z = -4; z <= 4; z++) TILES.push({ x, z, h: 0, ground: "grass" });
+const ctx = (objects: WorldObject[], p: Partial<Progress> = {}, tiles = TILES): QuestContext => ({ objects, tiles, progress: progress(p), creations: [] });
 
 describe("levels", () => {
   it("maps xp to levels", () => {
@@ -33,7 +36,16 @@ describe("quests", () => {
 
     const keeper = questById("lightkeeper")!;
     expect(questStatus(keeper, ctx([obj("lighthouse", [1, 0, 1])])).complete).toBe(false);
-    expect(questStatus(keeper, ctx([obj("lighthouse", [4.5, 0, 0])])).complete).toBe(true);
+    expect(questStatus(keeper, ctx([obj("lighthouse", [3.9, 0, 0])])).complete).toBe(true);
+
+    // Floating is measured from the tile under the object, not from zero.
+    const sky = questById("sky-architect")!;
+    const hill = TILES.map((t) => (t.x === 0 && t.z === 0 ? { ...t, h: 4 } : t));
+    expect(questStatus(sky, ctx([obj("crystal", [0, 2.2, 0])], {}, hill)).complete).toBe(false);
+    expect(questStatus(sky, ctx([obj("crystal", [0, 3.6, 0])], {}, hill)).complete).toBe(true);
+
+    expect(questStatus(questById("mountain-maker")!, ctx([], {}, hill)).complete).toBe(true);
+    expect(questStatus(questById("new-friends")!, ctx([obj("fox"), obj("slime")])).complete).toBe(true);
   });
 
   it("caps progress at the target and reads claim state", () => {

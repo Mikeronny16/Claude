@@ -1,12 +1,14 @@
 import {
-  Castle, Fence, Flag, Flame, Flower2, Gem, Ghost, House, LampFloor, Lightbulb, Milestone, Mountain, Orbit, Shapes,
-  Sprout, TreeDeciduous, TreePine, Wind,
+  Bird, Castle, Citrus, Droplet, Fence, Flag, Flame, Flower2, Gem, Ghost, House, LampFloor, Lightbulb, Milestone, Mountain, Orbit,
+  PawPrint, Rabbit, Shapes, Sprout, TreeDeciduous, TreePalm, TreePine, Wind,
 } from "lucide-react";
 import type { ObjectKind } from "@/lib/types";
 
 const ICONS: Record<ObjectKind, typeof TreePine> = {
   pine: TreePine,
   roundTree: TreeDeciduous,
+  palm: TreePalm,
+  pumpkins: Citrus,
   mushroom: Sprout,
   flowers: Flower2,
   boulder: Mountain,
@@ -22,6 +24,10 @@ const ICONS: Record<ObjectKind, typeof TreePine> = {
   lantern: LampFloor,
   campfire: Flame,
   flag: Flag,
+  fox: PawPrint,
+  bunny: Rabbit,
+  slime: Droplet,
+  owl: Bird,
   custom: Shapes,
 };
 

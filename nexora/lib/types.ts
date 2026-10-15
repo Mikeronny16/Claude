@@ -1,10 +1,12 @@
 export type Vec3 = [number, number, number];
 
-export type AssetCategory = "nature" | "build" | "magic" | "light";
+export type AssetCategory = "nature" | "build" | "magic" | "light" | "creatures";
 
 export type AssetKind =
   | "pine"
   | "roundTree"
+  | "palm"
+  | "pumpkins"
   | "mushroom"
   | "flowers"
   | "boulder"
@@ -19,7 +21,11 @@ export type AssetKind =
   | "runestone"
   | "lantern"
   | "campfire"
-  | "flag";
+  | "flag"
+  | "fox"
+  | "bunny"
+  | "slime"
+  | "owl";
 
 export type ObjectKind = AssetKind | "custom";
 
@@ -38,9 +44,22 @@ export interface WorldObject {
 
 export type IslandTheme = "twilight" | "aurora" | "ember" | "verdant";
 
+export type GroundType = "grass" | "dirt" | "sand" | "stone" | "water";
+
+/** One square block of the island. x/z are grid cells (1 unit); h is the height level. */
+export interface Tile {
+  x: number;
+  z: number;
+  h: number;
+  ground: GroundType;
+}
+
+export type GroundTool = GroundType | "raise" | "lower" | "add" | "remove";
+
 export interface World {
   name: string;
   theme: IslandTheme;
+  tiles: Tile[];
   objects: WorldObject[];
   updatedAt: number;
 }
@@ -119,6 +138,8 @@ export interface Progress {
   claimed: string[];
   /** Total objects ever placed (does not go down on delete). */
   placedTotal: number;
+  /** Ground tiles painted, raised, lowered, added or removed. */
+  tilesPainted: number;
   aiCreations: number;
   saves: number;
   explored: string[];

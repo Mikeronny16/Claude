@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useNexora } from "@/lib/store";
+import { generateTiles, tileTop } from "@/lib/terrain";
 
 const s = () => useNexora.getState();
 
 describe("world store", () => {
   beforeEach(() => {
     useNexora.setState({
-      world: { name: "Test", theme: "twilight", objects: [], updatedAt: 0 },
+      world: { name: "Test", theme: "twilight", tiles: generateTiles(3), objects: [], updatedAt: 0 },
       past: [], future: [], selectedId: null, saves: [], creations: [],
-      progress: { xp: 0, claimed: [], placedTotal: 0, aiCreations: 0, saves: 0, explored: [], reactions: {}, reports: [] },
+      progress: { xp: 0, claimed: [], placedTotal: 0, tilesPainted: 0, aiCreations: 0, saves: 0, explored: [], reactions: {}, reports: [] },
       settings: { reducedMotion: false, quality: "high", breakReminderMinutes: 0, snapToGrid: false },
       toasts: [], levelUp: null,
     });
@@ -17,6 +18,7 @@ describe("world store", () => {
   it("adds, edits, undoes and redoes", () => {
     const id = s().addObject("pine")!;
     expect(s().selectedId).toBe(id);
+    useNexora.setState({ world: { ...s().world, tiles: s().world.tiles.map((t) => ({ ...t, h: 0, ground: "grass" as const })) } });
     s().updateObject(id, { position: [1, 0, 1], scale: 2 });
     s().updateObject(id, { color: "#ff0000" });
     expect(s().world.objects[0]).toMatchObject({ position: [1, 0, 1], scale: 2, color: "#ff0000" });
@@ -43,6 +45,34 @@ describe("world store", () => {
     const before = s().past.length;
     s().updateObject(id, { scale: 1 });
     expect(s().past.length).toBe(before);
+  });
+
+  it("paints, raises and lowers tiles with undo, carrying objects along", () => {
+    useNexora.setState({ world: { ...s().world, tiles: s().world.tiles.map((t) => ({ ...t, h: 0, ground: "grass" as const })) } });
+    const id = s().addObject("bunny", { position: [0, 0, 0] })!;
+    expect(s().paintTile(0, 0, "raise")).toBe(true);
+    expect(s().paintTile(0, 0, "raise")).toBe(true);
+    const tile = s().world.tiles.find((t) => t.x === 0 && t.z === 0)!;
+    expect(tile.h).toBe(2);
+    expect(s().world.objects.find((o) => o.id === id)!.position[1]).toBeCloseTo(tileTop(tile));
+    expect(s().paintTile(0, 0, "sand")).toBe(true);
+    expect(s().progress.tilesPainted).toBe(3);
+    // Can't remove a tile that has an object on it.
+    expect(s().paintTile(0, 0, "remove")).toBe(false);
+    s().undo();
+    s().undo();
+    expect(s().world.tiles.find((t) => t.x === 0 && t.z === 0)!.h).toBe(1);
+    expect(s().world.objects.find((o) => o.id === id)!.position[1]).toBeCloseTo(0.5);
+    s().redo();
+    expect(s().world.tiles.find((t) => t.x === 0 && t.z === 0)!.h).toBe(2);
+  });
+
+  it("keeps placed objects on land", () => {
+    const id = s().addObject("pine", { position: [40, -3, -40] })!;
+    const o = s().world.objects.find((x) => x.id === id)!;
+    const t = s().world.tiles.find((x) => x.x === Math.round(o.position[0]) && x.z === Math.round(o.position[2]));
+    expect(t).toBeDefined();
+    expect(o.position[1]).toBeCloseTo(tileTop(t!));
   });
 
   it("respects unlock levels", () => {

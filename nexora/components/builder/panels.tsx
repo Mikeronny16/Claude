@@ -7,11 +7,12 @@ import {
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ConfirmDialog, Dialog } from "@/components/ui/Dialog";
-import { ASSETS, ASSET_MAP, CATEGORIES, MAX_OBJECTS, MAX_SAVES, SWATCHES } from "@/lib/catalog";
+import { ASSETS, ASSET_MAP, CATEGORIES, GROUNDS, GROUND_TOOLS, MAX_OBJECTS, MAX_SAVES, SWATCHES, THEMES } from "@/lib/catalog";
 import { useLevel } from "@/lib/hooks";
 import { validateName } from "@/lib/safety";
 import { useNexora } from "@/lib/store";
-import type { AssetCategory, AssetKind, Creation, Vec3, WorldObject } from "@/lib/types";
+import { cellOf, tileKey, tileMap, tileTop } from "@/lib/terrain";
+import type { AssetCategory, AssetKind, Creation, GroundTool, Vec3, WorldObject } from "@/lib/types";
 import { exportWorldFile, parseWorldFile, type ParsedWorldFile } from "@/lib/world";
 import { AssetGlyph } from "./AssetTile";
 
@@ -146,6 +147,7 @@ export function Inspector({ selected, onGoAdd }: { selected: WorldObject | null;
   const duplicate = useNexora((s) => s.duplicateObject);
   const remove = useNexora((s) => s.removeObject);
   const creations = useNexora((s) => s.creations);
+  const tiles = useNexora((s) => s.world.tiles);
 
   if (!selected) {
     return (
@@ -160,6 +162,8 @@ export function Inspector({ selected, onGoAdd }: { selected: WorldObject | null;
   }
 
   const [x, y, z] = selected.position;
+  const under = tileMap(tiles).get(tileKey(cellOf(x), cellOf(z)));
+  const groundY = under ? tileTop(under) : 0;
   const move = (d: Vec3) => update(selected.id, { position: [x + d[0], y + d[1], z + d[2]] });
   const turn = (d: number) => update(selected.id, { rotation: [selected.rotation[0], selected.rotation[1] + d, selected.rotation[2]] });
 
@@ -224,7 +228,7 @@ export function Inspector({ selected, onGoAdd }: { selected: WorldObject | null;
           <fieldset>
             <legend className="text-xs font-bold uppercase tracking-wider text-faint">Height</legend>
             <div className="mt-2 flex gap-1">
-              <NudgeButton label="Lower" onClick={() => move([0, -STEP, 0])} disabled={y <= 0}>
+              <NudgeButton label="Lower" onClick={() => move([0, -STEP, 0])} disabled={y <= groundY + 0.01}>
                 <ChevronDown size={18} aria-hidden />
               </NudgeButton>
               <NudgeButton label="Raise" onClick={() => move([0, STEP, 0])}>
@@ -516,5 +520,58 @@ export function SaveDialog({ open, onClose }: { open: boolean; onClose: () => vo
         </p>
       </form>
     </Dialog>
+  );
+}
+
+/* ------------------------------------------------------------------ Ground */
+
+/** A little block icon: colored top over an earth side, like a ground tile. */
+function BlockSwatch({ top, side = "#9a6440" }: { top: string; side?: string }) {
+  return (
+    <span className="relative block h-9 w-10" aria-hidden>
+      <span className="absolute inset-x-0 bottom-0 h-4 rounded-b-md" style={{ background: side, boxShadow: "inset 0 -3px 0 rgba(0,0,0,0.18)" }} />
+      <span className="absolute inset-x-0 top-1 h-5 rounded-md" style={{ background: top, boxShadow: "inset 0 2px 0 rgba(255,255,255,0.25)" }} />
+    </span>
+  );
+}
+
+const TOOL_GLYPH: Partial<Record<GroundTool, string>> = { raise: "▲", lower: "▼", add: "+", remove: "−" };
+
+export function GroundPanel({ tool, onTool }: { tool: GroundTool; onTool: (t: GroundTool) => void }) {
+  const theme = useNexora((s) => THEMES[s.world.theme]);
+  const count = useNexora((s) => s.world.tiles.length);
+  return (
+    <div>
+      <p className="text-xs text-faint">Pick a tool, then tap tiles on your island. Water on the edge pours off as a waterfall. {count} tiles.</p>
+      <div role="radiogroup" aria-label="Ground tools" className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-3">
+        {GROUND_TOOLS.map((t) => {
+          const isGround = t.id in GROUNDS;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="radio"
+              aria-checked={tool === t.id}
+              aria-label={`${t.name}: ${t.hint}`}
+              onClick={() => onTool(t.id)}
+              className="choice flex flex-col items-center gap-1.5 p-2 text-center"
+            >
+              {isGround ? (
+                <BlockSwatch top={t.id === "grass" ? theme.grass : GROUNDS[t.id as keyof typeof GROUNDS].color} side={t.id === "water" ? "#2b7fa8" : theme.soil} />
+              ) : (
+                <span className="relative grid h-9 w-10 place-items-center">
+                  <BlockSwatch top={theme.grass} side={theme.soil} />
+                  <span className={`absolute -right-1 -top-1 grid size-5 place-items-center rounded-full text-[0.7rem] font-black ${t.id === "remove" ? "bg-rose-300 text-rose-950" : "bg-amber-300 text-amber-950"}`}>
+                    {TOOL_GLYPH[t.id]}
+                  </span>
+                </span>
+              )}
+              <span className="text-xs font-semibold leading-tight">{t.name}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-xs text-faint">Every change can be undone with Undo.</p>
+    </div>
   );
 }

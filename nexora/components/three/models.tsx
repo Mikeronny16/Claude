@@ -521,9 +521,281 @@ function Flag({ color, animate, shadows }: ModelProps) {
   );
 }
 
+function Palm({ color, animate, shadows, phase = 0 }: ModelProps) {
+  const crown = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (animate && crown.current) crown.current.rotation.z = Math.sin(clock.elapsedTime * 1.2 + phase) * 0.05;
+  });
+  const segs = [0, 1, 2, 3, 4];
+  return (
+    <group>
+      {segs.map((i) => (
+        <mesh key={i} position={[i * 0.05, 0.16 + i * 0.3, 0]} rotation={[0, 0, -0.08]} castShadow={shadows}>
+          <cylinderGeometry args={[0.085 - i * 0.008, 0.1 - i * 0.008, 0.3, 8]} />
+          <Mat color={i % 2 ? "#a8743f" : "#8b5a2b"} />
+        </mesh>
+      ))}
+      <group ref={crown} position={[0.24, 1.62, 0]}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <group key={i} rotation={[0, (i / 6) * Math.PI * 2, 0]}>
+            <mesh position={[0.42, -0.12, 0]} rotation={[0, 0, -0.45]} scale={[1, 0.18, 0.42]} castShadow={shadows}>
+              <sphereGeometry args={[0.5, 10, 6]} />
+              <Mat color={color} />
+            </mesh>
+          </group>
+        ))}
+        {[0, 1, 2].map((i) => (
+          <mesh key={i} position={[Math.cos(i * 2.1) * 0.12, -0.14, Math.sin(i * 2.1) * 0.12]}>
+            <sphereGeometry args={[0.08, 10, 8]} />
+            <Mat color="#6b4423" />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+function Pumpkin({ position, size, color }: { position: [number, number, number]; size: number; color: string }) {
+  return (
+    <group position={position} scale={size}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <mesh key={i} position={[Math.cos((i / 5) * Math.PI * 2) * 0.07, 0.17, Math.sin((i / 5) * Math.PI * 2) * 0.07]} scale={[0.7, 0.85, 0.7]}>
+          <sphereGeometry args={[0.2, 14, 10]} />
+          <Mat color={color} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.36, 0]} rotation={[0, 0, 0.2]}>
+        <cylinderGeometry args={[0.025, 0.035, 0.12, 6]} />
+        <Mat color="#4d7c2a" />
+      </mesh>
+      <mesh position={[0.08, 0.36, 0.03]} rotation={[0.3, 0, -0.6]} scale={[1, 0.25, 0.6]}>
+        <sphereGeometry args={[0.08, 8, 6]} />
+        <Mat color="#65a30d" />
+      </mesh>
+    </group>
+  );
+}
+
+function Pumpkins({ color }: ModelProps) {
+  return (
+    <group>
+      <Pumpkin position={[0, 0, 0]} size={1.15} color={color} />
+      <Pumpkin position={[0.42, 0, 0.18]} size={0.8} color={color} />
+      <Pumpkin position={[-0.3, 0, 0.36]} size={0.7} color={color} />
+      <mesh position={[0, 0.02, 0.1]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.7, 14]} />
+        <Mat color="#6b8f2a" />
+      </mesh>
+    </group>
+  );
+}
+
+const EYE = "#241b3a";
+
+function Eyes({ y, z, spread = 0.055, r = 0.026 }: { y: number; z: number; spread?: number; r?: number }) {
+  return (
+    <>
+      {[-spread, spread].map((x) => (
+        <mesh key={x} position={[x, y, z]} scale={[1, 1.35, 0.6]}>
+          <sphereGeometry args={[r, 10, 8]} />
+          <meshStandardMaterial color={EYE} roughness={0.3} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+function Fox({ color, animate, shadows, phase = 0 }: ModelProps) {
+  const tail = useRef<THREE.Group>(null);
+  const head = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime + phase;
+    if (!animate) return;
+    if (tail.current) tail.current.rotation.y = Math.sin(t * 5) * 0.35;
+    if (head.current) head.current.rotation.y = Math.sin(t * 0.7) * 0.25;
+  });
+  return (
+    <group>
+      <mesh position={[0, 0.24, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow={shadows}>
+        <capsuleGeometry args={[0.14, 0.24, 6, 12]} />
+        <Mat color={color} />
+      </mesh>
+      <mesh position={[0, 0.22, 0.16]} scale={[0.9, 1, 0.8]}>
+        <sphereGeometry args={[0.11, 12, 10]} />
+        <Mat color="#fff7ed" />
+      </mesh>
+      {[
+        [-0.08, 0.13],
+        [0.08, 0.13],
+        [-0.08, -0.13],
+        [0.08, -0.13],
+      ].map(([x, z], i) => (
+        <mesh key={i} position={[x, 0.07, z]}>
+          <cylinderGeometry args={[0.03, 0.035, 0.14, 6]} />
+          <Mat color="#3f2a1d" />
+        </mesh>
+      ))}
+      <group ref={head} position={[0, 0.42, 0.2]}>
+        <mesh castShadow={shadows}>
+          <sphereGeometry args={[0.14, 14, 12]} />
+          <Mat color={color} />
+        </mesh>
+        <mesh position={[0, -0.03, 0.13]} rotation={[Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.065, 0.14, 10]} />
+          <Mat color="#fff7ed" />
+        </mesh>
+        <mesh position={[0, -0.025, 0.205]}>
+          <sphereGeometry args={[0.022, 8, 6]} />
+          <Mat color={EYE} />
+        </mesh>
+        {[-0.08, 0.08].map((x) => (
+          <mesh key={x} position={[x, 0.14, -0.01]} rotation={[0, 0, x > 0 ? -0.25 : 0.25]}>
+            <coneGeometry args={[0.05, 0.13, 6]} />
+            <Mat color={color} />
+          </mesh>
+        ))}
+        <Eyes y={0.03} z={0.12} />
+      </group>
+      <group ref={tail} position={[0, 0.3, -0.22]}>
+        <mesh position={[0, 0.04, -0.14]} rotation={[-1.1, 0, 0]} scale={[1, 1.6, 1]} castShadow={shadows}>
+          <sphereGeometry args={[0.1, 12, 10]} />
+          <Mat color={color} />
+        </mesh>
+        <mesh position={[0, 0.13, -0.29]}>
+          <sphereGeometry args={[0.065, 10, 8]} />
+          <Mat color="#fff7ed" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function Bunny({ color, animate, shadows, phase = 0 }: ModelProps) {
+  const body = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!body.current) return;
+    const t = clock.elapsedTime * 3.2 + phase;
+    body.current.position.y = animate ? Math.pow(Math.max(0, Math.sin(t)), 2) * 0.14 : 0;
+  });
+  return (
+    <group ref={body}>
+      <mesh position={[0, 0.17, 0]} scale={[1, 0.9, 1.1]} castShadow={shadows}>
+        <sphereGeometry args={[0.17, 16, 12]} />
+        <Mat color={color} />
+      </mesh>
+      <mesh position={[0, 0.36, 0.1]} castShadow={shadows}>
+        <sphereGeometry args={[0.13, 16, 12]} />
+        <Mat color={color} />
+      </mesh>
+      {[-0.05, 0.05].map((x) => (
+        <mesh key={x} position={[x, 0.55, 0.06]} rotation={[-0.15, 0, x > 0 ? -0.15 : 0.15]}>
+          <capsuleGeometry args={[0.035, 0.18, 4, 8]} />
+          <Mat color={color} />
+        </mesh>
+      ))}
+      <Eyes y={0.38} z={0.215} spread={0.05} r={0.022} />
+      <mesh position={[0, 0.34, 0.23]}>
+        <sphereGeometry args={[0.018, 8, 6]} />
+        <Mat color="#f472b6" />
+      </mesh>
+      <mesh position={[0, 0.17, -0.19]}>
+        <sphereGeometry args={[0.06, 10, 8]} />
+        <Mat color="#ffffff" />
+      </mesh>
+    </group>
+  );
+}
+
+function Slime({ color, animate, phase = 0 }: ModelProps) {
+  const body = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!body.current) return;
+    const s = animate ? Math.sin(clock.elapsedTime * 3 + phase) * 0.07 : 0;
+    body.current.scale.set(1 - s * 0.5, 1 + s, 1 - s * 0.5);
+  });
+  return (
+    <group ref={body}>
+      <mesh position={[0, 0.17, 0]} scale={[1, 0.72, 1]}>
+        <sphereGeometry args={[0.26, 20, 14]} />
+        <meshStandardMaterial color={color} roughness={0.15} emissive={color} emissiveIntensity={0.15} transparent opacity={0.92} />
+      </mesh>
+      <mesh position={[-0.09, 0.27, 0.12]}>
+        <sphereGeometry args={[0.04, 8, 6]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <Eyes y={0.2} z={0.22} spread={0.07} r={0.03} />
+      <mesh position={[0, 0.13, 0.235]} rotation={[0, 0, Math.PI]}>
+        <torusGeometry args={[0.03, 0.01, 6, 10, Math.PI]} />
+        <meshStandardMaterial color={EYE} />
+      </mesh>
+    </group>
+  );
+}
+
+function Owl({ color, animate, shadows, phase = 0 }: ModelProps) {
+  const head = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (animate && head.current) head.current.rotation.y = Math.sin(clock.elapsedTime * 0.6 + phase) * 0.7;
+  });
+  return (
+    <group>
+      <mesh position={[0, 0.26, 0]} castShadow={shadows}>
+        <capsuleGeometry args={[0.16, 0.14, 6, 12]} />
+        <Mat color={color} />
+      </mesh>
+      <mesh position={[0, 0.24, 0.1]} scale={[0.8, 1, 0.5]}>
+        <sphereGeometry args={[0.13, 12, 10]} />
+        <Mat color="#f3e3c3" />
+      </mesh>
+      {[-0.17, 0.17].map((x) => (
+        <mesh key={x} position={[x, 0.27, -0.01]} scale={[0.35, 1, 0.8]}>
+          <sphereGeometry args={[0.15, 10, 8]} />
+          <Mat color="#7a5a3a" />
+        </mesh>
+      ))}
+      {[-0.06, 0.06].map((x) => (
+        <mesh key={x} position={[x, 0.04, 0.06]}>
+          <sphereGeometry args={[0.035, 8, 6]} />
+          <Mat color="#f59e0b" />
+        </mesh>
+      ))}
+      <group ref={head} position={[0, 0.54, 0]}>
+        <mesh castShadow={shadows}>
+          <sphereGeometry args={[0.16, 16, 12]} />
+          <Mat color={color} />
+        </mesh>
+        {[-0.065, 0.065].map((x) => (
+          <group key={x} position={[x, 0.01, 0.13]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.058, 0.058, 0.02, 14]} />
+              <meshStandardMaterial color="#fffaf0" />
+            </mesh>
+            <mesh position={[0, 0, 0.012]}>
+              <sphereGeometry args={[0.03, 10, 8]} />
+              <meshStandardMaterial color={EYE} />
+            </mesh>
+          </group>
+        ))}
+        <mesh position={[0, -0.05, 0.16]} rotation={[Math.PI / 2 + 0.4, 0, 0]}>
+          <coneGeometry args={[0.025, 0.06, 6]} />
+          <Mat color="#f59e0b" />
+        </mesh>
+        {[-0.1, 0.1].map((x) => (
+          <mesh key={x} position={[x, 0.15, 0]} rotation={[0, 0, x > 0 ? -0.4 : 0.4]}>
+            <coneGeometry args={[0.035, 0.1, 5]} />
+            <Mat color={color} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 const MODELS: Record<AssetKind, (p: ModelProps) => React.JSX.Element> = {
   pine: Pine,
   roundTree: RoundTree,
+  palm: Palm,
+  pumpkins: Pumpkins,
   mushroom: Mushroom,
   flowers: Flowers,
   boulder: Boulder,
@@ -539,6 +811,10 @@ const MODELS: Record<AssetKind, (p: ModelProps) => React.JSX.Element> = {
   lantern: Lantern,
   campfire: Campfire,
   flag: Flag,
+  fox: Fox,
+  bunny: Bunny,
+  slime: Slime,
+  owl: Owl,
 };
 
 export function AssetModel({ kind, ...props }: ModelProps & { kind: AssetKind }) {

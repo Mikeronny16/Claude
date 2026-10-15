@@ -4,11 +4,12 @@ import { ASSET_MAP, MAX_CREATIONS, MAX_OBJECTS, MAX_SAVES } from "./catalog";
 import { levelFromXp } from "./levels";
 import { uid } from "./names";
 import { dayKey, questById, questStatus, type QuestContext } from "./quests";
+import { applyGroundTool, clampToLand, generateTiles, hashSeed } from "./terrain";
 import type {
-  AgeBand, AiUsage, AssetKind, AvatarId, Creation, CreationSource, CreationSpec, IslandTheme, Profile,
-  Progress, ReactionId, SaveSlot, Settings, Vec3, World, WorldObject,
+  AgeBand, AiUsage, AssetKind, AvatarId, Creation, CreationSource, CreationSpec, GroundTool, IslandTheme, Profile,
+  Progress, ReactionId, SaveSlot, Settings, Tile, Vec3, World, WorldObject,
 } from "./types";
-import { clampPosition, clampScale, sanitizeCreation, sanitizeWorld, snap, wrapAngle } from "./world";
+import { clampScale, sanitizeCreation, sanitizeWorld, snap, wrapAngle } from "./world";
 
 const HISTORY_LIMIT = 80;
 
@@ -23,6 +24,7 @@ const emptyProgress = (): Progress => ({
   xp: 0,
   claimed: [],
   placedTotal: 0,
+  tilesPainted: 0,
   aiCreations: 0,
   saves: 0,
   explored: [],
@@ -30,12 +32,19 @@ const emptyProgress = (): Progress => ({
   reports: [],
 });
 
-const emptyWorld = (name = "My Island", theme: IslandTheme = "twilight"): World => ({
+const emptyWorld = (name = "My Island", theme: IslandTheme = "twilight", seed = 1): World => ({
   name,
   theme,
+  tiles: generateTiles(seed),
   objects: [],
   updatedAt: Date.now(),
 });
+
+/** What undo/redo restores: the objects and the ground they stand on. */
+interface Snapshot {
+  objects: WorldObject[];
+  tiles: Tile[];
+}
 
 export interface Toast {
   id: string;
@@ -66,8 +75,8 @@ interface PersistedState {
 
 export interface NexoraState extends PersistedState {
   hydrated: boolean;
-  past: WorldObject[][];
-  future: WorldObject[][];
+  past: Snapshot[];
+  future: Snapshot[];
   selectedId: string | null;
   toasts: Toast[];
   levelUp: number | null;
@@ -84,6 +93,8 @@ export interface NexoraState extends PersistedState {
   duplicateObject: (id: string) => string | null;
   removeObject: (id: string) => void;
   clearWorld: () => void;
+  /** Applies a ground tool to the tile at cell (x, z). Returns true if the island changed. */
+  paintTile: (x: number, z: number, tool: GroundTool) => boolean;
   undo: () => void;
   redo: () => void;
 
@@ -108,26 +119,28 @@ export interface NexoraState extends PersistedState {
 }
 
 export function questContext(s: Pick<NexoraState, "world" | "progress" | "creations">): QuestContext {
-  return { objects: s.world.objects, progress: s.progress, creations: s.creations };
+  return { objects: s.world.objects, tiles: s.world.tiles, progress: s.progress, creations: s.creations };
 }
 
 export const useNexora = create<NexoraState>()(
   persist(
     (set, get) => {
-      /** Apply a change to the object list, recording it for undo. */
-      const commit = (next: WorldObject[], extra: Partial<NexoraState> = {}) => {
+      /** Apply a change to objects and/or tiles, recording it for undo. */
+      const commit = (next: Partial<Snapshot>, extra: Partial<NexoraState> = {}) => {
         const { world, past } = get();
         set({
-          world: { ...world, objects: next, updatedAt: Date.now() },
-          past: [...past, world.objects].slice(-HISTORY_LIMIT),
+          world: { ...world, objects: next.objects ?? world.objects, tiles: next.tiles ?? world.tiles, updatedAt: Date.now() },
+          past: [...past, { objects: world.objects, tiles: world.tiles }].slice(-HISTORY_LIMIT),
           future: [],
           ...extra,
         });
       };
 
-      const prepPosition = (p: Vec3): Vec3 => {
-        const c = clampPosition(p);
-        return get().settings.snapToGrid ? clampPosition([snap(c[0]), snap(c[1], 0.25), snap(c[2])]) : c;
+      /** Keep positions on land (and on the grid when snapping is on). */
+      const prepPosition = (p: Vec3, opts: { avoidWater?: boolean } = {}): Vec3 => {
+        const tiles = get().world.tiles;
+        const c = clampToLand(p, tiles, opts);
+        return get().settings.snapToGrid ? clampToLand([snap(c[0]), snap(c[1], 0.25), snap(c[2])], tiles, opts) : c;
       };
 
       const toast = (t: Omit<Toast, "id">) => {
@@ -153,7 +166,7 @@ export const useNexora = create<NexoraState>()(
         completeOnboarding: ({ name, avatar, ageBand, theme, worldName }) => {
           set({
             profile: { name: name.trim(), avatar, ageBand, createdAt: Date.now() },
-            world: emptyWorld(worldName.trim(), theme),
+            world: emptyWorld(worldName.trim(), theme, hashSeed(`${name}:${worldName}`)),
             past: [],
             future: [],
             selectedId: null,
@@ -190,7 +203,7 @@ export const useNexora = create<NexoraState>()(
           const n = world.objects.length;
           const angle = n * 2.399;
           const radius = Math.min(4, 0.8 + Math.sqrt(n) * 0.9);
-          const position = prepPosition(opts.position ?? [Math.cos(angle) * radius, 0, Math.sin(angle) * radius]);
+          const position = opts.position ? prepPosition(opts.position) : prepPosition([Math.cos(angle) * radius, 0, Math.sin(angle) * radius], { avoidWater: true });
           const obj: WorldObject = {
             id: uid("o"),
             kind,
@@ -200,7 +213,7 @@ export const useNexora = create<NexoraState>()(
             scale: 1,
             color: opts.color ?? (kind === "custom" ? "#ffffff" : ASSET_MAP[kind].defaultColor),
           };
-          commit([...world.objects, obj], {
+          commit({ objects: [...world.objects, obj] }, {
             selectedId: obj.id,
             progress: { ...progress, placedTotal: progress.placedTotal + 1 },
           });
@@ -222,7 +235,7 @@ export const useNexora = create<NexoraState>()(
           if (JSON.stringify(next) === JSON.stringify(cur)) return;
           const objects = world.objects.slice();
           objects[idx] = next;
-          commit(objects);
+          commit({ objects });
         },
 
         duplicateObject: (id) => {
@@ -238,19 +251,31 @@ export const useNexora = create<NexoraState>()(
             id: uid("o"),
             position: prepPosition([src.position[0] + 0.9, src.position[1], src.position[2] + 0.9]),
           };
-          commit([...world.objects, copy], { selectedId: copy.id, progress: { ...progress, placedTotal: progress.placedTotal + 1 } });
+          commit({ objects: [...world.objects, copy] }, { selectedId: copy.id, progress: { ...progress, placedTotal: progress.placedTotal + 1 } });
           return copy.id;
         },
 
         removeObject: (id) => {
           const { world, selectedId } = get();
           if (!world.objects.some((o) => o.id === id)) return;
-          commit(world.objects.filter((o) => o.id !== id), { selectedId: selectedId === id ? null : selectedId });
+          commit({ objects: world.objects.filter((o) => o.id !== id) }, { selectedId: selectedId === id ? null : selectedId });
         },
 
         clearWorld: () => {
           if (get().world.objects.length === 0) return;
-          commit([], { selectedId: null });
+          commit({ objects: [] }, { selectedId: null });
+        },
+
+        paintTile: (x, z, tool) => {
+          const { world, progress } = get();
+          const edit = applyGroundTool(world.tiles, world.objects, x, z, tool);
+          if (!edit) return false;
+          if (!edit.ok) {
+            toast({ tone: "warn", title: "Can't do that here", body: edit.reason });
+            return false;
+          }
+          commit({ tiles: edit.tiles, objects: edit.objects }, { progress: { ...progress, tilesPainted: progress.tilesPainted + 1 } });
+          return true;
         },
 
         undo: () => {
@@ -258,10 +283,10 @@ export const useNexora = create<NexoraState>()(
           if (past.length === 0) return;
           const prev = past[past.length - 1];
           set({
-            world: { ...world, objects: prev, updatedAt: Date.now() },
+            world: { ...world, objects: prev.objects, tiles: prev.tiles, updatedAt: Date.now() },
             past: past.slice(0, -1),
-            future: [world.objects, ...future].slice(0, HISTORY_LIMIT),
-            selectedId: prev.some((o) => o.id === selectedId) ? selectedId : null,
+            future: [{ objects: world.objects, tiles: world.tiles }, ...future].slice(0, HISTORY_LIMIT),
+            selectedId: prev.objects.some((o) => o.id === selectedId) ? selectedId : null,
           });
         },
 
@@ -270,10 +295,10 @@ export const useNexora = create<NexoraState>()(
           if (future.length === 0) return;
           const next = future[0];
           set({
-            world: { ...world, objects: next, updatedAt: Date.now() },
-            past: [...past, world.objects].slice(-HISTORY_LIMIT),
+            world: { ...world, objects: next.objects, tiles: next.tiles, updatedAt: Date.now() },
+            past: [...past, { objects: world.objects, tiles: world.tiles }].slice(-HISTORY_LIMIT),
             future: future.slice(1),
-            selectedId: next.some((o) => o.id === selectedId) ? selectedId : null,
+            selectedId: next.objects.some((o) => o.id === selectedId) ? selectedId : null,
           });
         },
 
@@ -297,8 +322,8 @@ export const useNexora = create<NexoraState>()(
           const slot = get().saves.find((s) => s.id === id);
           if (!slot) return;
           const restored = structuredClone(slot.world);
-          // Restoring is undoable: the current objects go onto the history stack.
-          commit(restored.objects, { selectedId: null });
+          // Restoring is undoable: the current island goes onto the history stack.
+          commit({ objects: restored.objects, tiles: restored.tiles }, { selectedId: null });
           set({ world: { ...get().world, name: restored.name, theme: restored.theme } });
         },
 
@@ -309,7 +334,8 @@ export const useNexora = create<NexoraState>()(
           const known = new Set(creations.map((c) => c.id));
           const merged = [...extraCreations.filter((c) => !known.has(c.id)), ...creations].slice(0, MAX_CREATIONS);
           set({ creations: merged });
-          commit(structuredClone(world.objects), { selectedId: null });
+          const copy = structuredClone(world);
+          commit({ objects: copy.objects, tiles: copy.tiles }, { selectedId: null });
           set({ world: { ...get().world, name: world.name, theme: world.theme } });
         },
 
@@ -326,7 +352,7 @@ export const useNexora = create<NexoraState>()(
         deleteCreation: (id) => {
           const { world, creations } = get();
           if (world.objects.some((o) => o.creationId === id)) {
-            commit(world.objects.filter((o) => o.creationId !== id), { selectedId: null });
+            commit({ objects: world.objects.filter((o) => o.creationId !== id) }, { selectedId: null });
           }
           set({ creations: creations.filter((c) => c.id !== id) });
         },

@@ -1,13 +1,17 @@
-import { ASSET_MAP, ISLAND_RADIUS } from "./catalog";
-import type { AssetCategory, Creation, Progress, WorldObject } from "./types";
+import { ASSET_MAP, MAX_LEVEL } from "./catalog";
+import { cellOf, tileKey, tileMap, tileTop } from "./terrain";
+import type { AssetCategory, Creation, Progress, Tile, WorldObject } from "./types";
 
 export interface QuestContext {
   objects: WorldObject[];
+  tiles: Tile[];
   progress: Progress;
   creations: Creation[];
 }
 
-export type QuestIcon = "sparkles" | "trees" | "home" | "lighthouse" | "palette" | "flame" | "wand" | "box" | "save" | "compass" | "castle" | "cloud";
+export type QuestIcon =
+  | "sparkles" | "trees" | "home" | "lighthouse" | "palette" | "flame" | "wand" | "box" | "save" | "compass" | "castle" | "cloud"
+  | "shovel" | "mountain" | "paw";
 
 export interface QuestDef {
   id: string;
@@ -24,6 +28,20 @@ export interface QuestDef {
 const categoryOf = (o: WorldObject): AssetCategory | "custom" => (o.kind === "custom" ? "custom" : ASSET_MAP[o.kind].category);
 const countCategory = (ctx: QuestContext, c: AssetCategory) => ctx.objects.filter((o) => categoryOf(o) === c).length;
 const distXZ = (a: WorldObject, b: WorldObject) => Math.hypot(a.position[0] - b.position[0], a.position[2] - b.position[2]);
+
+/** True when the object's tile touches open sky (including diagonally). */
+function nearEdge(o: WorldObject, tiles: Tile[]): boolean {
+  const map = tileMap(tiles);
+  const x = cellOf(o.position[0]);
+  const z = cellOf(o.position[2]);
+  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) if (!map.has(tileKey(x + dx, z + dz))) return true;
+  return false;
+}
+
+function heightAboveGround(o: WorldObject, tiles: Tile[]): number {
+  const t = tileMap(tiles).get(tileKey(cellOf(o.position[0]), cellOf(o.position[2])));
+  return o.position[1] - (t ? tileTop(t) : 0);
+}
 
 export const QUESTS: QuestDef[] = [
   {
@@ -56,8 +74,7 @@ export const QUESTS: QuestDef[] = [
     title: "Lightkeeper",
     description: "Place a lighthouse near the edge of your island.",
     xp: 150, target: 1, icon: "lighthouse", href: "/builder",
-    measure: (c) =>
-      c.objects.some((o) => o.kind === "lighthouse" && Math.hypot(o.position[0], o.position[2]) >= ISLAND_RADIUS * 0.6) ? 1 : 0,
+    measure: (c) => (c.objects.some((o) => o.kind === "lighthouse" && nearEdge(o, c.tiles)) ? 1 : 0),
   },
   {
     id: "palette-painter",
@@ -106,7 +123,28 @@ export const QUESTS: QuestDef[] = [
     title: "Sky Architect",
     description: "Make something float: raise an object high above the ground.",
     xp: 100, target: 1, icon: "cloud", href: "/builder",
-    measure: (c) => (c.objects.some((o) => o.position[1] >= 1.5) ? 1 : 0),
+    measure: (c) => (c.objects.some((o) => heightAboveGround(o, c.tiles) >= 1.5) ? 1 : 0),
+  },
+  {
+    id: "landscaper",
+    title: "Landscaper",
+    description: "Shape the land: paint, raise or lower 10 ground tiles in the Ground tab.",
+    xp: 120, target: 10, icon: "shovel", href: "/builder",
+    measure: (c) => c.progress.tilesPainted ?? 0,
+  },
+  {
+    id: "mountain-maker",
+    title: "Mountain Maker",
+    description: "Raise a tile all the way to the highest level.",
+    xp: 100, target: 1, icon: "mountain", href: "/builder",
+    measure: (c) => (c.tiles.some((t) => t.h >= MAX_LEVEL) ? 1 : 0),
+  },
+  {
+    id: "new-friends",
+    title: "New Friends",
+    description: "Invite 2 creatures to live on your island.",
+    xp: 100, target: 2, icon: "paw", href: "/builder",
+    measure: (c) => countCategory(c, "creatures"),
   },
   {
     id: "master-builder",

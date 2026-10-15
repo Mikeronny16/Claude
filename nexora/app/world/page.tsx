@@ -8,6 +8,7 @@ import { QuestIcon } from "@/components/ui/QuestIcon";
 import { WorldView } from "@/components/three/SceneLoader";
 import { THEMES } from "@/lib/catalog";
 import { useLevel, useReducedMotion } from "@/lib/hooks";
+import { AVATAR_MAP } from "@/lib/names";
 import { claimableCount, dailyQuest, questStatus } from "@/lib/quests";
 import { validateName } from "@/lib/safety";
 import { questContext, useNexora } from "@/lib/store";
@@ -76,6 +77,7 @@ export default function MyWorld() {
   const reduced = useReducedMotion();
   const lvl = useLevel();
   const [renaming, setRenaming] = useState(false);
+  const avatar = profile ? AVATAR_MAP[profile.avatar] : null;
 
   const ctx = useMemo(() => questContext({ world, progress, creations }), [world, progress, creations]);
   const daily = useMemo(() => questStatus(dailyQuest(), ctx), [ctx]);
@@ -114,6 +116,7 @@ export default function MyWorld() {
             autoRotate
             reducedMotion={reduced}
             quality={quality}
+            explorer={avatar ? { from: avatar.from, to: avatar.to } : null}
           />
           {world.objects.length === 0 && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-4">

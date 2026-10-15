@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { WorldView } from "@/components/three/SceneLoader";
 import { useReducedMotion } from "@/lib/hooks";
+import { AVATAR_MAP } from "@/lib/names";
 import { SHOWCASE_MAP } from "@/lib/showcase";
 import { useNexora } from "@/lib/store";
 
@@ -12,13 +13,14 @@ export function HeroScene() {
   const quality = useNexora((s) => s.settings.quality);
   return (
     <WorldView
-      label="A floating island with a lighthouse, cottages and glowing lanterns, slowly turning"
+      label="A floating block island with a lighthouse, cottages, a waterfall and a little explorer, slowly turning"
       world={SHOWCASE_MAP["lantern-harbor"].world}
       creations={[]}
       mode="view"
       autoRotate
       reducedMotion={reduced}
       quality={quality}
+      explorer={{ from: AVATAR_MAP.nova.from, to: AVATAR_MAP.nova.to }}
     />
   );
 }

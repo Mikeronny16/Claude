@@ -1,6 +1,6 @@
 # NEXORA — build your floating world
 
-A teen-focused (ages 12–15) 3D fantasy world-builder prototype. Players shape a floating sky island in real 3D, dream up objects with an AI Creation Studio, and complete creative quests for XP.
+A teen-focused (ages 12–15) 3D fantasy world-builder prototype. Players shape a floating block-tile sky island in real 3D (grass, sand, stone and water tiles, hills, waterfalls), live there with a little explorer character and creatures, dream up objects with an AI Creation Studio, and complete creative quests for XP.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · React Three Fiber / drei / three.js · Zustand · Tailwind CSS 4 · Anthropic SDK (optional) · Vitest
 
@@ -37,10 +37,10 @@ Live mode also enables Anthropic's server-side refusal fallback (`fallbacks: "de
 |---|---|
 | `/` | Cinematic landing with a live 3D showcase island |
 | `/onboarding` | Welcome → age range (under-12 stops kindly) → made-up explorer name + sigil → island theme + name → safety promise |
-| `/world` | My World hub: auto-rotating 3D island, level/XP, today's challenge, island mood (theme) switcher, rename |
-| `/builder` | World Builder: tap-to-place on the 3D island (or Auto-place), select by tap or list, 3D move/rotate/scale gizmo, panel nudge controls, colors, duplicate/delete, undo/redo, snap-to-grid, snapshots (save/restore/delete), JSON backup download/load, keyboard shortcuts |
+| `/world` | My World hub: auto-rotating 3D island with your wandering explorer, level/XP, today's challenge, island mood (theme) switcher, rename |
+| `/builder` | World Builder. **Add:** 23 objects incl. creatures (fox, bunny, slime, owl), tap-to-place or Auto-place. **Ground:** paint grass/dirt/sand/stone/water tiles, raise/lower terraces, add land (glowing ghost tiles) or remove it; water on the edge becomes a waterfall. **Edit:** 3D move/rotate/scale gizmo, nudge controls, colors, duplicate/delete. Undo/redo covers objects *and* ground, snap-to-grid, snapshots, JSON backup, keyboard shortcuts |
 | `/create` | AI Creation Studio: prompt + inspiration chips, safety checks, 3D preview, save / place on island / retry / discard, creations library |
-| `/quests` | 12 creative quests + a rotating daily challenge, claim XP, level-ups with item unlocks (Windmill Lv2, Portal Lv3, Rune Stone Lv4) |
+| `/quests` | 15 creative quests (incl. Landscaper, Mountain Maker, New Friends) + a rotating daily challenge, claim XP, level-ups with item unlocks (Windmill and Owl Lv2, Portal Lv3, Rune Stone Lv4) |
 | `/explore` | Team-made showcase islands in a 3D viewer, preset reactions, remix into your island (undoable, optional backup snapshot), report flow |
 | `/profile` | Explorer card, stats, badges, settings (reduce motion, graphics quality, break reminders, snap to grid) |
 | `/privacy` | Plain-language privacy & safety, guardian info, download all data, delete everything |
@@ -59,11 +59,12 @@ Builder shortcuts: `W` move · `E` rotate · `R` scale · arrows nudge (Shift = 
 
 ```
 app/                    routes (all client pages except landing shell) + api/ai/{status,create}
-components/three/       WorldScene (Canvas, gizmo, placement), Island (procedural terrain, sky), models (17 assets + AI parts renderer), SceneLoader (lazy, WebGL fallback)
+components/three/       WorldScene (Canvas, gizmo, placement, ground cursor), Island (instanced block tiles, waterfalls, clouds, islets, sky), Explorer (wandering character), models (23 assets + AI parts renderer), SceneLoader (lazy, WebGL fallback)
 components/builder/     Add / Edit / Objects / Saves panels
 components/ui/          Dialog (native <dialog>), Toasts, LevelUp, QuestIcon
 lib/store.ts            Zustand store: world, history (undo/redo), snapshots, creations, progress, settings; persisted + sanitized on load
 lib/ai/                 spec schema + sanitizer, offline demo generator, server-only Claude call
+lib/terrain.ts          tile islands: generation, ground tools, keeping objects on land, waterfall edges
 lib/quests.ts, levels.ts, safety.ts, world.ts, showcase.ts, catalog.ts
 tests/                  Vitest unit tests
 ```
@@ -71,7 +72,7 @@ tests/                  Vitest unit tests
 ## Status — honest
 
 **Working and verified** (unit tests + Playwright walkthroughs at 390 px and 1440 px on a production build, zero console errors):
-onboarding incl. under-12 stop and name filtering · route gating · tap-to-place on the 3D island · gizmo translate/rotate/scale (uniform) committing to the store · undo/redo (buttons + keys) · panel edits · duplicate/delete · object list · snapshots save/restore (restore is undoable) · reload persistence · quest claiming + level-up dialog · demo-mode AI creation + placement · unsafe/PII prompt blocking · explore visit/react/report · settings · data download · delete everything · no horizontal overflow at 320/390 px.
+onboarding incl. under-12 stop and name filtering · route gating · tap-to-place on the 3D island · ground tools (paint, raise, water, add land via ghost tiles, undo) · creatures and new props resting on dry tiles · gizmo translate/rotate/scale (uniform) committing to the store · undo/redo (buttons + keys) · panel edits · duplicate/delete · object list · snapshots save/restore (restore is undoable) · reload persistence · quest claiming + level-up dialog · demo-mode AI creation + placement · unsafe/PII prompt blocking · explore visit/react/report · settings · data download · delete everything · no horizontal overflow at 320/390 px.
 
 **Not done / limitations**
 - Live Claude mode is implemented and type-checked but **not exercised against the real API** here (no key in this environment).

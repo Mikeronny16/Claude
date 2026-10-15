@@ -2,16 +2,19 @@
 
 import { Crosshair, Grid3x3, Move3d, Redo2, Rotate3d, Save, Scale3d, Undo2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { AddPanel, Inspector, ObjectList, SaveDialog, SavesPanel, objectLabel, type PlacementIntent } from "@/components/builder/panels";
+import { AddPanel, GroundPanel, Inspector, ObjectList, SaveDialog, SavesPanel, objectLabel, type PlacementIntent } from "@/components/builder/panels";
 import { WorldView } from "@/components/three/SceneLoader";
 import type { TransformMode } from "@/components/three/WorldScene";
 import { useReducedMotion } from "@/lib/hooks";
 import { useNexora } from "@/lib/store";
-import type { Vec3 } from "@/lib/types";
+import { GROUND_TOOLS } from "@/lib/catalog";
+import { AVATAR_MAP } from "@/lib/names";
+import type { GroundTool, Vec3 } from "@/lib/types";
 
-type Tab = "add" | "edit" | "objects" | "saves";
+type Tab = "add" | "ground" | "edit" | "objects" | "saves";
 const TABS: { id: Tab; label: string }[] = [
   { id: "add", label: "Add" },
+  { id: "ground", label: "Ground" },
   { id: "edit", label: "Edit" },
   { id: "objects", label: "Objects" },
   { id: "saves", label: "Saves" },
@@ -32,13 +35,25 @@ export default function BuilderPage() {
   const canUndo = useNexora((s) => s.past.length > 0);
   const canRedo = useNexora((s) => s.future.length > 0);
   const settings = useNexora((s) => s.settings);
-  const { select, undo, redo, addObject, updateObject, removeObject, duplicateObject, updateSettings } = useNexora.getState();
+  const profile = useNexora((s) => s.profile);
+  const { select, undo, redo, addObject, updateObject, removeObject, duplicateObject, updateSettings, paintTile } = useNexora.getState();
   const reduced = useReducedMotion();
 
   const [tab, setTab] = useState<Tab>("add");
   const [mode, setMode] = useState<TransformMode>("translate");
   const [placing, setPlacing] = useState<PlacementIntent | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [groundTool, setGroundTool] = useState<GroundTool>("grass");
+  const grounding = tab === "ground";
+  const avatar = profile ? AVATAR_MAP[profile.avatar] : null;
+
+  const openTab = (t: Tab) => {
+    setTab(t);
+    if (t === "ground") {
+      setPlacing(null);
+      select(null);
+    }
+  };
 
   const selected = world.objects.find((o) => o.id === selectedId) ?? null;
 
@@ -119,6 +134,9 @@ export default function BuilderPage() {
           reducedMotion={reduced}
           quality={settings.quality}
           snap={settings.snapToGrid}
+          groundTool={grounding ? groundTool : null}
+          onGroundTool={(x, z) => paintTile(x, z, groundTool)}
+          explorer={avatar ? { from: avatar.from, to: avatar.to } : null}
           fallbackDetail="use the Add, Edit and Objects tabs to build."
         />
 
@@ -157,6 +175,12 @@ export default function BuilderPage() {
 
         {/* Placement banner */}
         <div aria-live="polite" className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3">
+          {grounding && (
+            <div className="panel panel-strong animate-rise pointer-events-auto flex max-w-full items-center gap-2 border-cyan-300/50 p-2 px-3">
+              <span className="size-2 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee]" aria-hidden />
+              <p className="min-w-0 truncate text-sm font-semibold">{GROUND_TOOLS.find((t) => t.id === groundTool)?.hint} — tap tiles on your island</p>
+            </div>
+          )}
           {placing && (
             <div className="panel panel-strong animate-rise pointer-events-auto flex max-w-full items-center gap-2 border-amber-300/50 p-2 pl-3 shadow-[0_0_30px_rgba(251,191,36,0.25)]">
               <Crosshair size={18} className="shrink-0 text-amber-200" aria-hidden />
@@ -182,7 +206,7 @@ export default function BuilderPage() {
               <span className="font-semibold">{objectLabel(selected, creations)}</span>
             </span>
             {tab !== "edit" && (
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setTab("edit")}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => openTab("edit")}>
                 Edit
               </button>
             )}
@@ -194,7 +218,7 @@ export default function BuilderPage() {
             </button>
           </div>
         )}
-        <div role="tablist" aria-label="Builder sections" className="grid grid-cols-4 gap-1 p-2">
+        <div role="tablist" aria-label="Builder sections" className="grid grid-cols-5 gap-1 p-2">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -203,8 +227,8 @@ export default function BuilderPage() {
               role="tab"
               aria-selected={tab === t.id}
               aria-controls={`panel-${t.id}`}
-              onClick={() => setTab(t.id)}
-              className={`min-h-10 rounded-xl text-sm font-bold transition ${tab === t.id ? "bg-violet-400/25 text-white shadow-[inset_0_0_0_1px_rgba(167,139,250,0.45)]" : "text-faint hover:text-white"}`}
+              onClick={() => openTab(t.id)}
+              className={`min-h-10 rounded-xl text-[0.82rem] font-bold transition ${tab === t.id ? "bg-violet-400/25 text-white shadow-[inset_0_0_0_1px_rgba(167,139,250,0.45)]" : "text-faint hover:text-white"}`}
             >
               {t.label}
             </button>
@@ -212,6 +236,7 @@ export default function BuilderPage() {
         </div>
         <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
           {tab === "add" && <AddPanel placing={placing} onArm={setPlacing} />}
+          {tab === "ground" && <GroundPanel tool={groundTool} onTool={setGroundTool} />}
           {tab === "edit" && <Inspector selected={selected} onGoAdd={() => setTab("add")} />}
           {tab === "objects" && (
             <ObjectList
