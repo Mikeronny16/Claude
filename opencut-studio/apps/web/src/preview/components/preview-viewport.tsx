@@ -164,6 +164,10 @@ function clampViewportCenter({
 	};
 }
 
+// Floating Cinema: a fitted frame keeps this margin so its bezel and the
+// stage around it stay visible.
+const FIT_MARGIN_PX = 16;
+
 function getFitScale({
 	canvasHeight,
 	canvasWidth,
@@ -184,7 +188,9 @@ function getFitScale({
 		return 1;
 	}
 
-	return Math.min(viewportWidth / canvasWidth, viewportHeight / canvasHeight);
+	const width = Math.max(viewportWidth - 2 * FIT_MARGIN_PX, viewportWidth / 2);
+	const height = Math.max(viewportHeight - 2 * FIT_MARGIN_PX, viewportHeight / 2);
+	return Math.min(width / canvasWidth, height / canvasHeight);
 }
 
 function getClampedZoom({ zoom }: { zoom: number }): number {

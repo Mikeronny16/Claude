@@ -311,8 +311,19 @@ function PreviewCanvas({
 						<ContextMenuTrigger asChild>
 							<div
 								ref={viewportRef}
-								className="relative flex size-full min-h-0 min-w-0 items-center justify-center overflow-hidden"
+								className="orbit-rings relative flex size-full min-h-0 min-w-0 items-center justify-center overflow-hidden rounded-md dark:bg-[var(--ti-obsidian)]"
 							>
+							{/* Floating Cinema bezel: sits behind the canvas, so it never shifts it or its overlays. */}
+							<div
+								aria-hidden
+								className="pointer-events-none absolute rounded-[10px] border border-[var(--ti-border)] bg-[var(--ti-graphite)] shadow-[var(--ti-rim),0_30px_60px_-24px_rgba(0,0,0,0.9),0_0_0_1px_rgba(0,0,0,0.4)]"
+								style={{
+									left: viewport.sceneLeft - 6,
+									top: viewport.sceneTop - 6,
+									width: viewport.sceneWidth + 12,
+									height: viewport.sceneHeight + 12,
+								}}
+							/>
 							<div
 								ref={canvasMountRef}
 								className="absolute block border"
