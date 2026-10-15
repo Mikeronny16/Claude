@@ -4,8 +4,9 @@
 //   bun run screenshots -- <output-dir>      (Linux without a display: xvfb-run -a ...)
 //
 // THEMES=light,dark chooses what to capture (default: both). Files are named
-// <theme>-<screen>.png.
-import { _electron } from "@playwright/test";
+// <theme>-<screen>.png. BASE_URL=http://localhost:3000 tours the `dev:web`
+// server in Chrome instead, for quick design checks without a build.
+import { _electron, chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -14,6 +15,7 @@ import { join, resolve } from "node:path";
 const studioRoot = resolve(import.meta.dirname, "..");
 const outputDir = resolve(process.argv[2] ?? join(studioRoot, "screenshots"));
 const themes = (process.env.THEMES ?? "light,dark").split(",").filter(Boolean);
+const baseUrl = process.env.BASE_URL;
 mkdirSync(outputDir, { recursive: true });
 
 const workDir = mkdtempSync(join(tmpdir(), "opencut-studio-tour-"));
@@ -37,8 +39,15 @@ async function addToTimeline(page, card) {
 	await page.getByRole("button", { name: "Add to timeline" }).first().click();
 }
 
-async function tour(theme) {
-	const prefix = theme;
+async function launch(theme) {
+	if (baseUrl) {
+		const browser = await chromium.launch({ channel: "chrome" });
+		const page = await browser.newPage({ colorScheme: theme });
+		// Dev builds load React Scan, which outlines components on screen.
+		await page.route("**/react-scan/**", (route) => route.abort());
+		await page.goto(`${baseUrl}/projects`);
+		return { page, close: () => browser.close() };
+	}
 	const app = await _electron.launch({
 		args: ["."],
 		cwd: studioRoot,
@@ -46,12 +55,21 @@ async function tour(theme) {
 		colorScheme: theme,
 		env: {
 			...process.env,
-			OPENCUT_STUDIO_USER_DATA_DIR: join(workDir, `user-data-${prefix}`),
-			OPENCUT_STUDIO_EXPORT_DIR: join(workDir, `exports-${prefix}`),
+			OPENCUT_STUDIO_USER_DATA_DIR: join(workDir, `user-data-${theme}`),
+			OPENCUT_STUDIO_EXPORT_DIR: join(workDir, `exports-${theme}`),
 		},
 	});
-	const page = await app.firstWindow();
+	return { page: await app.firstWindow(), close: () => app.close() };
+}
+
+async function tour(theme) {
+	const prefix = theme;
+	const { page, close } = await launch(theme);
 	await page.setViewportSize({ width: 1440, height: 900 });
+	await page.waitForLoadState("networkidle");
+	// The app opens dark; light is a choice saved by the theme toggle.
+	await page.evaluate((value) => localStorage.setItem("theme", value), theme);
+	await page.reload();
 	await page.waitForLoadState("networkidle");
 	const shot = async (name) => {
 		await page.waitForTimeout(600);
@@ -91,11 +109,11 @@ async function tour(theme) {
 	await shot("06-export");
 	await page.keyboard.press("Escape");
 
-	await page.goto("app://studio/projects");
+	await page.goto(`${baseUrl ?? "app://studio"}/projects`);
 	await page.waitForLoadState("networkidle");
 	await shot("07-projects-list");
 
-	await app.close();
+	await close();
 }
 
 try {

@@ -8,15 +8,27 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  /* OpenCut Studio theme (Ocean); its dark surfaces are at the end of this file. */
+  /* OpenCut Studio theme (Titanium); its dark surfaces are at the end of this file. */
   --font-ui: var(--font-manrope);
   --ui-radius-lg: 1rem;
   --ui-radius-md: 0.8rem;
   --ui-radius-sm: 0.6rem;
-  --brand-from: #0891b2;
-  --brand-to: #22d3ee;
-  --brand-edge: #67e8f9;
-  --brand-foreground: #021018;
+  --brand-from: #c3c9d0;
+  --brand-to: #eef1f4;
+  --brand-edge: #f7f8fa;
+  --brand-foreground: #101114;
+  /* Titanium design tokens. */
+  --ti-obsidian: #101114;
+  --ti-graphite: #1b1d21;
+  --ti-elevated: #25282d;
+  --ti-accent: #aeb5be;
+  --ti-highlight: #e0e4e9;
+  --ti-muted: #777f89;
+  --ti-border: #34383e;
+  --ti-border-strong: #555d67;
+  --ti-rim: inset 0 1px 0 rgba(224, 228, 233, 0.06);
+  --ti-lift: 0 10px 24px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --ti-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(0 0% 11%);
@@ -25,11 +37,11 @@
   --popover: hsl(0, 0%, 100%);
   --popover-hover: hsl(0, 0%, 96%);
   --popover-foreground: hsl(0 0% 2%);
-  --primary: #0891b2;
+  --primary: #3a3f46;
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(204, 100%, 97%);
-  --secondary-border: hsl(204, 100%, 94%);
-  --secondary-foreground: hsl(200, 98%, 39%);
+  --secondary: hsl(216, 10%, 95%);
+  --secondary-border: hsl(216, 10%, 88%);
+  --secondary-foreground: #3a3f46;
   --muted: hsl(0 0% 85.1%);
   --muted-foreground: hsl(0 0% 50%);
   --accent: hsl(0, 0%, 96%);
@@ -42,7 +54,7 @@
   --caution-foreground: hsl(0, 0%, 10%);
   --border: hsl(0 0% 91%);
   --input: hsl(0, 0%, 100%);
-  --ring: #06b6d4;
+  --ring: #555d67;
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
   --chart-3: hsl(30 80% 55%);
@@ -65,9 +77,9 @@
   --card: hsl(0, 0%, 98%);
   --card-foreground: hsl(0 0% 13%);
   --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(204, 100%, 95%);
-  --secondary-border: hsl(204, 100%, 92%);
-  --secondary-foreground: hsl(200, 98%, 37%);
+  --secondary: hsl(216, 10%, 93%);
+  --secondary-border: hsl(216, 10%, 86%);
+  --secondary-foreground: #3a3f46;
   --muted: hsl(0 0% 83.1%);
   --muted-foreground: hsl(0 0% 48%);
   --accent: hsl(0, 0%, 93%);
@@ -302,49 +314,85 @@
 }
 
 /*
- * OpenCut Studio theme: Ocean, deep navy and cyan. Its brand colours, font
- * (Manrope) and corners are on :root above. Video editors are used mostly
- * dark, so dark mode gets Ocean's own surfaces; light mode keeps the classic
- * ones.
+ * OpenCut Studio theme: Minimal Premium Titanium. Brand colours, font
+ * (Manrope), corners and the --ti-* tokens are on :root above. Video editors
+ * are used mostly dark, so dark mode is the designed experience; light mode
+ * keeps the classic surfaces with a graphite primary.
  */
 .dark {
-  --background: #040d1a;
-  --foreground: #dbe7f3;
-  --card: #071528;
-  --card-foreground: #dbe7f3;
-  --popover: #081a30;
-  --popover-hover: #0d2440;
-  --popover-foreground: #eef6ff;
-  --primary: #06b6d4;
-  --primary-foreground: #021018;
-  --secondary: rgba(6, 182, 212, 0.12);
-  --secondary-border: rgba(6, 182, 212, 0.28);
-  --secondary-foreground: #67e8f9;
-  --muted: #13283f;
-  --muted-foreground: #7f93ab;
-  --accent: #0c2038;
-  --accent-foreground: #e6f6ff;
-  --border: rgba(6, 182, 212, 0.14);
-  --input: #0a1c31;
-  --ring: #06b6d4;
-  --sidebar: #050f1f;
-  --sidebar-background: #050f1f;
-  --sidebar-border: rgba(6, 182, 212, 0.14);
+  --background: #101114;
+  --foreground: #d4d8de;
+  --card: #1b1d21;
+  --card-foreground: #d4d8de;
+  --popover: #25282d;
+  --popover-hover: #2e3238;
+  --popover-foreground: #e0e4e9;
+  --primary: #e0e4e9;
+  --primary-foreground: #101114;
+  --secondary: rgba(174, 181, 190, 0.1);
+  --secondary-border: rgba(174, 181, 190, 0.24);
+  --secondary-foreground: #e0e4e9;
+  --muted: #25282d;
+  /* #777f89 (--ti-muted) is under 4.5:1 on panels, so text uses this. */
+  --muted-foreground: #8a929c;
+  --accent: #25282d;
+  --accent-foreground: #e0e4e9;
+  --border: #34383e;
+  --input: #141519;
+  --ring: #aeb5be;
+  --sidebar: #141519;
+  --sidebar-background: #141519;
+  --sidebar-border: #34383e;
 }
 .dark .panel {
-  --background: #071528;
-  --foreground: #d5e3f1;
-  --card: #071528;
-  --card-foreground: #d5e3f1;
-  --muted: #13283f;
-  --accent: #0c2038;
-  --accent-foreground: #e6f6ff;
-  --border: rgba(6, 182, 212, 0.15);
-  --input: #0b1f36;
+  --background: #1b1d21;
+  --secondary: rgba(174, 181, 190, 0.1);
+  --secondary-border: rgba(174, 181, 190, 0.24);
+  --secondary-foreground: #e0e4e9;
+  --foreground: #d4d8de;
+  --card: #1b1d21;
+  --card-foreground: #d4d8de;
+  --muted: #25282d;
+  --accent: #25282d;
+  --accent-foreground: #e0e4e9;
+  --border: #34383e;
+  --input: #141519;
+  box-shadow: var(--ti-rim), 0 18px 40px -24px rgba(0, 0, 0, 0.8);
 }
+
+/*
+ * Orbital Architecture: faint concentric rings anchored at the window edges.
+ * Panels are opaque, so the rings only show in the margins, never behind
+ * text, thumbnails or controls.
+ */
 .dark body {
+  --orbit-ring: rgba(174, 181, 190, 0.07);
   background:
-    radial-gradient(1100px 520px at 0% -10%, rgba(6, 182, 212, 0.1), transparent 60%),
-    radial-gradient(900px 520px at 100% 110%, rgba(59, 130, 246, 0.09), transparent 60%),
-    #040d1a;
+    radial-gradient(circle at -6% 55%, transparent 0 calc(42vh - 1px), var(--orbit-ring) 42vh calc(42vh + 1px), transparent calc(42vh + 2px) calc(50vh - 1px), var(--orbit-ring) 50vh calc(50vh + 1px), transparent calc(50vh + 2px)),
+    radial-gradient(circle at 106% 55%, transparent 0 calc(42vh - 1px), var(--orbit-ring) 42vh calc(42vh + 1px), transparent calc(42vh + 2px) calc(50vh - 1px), var(--orbit-ring) 50vh calc(50vh + 1px), transparent calc(50vh + 2px)),
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224, 228, 233, 0.05), transparent 70%),
+    #101114;
+}
+
+/* Rings centred on an element (Floating Cinema, empty states). */
+.orbit-rings {
+  background-image: radial-gradient(circle, transparent 0 calc(30% - 1px), rgba(174, 181, 190, 0.06) 30% calc(30% + 1px), transparent calc(30% + 2px) calc(45% - 1px), rgba(174, 181, 190, 0.045) 45% calc(45% + 1px), transparent calc(45% + 2px) calc(62% - 1px), rgba(174, 181, 190, 0.03) 62% calc(62% + 1px), transparent calc(62% + 2px));
+}
+
+/* Spatial Lift: selected clips rise slightly. Static when motion is reduced. */
+.spatial-lift {
+  transition:
+    transform 160ms var(--ti-ease),
+    box-shadow 160ms var(--ti-ease);
+}
+.spatial-lift[data-lifted="true"] {
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .spatial-lift {
+    transition: none;
+  }
+  .spatial-lift[data-lifted="true"] {
+    transform: none;
+  }
 }

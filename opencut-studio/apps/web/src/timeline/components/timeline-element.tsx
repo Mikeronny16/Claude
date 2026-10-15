@@ -562,11 +562,12 @@ function ElementInner({
 			}}
 		>
 			<div
-				className="absolute inset-0 rounded-sm"
+				className="spatial-lift absolute inset-0 rounded-sm"
+				data-lifted={isSelected}
 				style={
 					isSelected
 						? {
-								boxShadow: `0 0 0 ${ELEMENT_RING_WIDTH_PX}px var(--primary)`,
+								boxShadow: `0 0 0 ${ELEMENT_RING_WIDTH_PX}px var(--primary), var(--ti-lift)`,
 							}
 						: undefined
 				}

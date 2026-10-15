@@ -9,19 +9,20 @@ export const TIMELINE_TRACK_THEME: Record<
 		waveformColor?: string;
 	}
 > = {
-	// Ocean-toned, kept clear of the cyan selection ring (--primary).
+	// Restrained and told apart by hue; white labels stay above 5:1 and the
+	// silver selection ring (--primary) stays visible on each.
 	video: { elementClassName: "transparent" },
-	text: { elementClassName: "bg-[#1F9A84]" },
+	text: { elementClassName: "bg-[#6553C9]" },
 	audio: {
-		elementClassName: "bg-[#5865D6]",
+		elementClassName: "bg-[#2B7A5E]",
 		waveformColor: TIMELINE_AUDIO_WAVEFORM_COLOR,
 	},
-	graphic: { elementClassName: "bg-[#CC5C7A]" },
-	effect: { elementClassName: "bg-[#2F74C0]" },
+	graphic: { elementClassName: "bg-[#9E4A6A]" },
+	effect: { elementClassName: "bg-[#3D66A8]" },
 } as const;
 
 export const SELECTED_TRACK_ROW_CLASS = "bg-accent/50";
-export const DEFAULT_TIMELINE_BOOKMARK_COLOR = "#22D3EE";
+export const DEFAULT_TIMELINE_BOOKMARK_COLOR = "#E0E4E9";
 
 export function getTimelineElementClassName({
 	type,
