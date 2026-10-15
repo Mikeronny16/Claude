@@ -8,10 +8,8 @@ import {
 	type WebContents,
 } from "electron";
 import { extname, join } from "node:path";
-import { APP_ORIGIN, registerAppScheme, serveAppScheme } from "./protocol";
+import { APP_ORIGIN, HOME_PATH, registerAppScheme, serveAppScheme } from "./protocol";
 import { startEditorServer, type EditorServer } from "./server";
-
-const START_PATH = "/projects";
 
 // Test hooks: isolate app data and send exports to a known folder.
 const userDataDir = process.env.OPENCUT_STUDIO_USER_DATA_DIR;
@@ -108,7 +106,7 @@ async function createMainWindow(): Promise<void> {
 	mainWindow.on("closed", () => {
 		mainWindow = null;
 	});
-	await mainWindow.loadURL(`${APP_ORIGIN}${START_PATH}`);
+	await mainWindow.loadURL(`${APP_ORIGIN}${HOME_PATH}`);
 }
 
 if (!app.requestSingleInstanceLock()) {

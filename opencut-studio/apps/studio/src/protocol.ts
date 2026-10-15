@@ -6,6 +6,7 @@ import { protocol } from "electron";
 export const APP_SCHEME = "app";
 export const APP_HOST = "studio";
 export const APP_ORIGIN = `${APP_SCHEME}://${APP_HOST}`;
+export const HOME_PATH = "/projects";
 
 /** Must run before the app is ready. */
 export function registerAppScheme(): void {
@@ -36,6 +37,11 @@ export function serveAppScheme({ serverOrigin }: { serverOrigin: string }): void
 		const url = new URL(request.url);
 		if (url.host !== APP_HOST) {
 			return new Response("Not found", { status: 404 });
+		}
+		// "/" is the website's landing page; the desktop app's home is the
+		// projects list.
+		if (url.pathname === "/") {
+			return Response.redirect(`${APP_ORIGIN}${HOME_PATH}`, 307);
 		}
 
 		const headers = new Headers(request.headers);

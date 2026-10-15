@@ -29,22 +29,22 @@ export async function showMediaUploadToast<T extends MediaUploadToastResult>({
 		await waitForNextPaint();
 		return run();
 	}, {
-		loading: `Uploading ${getAssetLabel({ count: filesCount })}...`,
+		loading: `Importing ${getAssetLabel({ count: filesCount })}...`,
 		success: ({ uploadedCount, assetNames }) => {
 			if (uploadedCount === 1) {
 				const assetName = assetNames?.[0];
 				return assetName
-					? `${assetName} has been uploaded`
-					: "1 media asset has been uploaded";
+					? `${assetName} has been imported`
+					: "1 media asset has been imported";
 			}
 
 			if (uploadedCount > 1) {
-				return `${uploadedCount} media assets have been uploaded`;
+				return `${uploadedCount} media assets have been imported`;
 			}
 
-			return "No media assets were uploaded";
+			return "No media assets were imported";
 		},
-		error: `Failed to upload ${getAssetLabel({ count: filesCount })}`,
+		error: `Failed to import ${getAssetLabel({ count: filesCount })}`,
 	});
 
 	return toastPromise.unwrap();

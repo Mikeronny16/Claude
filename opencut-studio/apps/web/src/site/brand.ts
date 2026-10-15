@@ -1,13 +1,13 @@
 export const SITE_URL = "https://opencut.app";
 
 export const SITE_INFO = {
-	title: "OpenCut",
-	description:
-		"A simple but powerful video editor that gets the job done. In your browser.",
+	title: "OpenCut Studio",
+	description: "A video editor that runs on your computer.",
 	url: SITE_URL,
 	openGraphImage: "/open-graph/default.jpg",
 	twitterImage: "/open-graph/default.jpg",
 	favicon: "/favicon.ico",
 };
 
-export const DEFAULT_LOGO_URL = "/logos/opencut/svg/logo.svg";
+// Placeholder mark until OpenCut Studio has its own logo.
+export const DEFAULT_LOGO_URL = "/logos/opencut-studio/logo.svg";

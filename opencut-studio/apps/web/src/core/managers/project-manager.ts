@@ -18,6 +18,8 @@ import { DEFAULT_FPS } from "@/fps/defaults";
 import { buildDefaultScene, getProjectDurationFromScenes } from "@/timeline/scenes";
 import { buildScene } from "@/services/renderer/scene-builder";
 import { CanvasRenderer } from "@/services/renderer/canvas-renderer";
+import { wasmCompositor } from "@/services/renderer/compositor/wasm-compositor";
+import type { SceneTracks } from "@/timeline";
 import {
 	CURRENT_PROJECT_VERSION,
 	migrations,
@@ -36,6 +38,8 @@ export interface MigrationState {
 	toVersion: number | null;
 	projectName: string | null;
 }
+
+const THUMBNAIL_WIDTH = 480;
 
 export class ProjectManager {
 	private active: TProject | null = null;
@@ -57,6 +61,9 @@ export class ProjectManager {
 		result: null,
 	};
 	private exportCancelRequested = false;
+	// The tracks the stored thumbnail was rendered from; a different object means
+	// the timeline changed and the next save refreshes the thumbnail.
+	private thumbnailTracks: SceneTracks | null = null;
 
 	constructor(private editor: EditorCore) {}
 
@@ -191,11 +198,13 @@ export class ProjectManager {
 
 		try {
 			const scenes = this.editor.scenes.getScenes();
+			const thumbnail = await this.renderThumbnailIfStale();
 			const updatedProject = {
 				...this.active,
 				scenes,
 				metadata: {
 					...this.active.metadata,
+					...(thumbnail && { thumbnail }),
 					duration: getProjectDurationFromScenes({ scenes }),
 					updatedAt: new Date(),
 				},
@@ -648,17 +657,39 @@ export class ProjectManager {
 	}
 
 	private async updateThumbnailFromTimeline(): Promise<boolean> {
-		if (!this.active) return false;
+		const thumbnail = await this.renderThumbnail();
+		if (!thumbnail) return false;
+		await this.updateThumbnail({ thumbnail });
+		return true;
+	}
+
+	private async renderThumbnailIfStale(): Promise<string | null> {
+		const tracks = this.editor.scenes.getActiveSceneOrNull()?.tracks ?? null;
+		if (!tracks || tracks === this.thumbnailTracks) return null;
+		try {
+			return await this.renderThumbnail();
+		} catch (error) {
+			console.error("Failed to refresh project thumbnail:", error);
+			return null;
+		}
+	}
+
+	/** First frame of the timeline as a small JPEG, or null when it's empty. */
+	private async renderThumbnail(): Promise<string | null> {
+		if (!this.active) return null;
 
 		const tracks = this.editor.scenes.getActiveScene().tracks;
 		const mediaAssets = this.editor.media.getAssets();
 		const duration = this.editor.timeline.getTotalDuration();
 		const { canvasSize, background } = this.active.settings;
+		this.thumbnailTracks = tracks;
+		// An empty timeline renders as a blank frame; leave the card's placeholder.
+		if (!duration) return null;
 
 		const scene = buildScene({
 			tracks,
 			mediaAssets,
-			duration: duration || 1,
+			duration,
 			canvasSize,
 			background,
 		});
@@ -673,16 +704,26 @@ export class ProjectManager {
 		tempCanvas.width = canvasSize.width;
 		tempCanvas.height = canvasSize.height;
 
-		await renderer.renderToCanvas({
-			node: scene,
-			time: 0,
-			targetCanvas: tempCanvas,
-		});
+		try {
+			await renderer.renderToCanvas({
+				node: scene,
+				time: 0,
+				targetCanvas: tempCanvas,
+			});
+		} finally {
+			// Rendered on the compositor canvas the preview shows.
+			wasmCompositor.markSharedCanvasUsed();
+		}
 
-		const thumbnailDataUrl = tempCanvas.toDataURL("image/png");
-
-		await this.updateThumbnail({ thumbnail: thumbnailDataUrl });
-		return true;
+		// Stored in the project list, so keep it small.
+		const scale = Math.min(1, THUMBNAIL_WIDTH / canvasSize.width);
+		const thumbnailCanvas = document.createElement("canvas");
+		thumbnailCanvas.width = Math.round(canvasSize.width * scale);
+		thumbnailCanvas.height = Math.round(canvasSize.height * scale);
+		thumbnailCanvas
+			.getContext("2d")
+			?.drawImage(tempCanvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+		return thumbnailCanvas.toDataURL("image/jpeg", 0.85);
 	}
 
 	private updateMetadata(project: TProject): void {

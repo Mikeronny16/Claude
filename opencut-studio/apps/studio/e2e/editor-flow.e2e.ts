@@ -225,6 +225,10 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	app = await launchApp();
 	page = await openWindow(app);
 	await expect(page.getByText("New project").first()).toBeVisible();
+	// The project card shows the clip's first frame, not a blank one.
+	const thumbnail = page.getByAltText("Project thumbnail").first();
+	await expect(thumbnail).toBeVisible();
+	expect(await distinctColors(app, thumbnail)).toBeGreaterThan(20);
 	await page.goto(projectUrl);
 	await expect(timelineClips(page)).toHaveCount(1);
 	await expect(page.getByTitle(CLIP_NAME).first()).toBeVisible();
