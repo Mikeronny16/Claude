@@ -131,7 +131,7 @@ export function DraggableItem({
 							>
 								<span className="sr-only">{name}</span>
 								<span aria-hidden="true">
-									{name.length > 8
+									{name.length > MAX_CARD_LABEL_LENGTH
 										? `${name.slice(0, 16)}...${name.slice(-3)}`
 										: name}
 								</span>
@@ -199,6 +199,9 @@ export function DraggableItem({
 	);
 }
 
+// Longer names are shortened to their first 16 and last 3 characters.
+const MAX_CARD_LABEL_LENGTH = 16 + 3;
+
 function PlusButton({
 	className,
 	onClick,
@@ -221,6 +224,7 @@ function PlusButton({
 				onClick?.();
 			}}
 			title={tooltipText}
+			aria-label={tooltipText ?? "Add to timeline"}
 		>
 			<Plus />
 		</Button>

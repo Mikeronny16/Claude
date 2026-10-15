@@ -12,6 +12,8 @@ const webEnvSchema = z.object({
 	// Public
 	NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
 	NEXT_PUBLIC_MARBLE_API_URL: z.url().default("https://api.marblecms.com"),
+	// Analytics load only when this is set; desktop builds ship without it.
+	NEXT_PUBLIC_DATABUDDY_CLIENT_ID: z.string().optional(),
 
 	// Server integrations
 	DATABASE_URL: z
@@ -46,16 +48,26 @@ export class IntegrationNotConfiguredError extends Error {
 	}
 }
 
+type WebEnvWith<K extends OptionalWebEnvKey> = WebEnv & {
+	[P in K]-?: NonNullable<WebEnv[P]>;
+};
+
+function hasWebEnv<K extends OptionalWebEnvKey>(
+	env: WebEnv,
+	keys: K[],
+): env is WebEnvWith<K> {
+	return keys.every((key) => Boolean(env[key]));
+}
+
 export function isWebEnvConfigured(...keys: OptionalWebEnvKey[]): boolean {
-	return keys.every((key) => Boolean(webEnv[key]));
+	return hasWebEnv(webEnv, keys);
 }
 
 export function requireWebEnv<K extends OptionalWebEnvKey>(
 	...keys: K[]
-): { [P in K]: NonNullable<WebEnv[P]> } {
-	const missing = keys.filter((key) => !webEnv[key]);
-	if (missing.length > 0) throw new IntegrationNotConfiguredError(missing);
-	return Object.fromEntries(keys.map((key) => [key, webEnv[key]])) as {
-		[P in K]: NonNullable<WebEnv[P]>;
-	};
+): WebEnvWith<K> {
+	if (!hasWebEnv(webEnv, keys)) {
+		throw new IntegrationNotConfiguredError(keys.filter((key) => !webEnv[key]));
+	}
+	return webEnv;
 }
