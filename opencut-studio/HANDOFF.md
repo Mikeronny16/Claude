@@ -50,6 +50,9 @@ cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default:
 - Windows: Bun from winget (`Oven-sh.Bun`) has no `bunx` on PATH; use `bun x`.
   The first e2e run after a fresh build timed out waiting for the window once
   (likely antivirus scanning the new files); the rerun passed.
+- If `dev:web` in the browser runs old code, check DevTools → Application →
+  Service workers: another project served on localhost:3000 had registered a
+  `sw.js` that cached OpenCut's chunks. Unregister it (the editor has none).
 
 - The 4 failing unit tests predate this work: 2 mask-snapping assertions
   (`src/masks/__tests__/snap.test.ts`), 1 needs a canvas for text measuring,
