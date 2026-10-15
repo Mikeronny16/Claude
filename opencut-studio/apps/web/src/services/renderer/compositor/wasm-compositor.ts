@@ -106,7 +106,17 @@ class WasmCompositor {
 	}
 
 	render(frame: FrameDescriptor) {
-		renderFrame(frame);
+		renderFrame({
+			...frame,
+			// opencut-wasm's FrameItemDescriptor renames its variants to camelCase
+			// but not the fields of its struct variants, so a scene effect is
+			// rejected ("missing field `effect_pass_groups`") unless snake_case.
+			items: frame.items.map((item) =>
+				item.type === "sceneEffect"
+					? { type: item.type, effect_pass_groups: item.effectPassGroups }
+					: item,
+			),
+		});
 		if (isRenderPerfEnabled()) {
 			recordWasmFrameProfile(
 				getLastFrameProfile() as Array<{ name: string; durationMs: number }>,
