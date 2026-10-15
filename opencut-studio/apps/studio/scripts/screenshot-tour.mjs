@@ -26,6 +26,8 @@ async function tour(theme) {
 	const app = await _electron.launch({
 		args: ["."],
 		cwd: studioRoot,
+		// Playwright emulates a light colour scheme unless told otherwise.
+		colorScheme: theme,
 		env: {
 			...process.env,
 			OPENCUT_STUDIO_USER_DATA_DIR: join(workDir, `user-data-${theme}`),
