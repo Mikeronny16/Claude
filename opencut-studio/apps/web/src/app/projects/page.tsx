@@ -67,6 +67,7 @@ import { ProjectInfoDialog } from "@/project/components/project-info-dialog";
 import { RenameProjectDialog } from "@/project/components/rename-project-dialog";
 import { cn } from "@/utils/ui";
 import { ChangelogNotification } from "@/changelog/components/changelog-notification";
+import { DesignPicker } from "@/design/components/design-picker";
 const formatProjectDuration = ({
 	duration,
 }: {
@@ -184,6 +185,7 @@ function ProjectsHeader() {
 
 				<div className="flex items-center gap-3 md:gap-4">
 					<SearchBar className="hidden md:block" />
+					<DesignPicker className="size-10" />
 					<NewProjectButton />
 				</div>
 			</div>

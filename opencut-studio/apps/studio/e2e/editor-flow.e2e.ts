@@ -219,12 +219,19 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	// Same loudness as the source tone, so the audio made it through.
 	expect(Math.abs(meanVolumeDb(exported) - meanVolumeDb(clipPath))).toBeLessThan(1.5);
 
+	// Pick a design detail in the Design picker; it should survive a relaunch.
+	await page.getByRole("button", { name: "Design" }).click();
+	await page.locator("button[aria-pressed]").filter({ hasText: /Manrope$/ }).click();
+	await expect(page.locator("html")).toHaveAttribute("data-font", "manrope");
+	await page.keyboard.press("Escape");
+
 	// Quit and relaunch: the project, its media and its timeline persist.
 	await page.waitForTimeout(1500); // autosave is debounced
 	await app.close();
 	app = await launchApp();
 	page = await openWindow(app);
 	await expect(page.getByText("New project").first()).toBeVisible();
+	await expect(page.locator("html")).toHaveAttribute("data-font", "manrope");
 	// The project card shows the clip's first frame, not a blank one.
 	const thumbnail = page.getByAltText("Project thumbnail").first();
 	await expect(thumbnail).toBeVisible();

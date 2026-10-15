@@ -7,9 +7,29 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import { baseMetaData } from "./metadata";
 import { BotIdClient } from "botid/client";
 import { webEnv } from "@/env/web";
-import { Inter } from "next/font/google";
+import {
+	Bricolage_Grotesque,
+	Inter,
+	Manrope,
+	Plus_Jakarta_Sans,
+} from "next/font/google";
+import { DEFAULT_DESIGN, designInitScript } from "@/design/designs";
 
-const siteFont = Inter({ subsets: ["latin"] });
+// One UI font per design (see app/globals.css); next/font self-hosts them,
+// so they work offline.
+const interFont = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const jakartaFont = Plus_Jakarta_Sans({
+	subsets: ["latin"],
+	variable: "--font-jakarta",
+});
+const manropeFont = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+const bricolageFont = Bricolage_Grotesque({
+	subsets: ["latin"],
+	variable: "--font-bricolage",
+});
+const fontVariables = [interFont, jakartaFont, manropeFont, bricolageFont]
+	.map((font) => font.variable)
+	.join(" ");
 
 export const metadata = baseMetaData;
 
@@ -26,8 +46,16 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html
+			lang="en"
+			className={fontVariables}
+			data-palette={DEFAULT_DESIGN.palette}
+			data-font={DEFAULT_DESIGN.font}
+			data-corners={DEFAULT_DESIGN.corners}
+			suppressHydrationWarning
+		>
 			<head>
+				<script dangerouslySetInnerHTML={{ __html: designInitScript }} />
 				<BotIdClient protect={protectedRoutes} />
 				{process.env.NODE_ENV === "development" && (
 					<>
@@ -39,7 +67,7 @@ export default function RootLayout({
 					</>
 				)}
 			</head>
-			<body className={`${siteFont.className} font-sans antialiased`}>
+			<body className="font-sans antialiased">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
