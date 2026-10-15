@@ -2,7 +2,7 @@
 
 State of the work for whoever picks it up next (a person or a new Claude
 session). Branch `claude/opencut-studio` of `github.com/Mikeronny16/Claude`,
-folder `opencut-studio/`. Last updated 2026-10-15.
+folder `opencut-studio/`. Last updated 2026-10-15 (on Windows 11).
 
 ## What this is
 
@@ -40,21 +40,26 @@ No env vars, accounts, database or cloud services are needed.
 ## Checks
 
 ```bash
-bun test                              # from opencut-studio/: 214/218 pass
+bun test                              # from opencut-studio/: 215/219 pass
 cd apps/web && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bun run build && bun run test:e2e      # Linux headless: xvfb-run -a bun run test:e2e
-cd apps/studio && bun run screenshots -- <dir>           # DESIGNS=ocean,graphite THEMES=dark ...
+cd apps/studio && bun run screenshots -- <dir>           # THEMES=dark (default: light,dark)
 ```
+
+- Windows: Bun from winget (`Oven-sh.Bun`) has no `bunx` on PATH; use `bun x`.
+  The first e2e run after a fresh build timed out waiting for the window once
+  (likely antivirus scanning the new files); the rerun passed.
 
 - The 4 failing unit tests predate this work: 2 mask-snapping assertions
   (`src/masks/__tests__/snap.test.ts`), 1 needs a canvas for text measuring,
   1 feeds fractional ticks to `mediaTime` (`src/timeline/placement/__tests__/resolve.test.ts`).
 - e2e (`apps/studio/e2e/editor-flow.e2e.ts`) drives the built app: create
   project, import, add to timeline, preview pixels, Effects panel doesn't hijack
-  the preview, play, undo/redo, MP4 export checked with ffprobe, design picker
-  choice, relaunch with project/thumbnail/timeline/design intact. Passes on
-  Linux under Xvfb. Needs `ffmpeg`/`ffprobe` on PATH; so does `screenshots`.
+  the preview, play, undo/redo, MP4 export checked with ffprobe, Manrope UI
+  font loaded, relaunch with project/thumbnail/timeline intact. Passes on
+  Linux under Xvfb and on Windows 11. Needs `ffmpeg`/`ffprobe` on PATH; so
+  does `screenshots`.
 - Run Playwright via `bun run test:e2e`, not `npx playwright` (npx picked up a
   second copy). Playwright emulates a light colour scheme unless `colorScheme`
   is set. E2E files are `*.e2e.ts` so `bun test` skips them.
@@ -86,6 +91,15 @@ cd apps/studio && bun run screenshots -- <dir>           # DESIGNS=ocean,graphit
    `apps/web/src/app/globals.css`; registry, presets and storage in
    `apps/web/src/design/designs.ts`; picker (🎨 in editor and projects headers)
    in `apps/web/src/design/components/design-picker.tsx`. Default is Classic.
+9. Fixes found on Windows: the preview went black whenever an effect clip was
+   on the timeline (opencut-wasm wants `effect_pass_groups` in snake_case for
+   scene effects; mapped in `wasm-compositor.ts`); the desktop build failed
+   with EPERM copying the standalone server's junctions (`prepare-server.ts`
+   recreates them inside `build/server`).
+10. Design chosen by Mike: Ocean palette + Manrope + Round corners, now the
+   only design. Picker, `src/design/` and the other palettes/fonts removed.
+   Tokens: `:root` and the closing Ocean section of `globals.css`; timeline
+   clip and bookmark colours in `src/timeline/components/theme.ts`.
 
 ## Known limitations
 
@@ -93,16 +107,17 @@ cd apps/studio && bun run screenshots -- <dir>           # DESIGNS=ocean,graphit
   checked on Windows/macOS).
 - HEVC import doesn't decode in Electron on Linux.
 - Projects and media live in browser storage (IndexedDB/OPFS), not files.
-- No installers yet. Only tested on Linux.
+- No installers yet. Tested on Linux and Windows 11; not on macOS.
+- `build/server` on Windows uses junctions with absolute paths, so it can't be
+  moved as is; the installer step must copy it with that in mind.
+- The Rust source in `rust/crates/compositor/src/frame.rs` still has the
+  snake_case `SceneEffect` field; a local WASM rebuild must keep it (or change
+  `wasm-compositor.ts` with it).
 - Logo is a placeholder.
 
 ## Next steps, in order
 
-1. **Design choice.** Mike picks palette + font + corners in the picker. Set
-   `DEFAULT_DESIGN` in `src/design/designs.ts`; ask Mike whether to keep the
-   picker as a Themes feature or remove the unused palettes. Make timeline clip
-   colours (`src/timeline/components/theme.ts`) and the bookmark colour match
-   the chosen palette. Re-run screenshots and e2e; show Mike before/after.
+1. ~~Design choice~~ — done (Ocean + Manrope + Round, see Done 10).
 2. **Project files on disk**: save/open/backup through a new storage adapter
    (`StorageAdapter` in `src/services/storage/types.ts`) and Electron IPC
    (preload with a narrow API), reusing the migration runner.

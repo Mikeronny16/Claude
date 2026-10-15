@@ -7,29 +7,11 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import { baseMetaData } from "./metadata";
 import { BotIdClient } from "botid/client";
 import { webEnv } from "@/env/web";
-import {
-	Bricolage_Grotesque,
-	Inter,
-	Manrope,
-	Plus_Jakarta_Sans,
-} from "next/font/google";
-import { DEFAULT_DESIGN, designInitScript } from "@/design/designs";
+import { Manrope } from "next/font/google";
 
-// One UI font per design (see app/globals.css); next/font self-hosts them,
-// so they work offline.
-const interFont = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jakartaFont = Plus_Jakarta_Sans({
-	subsets: ["latin"],
-	variable: "--font-jakarta",
-});
-const manropeFont = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
-const bricolageFont = Bricolage_Grotesque({
-	subsets: ["latin"],
-	variable: "--font-bricolage",
-});
-const fontVariables = [interFont, jakartaFont, manropeFont, bricolageFont]
-	.map((font) => font.variable)
-	.join(" ");
+// The UI font (--font-ui in app/globals.css); next/font self-hosts it, so it
+// works offline.
+const uiFont = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 
 export const metadata = baseMetaData;
 
@@ -46,16 +28,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html
-			lang="en"
-			className={fontVariables}
-			data-palette={DEFAULT_DESIGN.palette}
-			data-font={DEFAULT_DESIGN.font}
-			data-corners={DEFAULT_DESIGN.corners}
-			suppressHydrationWarning
-		>
+		<html lang="en" className={uiFont.variable} suppressHydrationWarning>
 			<head>
-				<script dangerouslySetInnerHTML={{ __html: designInitScript }} />
 				<BotIdClient protect={protectedRoutes} />
 				{process.env.NODE_ENV === "development" && (
 					<>

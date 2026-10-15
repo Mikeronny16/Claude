@@ -3,9 +3,8 @@
 //
 //   bun run screenshots -- <output-dir>      (Linux without a display: xvfb-run -a ...)
 //
-// DESIGNS=classic,ocean,... (preset names) and THEMES=light,dark choose what
-// to capture (defaults: the saved design, both themes). Files are named
-// <design>-<theme>-<screen>.png.
+// THEMES=light,dark chooses what to capture (default: both). Files are named
+// <theme>-<screen>.png.
 import { _electron } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -14,7 +13,6 @@ import { join, resolve } from "node:path";
 
 const studioRoot = resolve(import.meta.dirname, "..");
 const outputDir = resolve(process.argv[2] ?? join(studioRoot, "screenshots"));
-const designs = (process.env.DESIGNS ?? "").split(",").filter(Boolean);
 const themes = (process.env.THEMES ?? "light,dark").split(",").filter(Boolean);
 mkdirSync(outputDir, { recursive: true });
 
@@ -39,8 +37,8 @@ async function addToTimeline(page, card) {
 	await page.getByRole("button", { name: "Add to timeline" }).first().click();
 }
 
-async function tour({ design, theme }) {
-	const prefix = [design, theme].filter(Boolean).join("-");
+async function tour(theme) {
+	const prefix = theme;
 	const app = await _electron.launch({
 		args: ["."],
 		cwd: studioRoot,
@@ -55,16 +53,6 @@ async function tour({ design, theme }) {
 	const page = await app.firstWindow();
 	await page.setViewportSize({ width: 1440, height: 900 });
 	await page.waitForLoadState("networkidle");
-	if (design) {
-		// Choose the preset the way a user would, through the Design picker.
-		await page.getByRole("button", { name: "Design" }).click();
-		await page
-			.locator("button[aria-pressed]")
-			.filter({ hasText: new RegExp(`${design}$`, "i") })
-			.first()
-			.click();
-		await page.keyboard.press("Escape");
-	}
 	const shot = async (name) => {
 		await page.waitForTimeout(600);
 		await page.screenshot({ path: join(outputDir, `${prefix}-${name}.png`) });
@@ -107,18 +95,12 @@ async function tour({ design, theme }) {
 	await page.waitForLoadState("networkidle");
 	await shot("07-projects-list");
 
-	await page.getByRole("button", { name: "Design" }).click();
-	await shot("08-design-picker");
-	await page.keyboard.press("Escape");
-
 	await app.close();
 }
 
 try {
-	for (const design of designs.length > 0 ? designs : [undefined]) {
-		for (const theme of themes) {
-			await tour({ design, theme });
-		}
+	for (const theme of themes) {
+		await tour(theme);
 	}
 } finally {
 	rmSync(workDir, { recursive: true, force: true });

@@ -15,7 +15,6 @@ import { ExportButton } from "./export-button";
 import { FeedbackPopover } from "@/feedback/components/feedback-popover";
 import { isFeedbackEnabled } from "@/feedback/config";
 import { ThemeToggle } from "../theme-toggle";
-import { DesignPicker } from "@/design/components/design-picker";
 import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
@@ -35,7 +34,6 @@ export function EditorHeader() {
 			<nav className="flex items-center gap-2">
 				{isFeedbackEnabled && <FeedbackPopover />}
 				<ExportButton />
-				<DesignPicker />
 				<ThemeToggle />
 			</nav>
 		</header>

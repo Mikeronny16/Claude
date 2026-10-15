@@ -8,15 +8,15 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  /* Overridden per design at the end of this file. */
-  --font-ui: var(--font-inter);
-  --ui-radius-lg: 0.82rem;
-  --ui-radius-md: 0.65rem;
-  --ui-radius-sm: 0.35rem;
-  --brand-from: #2567ec;
-  --brand-to: #37b6f7;
-  --brand-edge: #38bdf8;
-  --brand-foreground: #ffffff;
+  /* OpenCut Studio theme (Ocean); its dark surfaces are at the end of this file. */
+  --font-ui: var(--font-manrope);
+  --ui-radius-lg: 1rem;
+  --ui-radius-md: 0.8rem;
+  --ui-radius-sm: 0.6rem;
+  --brand-from: #0891b2;
+  --brand-to: #22d3ee;
+  --brand-edge: #67e8f9;
+  --brand-foreground: #021018;
 
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(0 0% 11%);
@@ -25,7 +25,7 @@
   --popover: hsl(0, 0%, 100%);
   --popover-hover: hsl(0, 0%, 96%);
   --popover-foreground: hsl(0 0% 2%);
-  --primary: hsl(200, 90%, 52%);
+  --primary: #0891b2;
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(204, 100%, 97%);
   --secondary-border: hsl(204, 100%, 94%);
@@ -42,7 +42,7 @@
   --caution-foreground: hsl(0, 0%, 10%);
   --border: hsl(0 0% 91%);
   --input: hsl(0, 0%, 100%);
-  --ring: hsl(0, 0%, 55%);
+  --ring: #06b6d4;
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
   --chart-3: hsl(30 80% 55%);
@@ -302,45 +302,12 @@
 }
 
 /*
- * OpenCut Studio design tokens (see src/design/designs.ts). Three independent
- * choices on <html>: data-palette (colours), data-font and data-corners.
- * Palettes set brand colours in both modes and their own surfaces in dark
- * mode; video editors are used mostly dark, so light mode keeps the classic
- * surfaces.
+ * OpenCut Studio theme: Ocean, deep navy and cyan. Its brand colours, font
+ * (Manrope) and corners are on :root above. Video editors are used mostly
+ * dark, so dark mode gets Ocean's own surfaces; light mode keeps the classic
+ * ones.
  */
-
-/* Fonts. Inter is the default set on :root. */
-html[data-font="jakarta"] { --font-ui: var(--font-jakarta); }
-html[data-font="manrope"] { --font-ui: var(--font-manrope); }
-html[data-font="bricolage"] { --font-ui: var(--font-bricolage); }
-
-/* Corners. "medium" is the default set on :root. */
-html[data-corners="sharp"] {
-  --ui-radius-lg: 0.5rem;
-  --ui-radius-md: 0.375rem;
-  --ui-radius-sm: 0.25rem;
-}
-html[data-corners="round"] {
-  --ui-radius-lg: 1rem;
-  --ui-radius-md: 0.8rem;
-  --ui-radius-sm: 0.6rem;
-}
-html[data-corners="extra-round"] {
-  --ui-radius-lg: 1.25rem;
-  --ui-radius-md: 0.95rem;
-  --ui-radius-sm: 0.75rem;
-}
-
-/* Palette: Ocean. Deep navy and cyan. */
-html[data-palette="ocean"] {
-  --primary: #0891b2;
-  --ring: #06b6d4;
-  --brand-from: #0891b2;
-  --brand-to: #22d3ee;
-  --brand-edge: #67e8f9;
-  --brand-foreground: #021018;
-}
-html[data-palette="ocean"].dark {
+.dark {
   --background: #040d1a;
   --foreground: #dbe7f3;
   --card: #071528;
@@ -359,11 +326,12 @@ html[data-palette="ocean"].dark {
   --accent-foreground: #e6f6ff;
   --border: rgba(6, 182, 212, 0.14);
   --input: #0a1c31;
+  --ring: #06b6d4;
   --sidebar: #050f1f;
   --sidebar-background: #050f1f;
   --sidebar-border: rgba(6, 182, 212, 0.14);
 }
-html[data-palette="ocean"].dark .panel {
+.dark .panel {
   --background: #071528;
   --foreground: #d5e3f1;
   --card: #071528;
@@ -374,103 +342,9 @@ html[data-palette="ocean"].dark .panel {
   --border: rgba(6, 182, 212, 0.15);
   --input: #0b1f36;
 }
-html[data-palette="ocean"].dark body {
+.dark body {
   background:
     radial-gradient(1100px 520px at 0% -10%, rgba(6, 182, 212, 0.1), transparent 60%),
     radial-gradient(900px 520px at 100% 110%, rgba(59, 130, 246, 0.09), transparent 60%),
     #040d1a;
-}
-
-/* Palette: Graphite. Neutral greys that don't tint the footage, signal orange. */
-html[data-palette="graphite"] {
-  --primary: #f04d12;
-  --ring: #ff5a1f;
-  --brand-from: #ff5a1f;
-  --brand-to: #ff8a3d;
-  --brand-edge: #ffb07a;
-  --brand-foreground: #ffffff;
-}
-html[data-palette="graphite"].dark {
-  --background: #0f0f10;
-  --foreground: #e7e5e4;
-  --card: #18181a;
-  --card-foreground: #e7e5e4;
-  --popover: #1d1d20;
-  --popover-hover: #29292d;
-  --popover-foreground: #f5f5f4;
-  --primary: #ff5a1f;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(255, 90, 31, 0.12);
-  --secondary-border: rgba(255, 90, 31, 0.3);
-  --secondary-foreground: #ff9a6b;
-  --muted: #2a2a2e;
-  --muted-foreground: #8b8b90;
-  --accent: #242427;
-  --accent-foreground: #f5f5f4;
-  --border: #27272a;
-  --input: #141416;
-  --sidebar: #121214;
-  --sidebar-background: #121214;
-  --sidebar-border: #27272a;
-}
-html[data-palette="graphite"].dark .panel {
-  --background: #18181a;
-  --foreground: #e2e0de;
-  --card: #18181a;
-  --card-foreground: #e2e0de;
-  --muted: #2a2a2e;
-  --accent: #242427;
-  --accent-foreground: #f5f5f4;
-  --border: #29292c;
-  --input: #202023;
-}
-
-/* Palette: Aurora. Plum black with a pink-to-amber sunset. */
-html[data-palette="aurora"] {
-  --primary: #e11d74;
-  --ring: #ff3d8b;
-  --brand-from: #ff3d8b;
-  --brand-to: #ffb347;
-  --brand-edge: #ffd2a1;
-  --brand-foreground: #1a0610;
-}
-html[data-palette="aurora"].dark {
-  --background: #0c0911;
-  --foreground: #f1eaf7;
-  --card: #15101d;
-  --card-foreground: #f1eaf7;
-  --popover: #1b1426;
-  --popover-hover: #261c34;
-  --popover-foreground: #fbf7ff;
-  --primary: #ff3d8b;
-  --primary-foreground: #1a0610;
-  --secondary: rgba(255, 61, 139, 0.14);
-  --secondary-border: rgba(255, 61, 139, 0.32);
-  --secondary-foreground: #ff8fbd;
-  --muted: #2c2139;
-  --muted-foreground: #9d8daf;
-  --accent: #221a2e;
-  --accent-foreground: #ffffff;
-  --border: #281e35;
-  --input: #120d19;
-  --sidebar: #0f0b15;
-  --sidebar-background: #0f0b15;
-  --sidebar-border: #281e35;
-}
-html[data-palette="aurora"].dark .panel {
-  --background: #15101d;
-  --foreground: #ece4f3;
-  --card: #15101d;
-  --card-foreground: #ece4f3;
-  --muted: #2c2139;
-  --accent: #221a2e;
-  --accent-foreground: #ffffff;
-  --border: #2a1f38;
-  --input: #1d1628;
-}
-html[data-palette="aurora"].dark body {
-  background:
-    radial-gradient(1000px 520px at 0% 0%, rgba(255, 61, 139, 0.12), transparent 60%),
-    radial-gradient(900px 600px at 100% 100%, rgba(255, 179, 71, 0.09), transparent 55%),
-    #0c0911;
 }
