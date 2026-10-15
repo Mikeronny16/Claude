@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/auth/rate-limit";
 import { submitFeedback, MAX_MESSAGE_LENGTH } from "@/feedback";
+import { isWebEnvConfigured } from "@/env/web";
+import { notConfiguredResponse } from "@/env/not-configured-response";
 
 const submitSchema = z.object({
 	message: z
@@ -11,6 +13,10 @@ const submitSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+	if (!isWebEnvConfigured("DATABASE_URL")) {
+		return notConfiguredResponse({ feature: "Feedback" });
+	}
+
 	const { limited } = await checkRateLimit({ request });
 	if (limited) {
 		return NextResponse.json({ error: "Too many requests" }, { status: 429 });

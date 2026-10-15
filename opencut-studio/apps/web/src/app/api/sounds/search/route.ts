@@ -1,4 +1,5 @@
 import { webEnv } from "@/env/web";
+import { notConfiguredResponse } from "@/env/not-configured-response";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/auth/rate-limit";
@@ -148,6 +149,11 @@ function transformFreesoundResult(
 }
 
 export async function GET(request: NextRequest) {
+	const freesoundApiKey = webEnv.FREESOUND_API_KEY;
+	if (!freesoundApiKey) {
+		return notConfiguredResponse({ feature: "Sound search" });
+	}
+
 	try {
 		const { limited } = await checkRateLimit({ request });
 		if (limited) {
@@ -202,7 +208,7 @@ export async function GET(request: NextRequest) {
 
 		const params = new URLSearchParams({
 			query: query || "",
-			token: webEnv.FREESOUND_API_KEY,
+			token: freesoundApiKey,
 			page: page.toString(),
 			page_size: pageSize.toString(),
 			sort: sortParam,
