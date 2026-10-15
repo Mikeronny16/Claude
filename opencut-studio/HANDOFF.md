@@ -40,7 +40,7 @@ No env vars, accounts, database or cloud services are needed.
 ## Checks
 
 ```bash
-bun test                              # from opencut-studio/: 221/225 pass
+bun test                              # from opencut-studio/: 223/227 pass
 cd apps/web && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bun run build && bun run test:e2e      # Linux headless: xvfb-run -a bun run test:e2e
@@ -60,7 +60,8 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
   1 feeds fractional ticks to `mediaTime` (`src/timeline/placement/__tests__/resolve.test.ts`).
 - e2e (`apps/studio/e2e/editor-flow.e2e.ts`) drives the built app: create
   project, import, add to timeline, preview pixels, Effects panel doesn't hijack
-  the preview, Titanium Dial keys + undo, play, undo/redo, MP4 export
+  the preview, Titanium Dial keys + undo, track toggle by Enter, play,
+  undo/redo, MP4 export
   checked with ffprobe, Manrope UI
   font loaded, relaunch with project/thumbnail/timeline intact. Passes on
   Linux under Xvfb and on Windows 11. Needs `ffmpeg`/`ffprobe` on PATH; so
@@ -125,6 +126,14 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
    - Titanium Dial: `src/titanium-dial/` (math + tests, targets, control,
      panel beside the timeline). Focused sliders keep arrow/Page/Home/End
      keys (`actions/use-keybindings.ts`).
+   - Timeline track names: V1/T1/G1/FX1 counted from the bottom, A1 from the
+     top (`timeline/components/track-labels.ts`, tested); mute/hide are
+     labelled buttons. No track lock: the model has none, so no fake icon.
+   - Inspector: title row and labelled top tabs (`panels/properties/index.tsx`).
+   - Media panel: All / Video / Audio / Images filters (`views/assets.tsx`).
+   - Enter presses a focused button/tab/link instead of the global "go to
+     start" shortcut (Home still does that), so every control works from the
+     keyboard. Space stays play/pause.
 
 ## Known limitations
 
@@ -143,8 +152,8 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
 - Light mode keeps the classic surfaces with a graphite accent; the Titanium
   design is dark-first.
 - Transitions and Adjustment sections are placeholders (marked "coming soon").
-- Spatial Orbit Timeline is styled through tokens, lift and colours; track
-  rows are unchanged (no perspective, by design of the brief's accuracy rule).
+- Spatial Orbit Timeline is styled through tokens, lift, colours and track
+  names; track rows have no perspective (the brief's accuracy rule).
 - Design backlog from the mockups (not built): size presets on new project,
   drag-and-drop to start a project, Myanmar fonts, AI Copilot panel UI.
 

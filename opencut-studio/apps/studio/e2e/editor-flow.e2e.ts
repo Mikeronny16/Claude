@@ -219,6 +219,16 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 	await page.keyboard.press("Control+Shift+z");
 	await expect(timelineClips(page)).toHaveCount(1);
 
+	// Track toggles are labelled buttons that Enter presses.
+	await page.getByRole("button", { name: "Hide Video 1" }).focus();
+	await page.keyboard.press("Enter");
+	await expect(page.getByRole("button", { name: "Show Video 1" })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	);
+	await page.keyboard.press("Enter");
+	await expect(page.getByRole("button", { name: "Hide Video 1" })).toBeVisible();
+
 	// Export as MP4 through the export popover.
 	await page.getByRole("button", { name: "Export" }).first().click();
 	await page.getByRole("button", { name: "Export", exact: true }).last().click();

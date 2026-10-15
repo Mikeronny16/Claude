@@ -15,6 +15,10 @@ const SLIDER_KEYS = new Set([
 	"End",
 ]);
 
+// Enter presses a focused control rather than running a shortcut.
+const ENTER_ACTIVATED_CONTROLS =
+	'button, a[href], select, [role="button"], [role="tab"], [role="checkbox"], [role="switch"], [role="radio"], [role="menuitem"], [role="option"]';
+
 /**
  * a composable that hooks to the caller component's
  * lifecycle and hooks to the keyboard events to fire
@@ -49,6 +53,10 @@ export function useKeybindingsListener() {
 				activeElement instanceof HTMLElement &&
 				activeElement.getAttribute("role") === "slider" &&
 				SLIDER_KEYS.has(ev.key);
+			const isControlActivation =
+				normalizedKey === "enter" &&
+				activeElement instanceof HTMLElement &&
+				activeElement.matches(ENTER_ACTIVATED_CONTROLS);
 			const boundAction = binding ? keybindings.get(binding) : undefined;
 
 			if (normalizedKey === "escape" && isTextInput) {
@@ -59,7 +67,7 @@ export function useKeybindingsListener() {
 			if (!binding) return;
 			if (!boundAction) return;
 
-			if (isTextInput || isSliderKey) return;
+			if (isTextInput || isSliderKey || isControlActivation) return;
 			if (boundAction === "paste-copied") {
 				if (!editor.clipboard.hasEntry()) return;
 				ev.preventDefault();
