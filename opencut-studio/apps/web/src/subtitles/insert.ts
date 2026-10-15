@@ -7,13 +7,14 @@ import {
 import { buildSubtitleTextElement } from "./build-subtitle-text-element";
 import type { SubtitleCue } from "./types";
 
-export function insertCaptionChunksAsTextTrack({
+/** One command that adds a text track holding the captions. */
+export function buildCaptionTrackCommand({
 	editor,
 	captions,
 }: {
 	editor: EditorCore;
 	captions: SubtitleCue[];
-}): string | null {
+}): { command: BatchCommand; trackId: string } | null {
 	if (captions.length === 0) {
 		return null;
 	}
@@ -32,9 +33,23 @@ export function insertCaptionChunksAsTextTrack({
 				}),
 			}),
 	);
-	editor.command.execute({
+	return {
 		command: new BatchCommand([addTrackCommand, ...insertCommands]),
-	});
+		trackId,
+	};
+}
 
-	return trackId;
+export function insertCaptionChunksAsTextTrack({
+	editor,
+	captions,
+}: {
+	editor: EditorCore;
+	captions: SubtitleCue[];
+}): string | null {
+	const built = buildCaptionTrackCommand({ editor, captions });
+	if (!built) {
+		return null;
+	}
+	editor.command.execute({ command: built.command });
+	return built.trackId;
 }

@@ -5,7 +5,7 @@ import type { CopilotParam, CopilotPlan, CopilotStep } from "./steps";
 // the review / preview / apply flow can be used and tested offline.
 
 export const DEMO_HELP =
-	'Demo mode understands simple commands like "split at playhead", "delete selected", "opacity 50%", "rotate 15", "scale 120%", "volume -6 dB" or "add title Hello". Add a Claude API key for anything else.';
+	'Demo mode understands simple commands like "remove silences", "add captions", "cut the first 2 seconds", "split at playhead", "delete selected", "opacity 50%", "rotate 15", "volume -6 dB" or "add title Hello". Add a Claude API key for anything else.';
 
 const NUMBER = String.raw`(-?\d+(?:\.\d+)?)`;
 const PARAM_PATTERNS: Array<{ param: CopilotParam; pattern: RegExp }> = [
@@ -16,6 +16,8 @@ const PARAM_PATTERNS: Array<{ param: CopilotParam; pattern: RegExp }> = [
 ];
 const TEXT_PATTERN = /^(?:add|put|insert)?\s*(?:a\s+)?(?:title|text|caption)\s*[:\-]?\s*["“']?(.+?)["”']?\s*$/i;
 const TIME_PATTERN = /\bat\s+(?:(\d+):)?(\d+(?:\.\d+)?)\s*s?\b/;
+const EDGE_PATTERN =
+	/\b(?:cut|remove|delete|trim)\s+(?:off\s+)?(?:the\s+)?(first|last)\s+(\d+(?:\.\d+)?)\s*(?:s|secs?|seconds?)?\b/;
 
 function readTime({ text, fallback }: { text: string; fallback: number }): number {
 	const match = text.match(TIME_PATTERN);
@@ -33,6 +35,22 @@ function planPart({
 	const lower = text.toLowerCase();
 	const selected = context.selectedClipIds;
 
+	if (/\b(?:captions|subtitles|transcribe|transcript)\b/.test(lower)) {
+		return { tool: "add_captions", language: "auto" };
+	}
+	if (/\bsilen(?:ce|ces|t)\b/.test(lower)) {
+		return { tool: "remove_silences", minSilence: 0.6 };
+	}
+	const edge = lower.match(EDGE_PATTERN);
+	if (edge) {
+		const seconds = Math.min(Number(edge[2]), context.duration);
+		if (seconds <= 0) return "The timeline is empty.";
+		const range =
+			edge[1] === "first"
+				? { start: 0, end: seconds }
+				: { start: context.duration - seconds, end: context.duration };
+		return { tool: "remove_ranges", ranges: [range], reason: "request" };
+	}
 	const textMatch = text.match(TEXT_PATTERN);
 	if (textMatch) {
 		return { tool: "add_text", text: textMatch[1], start: context.playhead, duration: 3 };

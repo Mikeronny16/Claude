@@ -12,9 +12,14 @@ import type { SceneTracks, TimelineElement } from "@/timeline";
 import { DEFAULTS } from "@/timeline/defaults";
 import { buildTextElement } from "@/timeline/element-utils";
 import { DIAL_TARGETS } from "@/titanium-dial/targets";
-import { mediaTimeFromSeconds, mediaTimeToSeconds } from "@/wasm";
+import { buildCaptionTrackCommand } from "@/subtitles/insert";
+import { mediaTimeFromSeconds, mediaTimeToSeconds, subMediaTime } from "@/wasm";
 import { orderedTracks } from "./context";
+import { normalizeRanges, type TimeRange } from "./silence";
 import type { CopilotStep } from "./steps";
+
+// Tolerance for comparing clip edges, in seconds (well under one frame).
+const EDGE_EPSILON = 1e-4;
 
 type Located = { trackId: string; element: TimelineElement };
 
@@ -33,6 +38,62 @@ function refs({ clipIds, clips }: { clipIds: string[]; clips: Map<string, Locate
 		const clip = clips.get(id);
 		return clip ? [{ trackId: clip.trackId, elementId: id }] : [];
 	});
+}
+
+function clipSpans({ editor }: { editor: EditorCore }) {
+	return [...locateClips({ editor }).values()].map(({ trackId, element }) => {
+		const start = mediaTimeToSeconds({ time: element.startTime });
+		return {
+			trackId,
+			element,
+			start,
+			end: start + mediaTimeToSeconds({ time: element.duration }),
+		};
+	});
+}
+
+/**
+ * Cuts a time range out of every track: splits clips at its edges, deletes
+ * what is inside, and moves everything after it earlier to close the gap.
+ */
+function removeRange({ editor, range }: { editor: EditorCore; range: TimeRange }) {
+	const startTime = mediaTimeFromSeconds({ seconds: range.start });
+	const endTime = mediaTimeFromSeconds({ seconds: range.end });
+	const toRef = ({ trackId, element }: { trackId: string; element: TimelineElement }) => ({
+		trackId,
+		elementId: element.id,
+	});
+	for (const [seconds, time] of [
+		[range.end, endTime],
+		[range.start, startTime],
+	] as const) {
+		const crossing = clipSpans({ editor }).filter(
+			(clip) => clip.start < seconds - EDGE_EPSILON && clip.end > seconds + EDGE_EPSILON,
+		);
+		if (crossing.length > 0) {
+			new SplitElementsCommand({
+				elements: crossing.map(toRef),
+				splitTime: time,
+				retainSide: "both",
+			}).execute();
+		}
+	}
+	const inside = clipSpans({ editor }).filter(
+		(clip) => clip.start >= range.start - EDGE_EPSILON && clip.end <= range.end + EDGE_EPSILON,
+	);
+	if (inside.length > 0) {
+		new DeleteElementsCommand({ elements: inside.map(toRef) }).execute();
+	}
+	const gap = subMediaTime({ a: endTime, b: startTime });
+	const later = clipSpans({ editor }).filter((clip) => clip.start >= range.end - EDGE_EPSILON);
+	if (later.length > 0) {
+		new UpdateElementsCommand({
+			updates: later.map((clip) => ({
+				...toRef(clip),
+				patch: { startTime: subMediaTime({ a: clip.element.startTime, b: gap }) },
+			})),
+		}).execute();
+	}
 }
 
 /** Runs one step on the live timeline without adding to the undo history. */
@@ -92,6 +153,22 @@ function runStep({ editor, step }: { editor: EditorCore; step: CopilotStep }): s
 			new UpdateElementsCommand({ updates }).execute();
 			return null;
 		}
+		case "remove_ranges": {
+			const ranges = normalizeRanges({ ranges: step.ranges });
+			if (ranges.length === 0) return "Nothing to remove.";
+			// Last range first, so earlier ranges keep their times.
+			for (const range of [...ranges].reverse()) removeRange({ editor, range });
+			return null;
+		}
+		case "insert_captions": {
+			const built = buildCaptionTrackCommand({ editor, captions: step.captions });
+			if (!built) return "No speech was found for captions.";
+			built.command.execute();
+			return null;
+		}
+		case "remove_silences":
+		case "add_captions":
+			return "This step wasn't prepared.";
 		case "add_text": {
 			const raw = DEFAULTS.text.element;
 			new InsertElementCommand({

@@ -40,7 +40,7 @@ No env vars, accounts, database or cloud services are needed.
 ## Checks
 
 ```bash
-bun test                              # from opencut-studio/: 232/236 pass
+bun test                              # from opencut-studio/: 239/243 pass
 cd apps/web && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bunx tsc --noEmit -p tsconfig.json
 cd apps/studio && bun run build && bun run test:e2e      # Linux headless: xvfb-run -a bun run test:e2e
@@ -149,8 +149,19 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
    - Demo mode without a key (`copilot/demo-planner.ts`): "split at
      playhead", "delete selected", "opacity 50%", "rotate 15", "scale 120%",
      "volume -6 dB", "add title …", chained with "and"/"then".
-   - Tests: steps, demo planner and Claude-reply parsing (unit); demo plan →
-     apply → undo (e2e, which blanks the key).
+   - Silences and captions: analysis steps (remove_silences, add_captions)
+     are prepared before the plan shows (`copilot/prepare.ts`): silences are
+     found in the mixed timeline audio (`copilot/silence.ts`, -40 dB, 0.6 s,
+     0.15 s kept each side; skipped with no audio or if >80 % is quiet) and
+     cut from every track with gaps closed (`remove_ranges`, also Claude's
+     remove_time_ranges); captions reuse the Captions panel's Whisper
+     pipeline (`buildCaptionTrackCommand` in `subtitles/insert.ts`), with
+     times moved past any earlier cuts. First captions run downloads the
+     Whisper model (~70 s here), later runs work offline.
+   - Tests: steps, demo planner, Claude-reply parsing, silence detection and
+     range maths (unit); demo plan → apply → undo, and remove silences →
+     shorter timeline → one undo (e2e, which blanks the key). Captions
+     checked by hand in the desktop app with Windows text-to-speech audio.
 
 ## Known limitations
 
@@ -185,10 +196,10 @@ BASE_URL=http://localhost:3000 bun run screenshots -- <dir>   # same tour on dev
 4. **FFmpeg sidecar** for AAC export and HEVC/ProRes import (LGPL notices).
 5. ~~AI Copilot~~ — v1 done (Done 12). Not yet: the Claude path has not run
    against the real API (no key on this machine); key entry in Settings
-   instead of an environment variable; more tools (remove silences via
-   audio analysis, captions via the existing Whisper transcription, move
-   and trim, music); editing the timeline while a plan is previewed isn't
-   guarded.
+   instead of an environment variable; more tools (move and trim, music,
+   speed); editing the timeline while a plan is previewed isn't guarded;
+   removing time doesn't move bookmarks; Whisper has no Burmese option
+   in the app's language list.
 
 ## Working agreement
 

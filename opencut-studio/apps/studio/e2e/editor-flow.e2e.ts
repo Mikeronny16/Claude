@@ -295,3 +295,48 @@ test("create, import, edit, play, undo, export, and reopen a project", async () 
 
 	await app.close();
 });
+
+test("Copilot removes silences as one undo step", async () => {
+	// 1 s tone, 2 s silence, 1 s tone.
+	const pausePath = join(workDir, "pause.mp4");
+	execFileSync("ffmpeg", [
+		"-v", "error", "-y",
+		"-f", "lavfi", "-i", "color=c=0x204060:s=320x180:r=30:d=4",
+		"-f", "lavfi", "-i", "aevalsrc=exprs='if(lt(t,1)+gt(t,3),0.3*sin(2*PI*440*t),0)':s=48000:d=4",
+		"-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest",
+		pausePath,
+	]);
+
+	const app = await launchApp();
+	const page = await openWindow(app);
+	await page.getByRole("button", { name: "New project" }).first().click();
+	await expect(page).toHaveURL(/\/editor\/[\w-]+$/);
+	// The welcome dialog shows only on the first visit in this profile.
+	await page
+		.getByRole("dialog")
+		.waitFor({ timeout: 3000 })
+		.then(() => page.keyboard.press("Escape"))
+		.catch(() => {});
+	await page.locator('input[type="file"]').setInputFiles(pausePath);
+	const card = page.getByTitle("pause.mp4").first();
+	await expect(card).toBeVisible();
+	await card.hover();
+	await page.getByRole("button", { name: "Add to timeline" }).first().click();
+	await expect(page.getByText("00:00:04:00")).toBeVisible();
+
+	await page.getByRole("button", { name: "Copilot" }).click();
+	const copilot = page.getByRole("region", { name: "AI Copilot" });
+	await copilot.getByRole("button", { name: "Remove silences" }).click();
+	await expect(copilot.getByText(/^Remove 1 silent part \(1\.\d s in total\)$/)).toBeVisible();
+	await copilot.getByRole("button", { name: "Apply 1 change" }).click();
+	await expect(page.getByText(/^00:00:02:\d\d$/)).toBeVisible();
+	await expect(timelineClips(page)).toHaveCount(2);
+
+	await page.locator("body").click({ position: { x: 5, y: 5 } });
+	await page.keyboard.press("Control+z");
+	await expect(page.getByText("00:00:04:00")).toBeVisible();
+	await expect(timelineClips(page)).toHaveCount(1);
+
+	await page.waitForTimeout(1500); // autosave is debounced; closing earlier asks about unsaved changes
+	await app.close();
+});

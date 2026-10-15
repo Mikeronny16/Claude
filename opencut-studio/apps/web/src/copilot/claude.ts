@@ -13,7 +13,9 @@ Each request comes with a JSON summary of the timeline: every clip's id, name, t
 
 Plan the edit by calling the tools, in the order they should run. Your tool calls are shown to the user as a plan and run only if they approve it, so make every call the edit needs in this one reply; you will not see tool results. Use only clip ids from the summary. Splitting keeps a clip's id on its left part, and the new right part can't be referred to in the same plan. "This", "it" or "selected" means the selected clips.
 
-If the request is unclear or needs something these tools can't do (for example removing silences, adding music, captions or exporting), don't call any tool; say briefly what you can do instead. Reply in the user's language, in one or two short sentences.`;
+To cut out a stretch of time across the whole timeline, use remove_time_ranges; later clips move up to close the gap. remove_silences and add_captions listen to the audio first, so call them without guessing times; when both are wanted, call remove_silences first.
+
+If the request is unclear or needs something these tools can't do (for example adding music, changing speed or exporting), don't call any tool; say briefly what you can do instead. Reply in the user's language, in one or two short sentences.`;
 
 const clipIds = {
 	type: "array",
@@ -61,6 +63,66 @@ export const COPILOT_TOOLS: Anthropic.Tool[] = [
 				value: { type: "number" },
 			},
 			required: ["clip_ids", "param", "value"],
+			additionalProperties: false,
+		},
+	},
+	{
+		name: "remove_time_ranges",
+		description:
+			"Cut time ranges out of the whole timeline (every track), closing the gaps so everything after moves earlier.",
+		strict: true,
+		input_schema: {
+			type: "object",
+			properties: {
+				ranges: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							start: { type: "number", description: "Seconds." },
+							end: { type: "number", description: "Seconds." },
+						},
+						required: ["start", "end"],
+						additionalProperties: false,
+					},
+				},
+			},
+			required: ["ranges"],
+			additionalProperties: false,
+		},
+	},
+	{
+		name: "remove_silences",
+		description:
+			"Find silent stretches in the timeline's audio and cut them out, closing the gaps. The editor measures the audio itself.",
+		strict: true,
+		input_schema: {
+			type: "object",
+			properties: {
+				min_silence: {
+					type: "number",
+					description: "Shortest silence to remove, in seconds (0.2-5). Use 0.6 unless the user says otherwise.",
+				},
+			},
+			required: ["min_silence"],
+			additionalProperties: false,
+		},
+	},
+	{
+		name: "add_captions",
+		description:
+			"Transcribe the timeline's speech on this computer and add it as captions on a new text track.",
+		strict: true,
+		input_schema: {
+			type: "object",
+			properties: {
+				language: {
+					type: "string",
+					enum: ["auto", "en", "es", "it", "fr", "de", "pt", "ru", "ja", "zh"],
+					description: "Spoken language, or auto to detect it.",
+				},
+			},
+			required: ["language"],
 			additionalProperties: false,
 		},
 	},

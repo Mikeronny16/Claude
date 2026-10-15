@@ -11,6 +11,7 @@ import { CopilotPreview } from "../apply";
 import { buildCopilotContext, type CopilotContext } from "../context";
 import { useCopilotStore } from "../copilot-store";
 import { DEMO_HELP, planFromDemo } from "../demo-planner";
+import { prepareCopilotSteps } from "../prepare";
 import { describeCopilotStep, type CopilotPlan } from "../steps";
 
 type Mode = "checking" | "claude" | "demo";
@@ -23,12 +24,13 @@ type Entry = {
 	clips?: CopilotContext["clips"];
 	enabled: boolean[];
 	notes: string[];
+	progress?: string;
 	error?: string;
 };
 
 const SUGGESTIONS: Record<Exclude<Mode, "checking">, string[]> = {
-	demo: ["Split at playhead", "Opacity 50%", "Add title Hello"],
-	claude: ["Cut the first 2 seconds", "Fade the selected clip to 50%", "Add a title that says Welcome"],
+	demo: ["Remove silences", "Add captions", "Add title Hello"],
+	claude: ["Remove the silences", "Add captions", "Cut the first 2 seconds"],
 };
 
 async function requestClaudePlan({
@@ -108,10 +110,22 @@ export function CopilotPanel() {
 		});
 		setEntries((current) => [...current, { id, request, status: "thinking", enabled: [], notes: [] }]);
 		try {
-			const plan =
+			const proposed =
 				mode === "claude"
 					? await requestClaudePlan({ request, context })
 					: planFromDemo({ request, context });
+			// Silences and captions need the audio first, so the plan shows real
+			// times and text.
+			const prepared = await prepareCopilotSteps({
+				editor,
+				steps: proposed.steps,
+				onProgress: (progress) => update(id, { progress }),
+			});
+			const message =
+				prepared.steps.length === 0 && prepared.notes.length > 0
+					? prepared.notes.join(" ")
+					: [proposed.message, ...prepared.notes].join(" ");
+			const plan = { message, steps: prepared.steps };
 			update(id, {
 				status: "ready",
 				plan,
@@ -195,7 +209,7 @@ export function CopilotPanel() {
 						<p className="bg-accent self-end rounded-xl rounded-br-sm px-3 py-1.5 text-xs">{entry.request}</p>
 						{entry.status === "thinking" && (
 							<p className="text-muted-foreground text-xs" aria-live="polite">
-								Planning…
+								{entry.progress ?? "Planning…"}
 							</p>
 						)}
 						{entry.status === "error" && (
