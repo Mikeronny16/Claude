@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { useRouter } from "next/navigation";
 import type { KeyboardEvent, MouseEvent } from "react";
 import { useEffect, useState } from "react";
@@ -148,8 +149,18 @@ function ProjectsHeader() {
 						<BreadcrumbList>
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
-									<Link href="/" className="text-sm sm:text-base">
-										Home
+									<Link
+										href="/"
+										className="text-foreground flex items-center gap-2.5 text-sm font-semibold tracking-tight sm:text-base"
+									>
+										<Image
+											src={DEFAULT_LOGO_URL}
+											alt=""
+											width={28}
+											height={28}
+											className="invert dark:invert-0 size-7"
+										/>
+										OpenCut Studio
 									</Link>
 								</BreadcrumbLink>
 							</BreadcrumbItem>

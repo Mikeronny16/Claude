@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { EditorCore } from "@/core";
 import { useEditor } from "@/editor/use-editor";
 import { useKeybindingsListener } from "@/actions/use-keybindings";
@@ -98,25 +99,11 @@ export function EditorProvider({ projectId, children }: EditorProviderProps) {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="bg-background flex h-screen w-screen items-center justify-center">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="text-muted-foreground size-8 animate-spin" />
-					<p className="text-muted-foreground text-sm">Loading project...</p>
-				</div>
-			</div>
-		);
+		return <BrandedLoader label="Loading project..." />;
 	}
 
 	if (!activeProject) {
-		return (
-			<div className="bg-background flex h-screen w-screen items-center justify-center">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="text-muted-foreground size-8 animate-spin" />
-					<p className="text-muted-foreground text-sm">Exiting project...</p>
-				</div>
-			</div>
-		);
+		return <BrandedLoader label="Exiting project..." />;
 	}
 
 	return (
@@ -151,4 +138,24 @@ function EditorRuntimeBindings() {
 	useEditorActions();
 	useKeybindingsListener();
 	return null;
+}
+
+function BrandedLoader({ label }: { label: string }) {
+	return (
+		<div className="bg-background orbit-rings flex h-screen w-screen items-center justify-center">
+			<div role="status" className="flex flex-col items-center gap-5">
+				<div className="relative grid size-20 place-items-center">
+					<div className="border-border border-t-primary absolute inset-0 rounded-full border-2 motion-safe:animate-spin" />
+					<Image
+						src={DEFAULT_LOGO_URL}
+						alt=""
+						width={44}
+						height={44}
+						className="invert dark:invert-0 size-11"
+					/>
+				</div>
+				<p className="text-muted-foreground text-sm">{label}</p>
+			</div>
+		</div>
+	);
 }

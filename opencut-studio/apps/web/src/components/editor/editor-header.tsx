@@ -23,15 +23,22 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ShortcutsDialog } from "@/actions/components/shortcuts-dialog";
 import Image from "next/image";
 import { cn } from "@/utils/ui";
+import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
+import { frameRateToFloat } from "@/fps/utils";
 
 export function EditorHeader() {
 	return (
-		<header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
-			<div className="flex items-center gap-1">
+		<header className="bg-background flex h-[3.4rem] items-center justify-between gap-3 px-3 pt-0.5">
+			<div className="flex min-w-0 items-center gap-1">
 				<ProjectDropdown />
+				<span className="hidden pr-2 text-[0.95rem] font-semibold tracking-tight lg:inline">
+					OpenCut Studio
+				</span>
+				<span aria-hidden className="bg-border hidden h-4 w-px lg:block" />
 				<EditableProjectName />
 			</div>
 			<nav className="flex items-center gap-2">
+				<ProjectFormatButton />
 				{isFeedbackEnabled && <FeedbackPopover />}
 				<ExportButton />
 				<ThemeToggle />
@@ -108,13 +115,18 @@ function ProjectDropdown() {
 		<>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="icon" className="p-1 rounded-sm size-8">
+					<Button
+						variant="ghost"
+						size="icon"
+						className="p-1 rounded-sm size-8"
+						aria-label="Project menu"
+					>
 						<Image
 							src={DEFAULT_LOGO_URL}
 							alt="OpenCut Studio"
 							width={32}
 							height={32}
-							className="invert dark:invert-0 size-5"
+							className="invert dark:invert-0 size-6"
 						/>
 					</Button>
 				</DropdownMenuTrigger>
@@ -153,6 +165,27 @@ function ProjectDropdown() {
 				onOpenChange={(isOpen) => setOpenDialog(isOpen ? "shortcuts" : null)}
 			/>
 		</>
+	);
+}
+
+/** Project size and frame rate, e.g. "1080p · 30 fps"; opens project settings. */
+function ProjectFormatButton() {
+	const settings = useEditor((e) => e.project.getActive()?.settings);
+	const setActiveTab = useAssetsPanelStore((state) => state.setActiveTab);
+	if (!settings) return null;
+
+	const { width, height } = settings.canvasSize;
+	const fps = Math.round(frameRateToFloat(settings.fps) * 100) / 100;
+	return (
+		<Button
+			variant="ghost"
+			size="sm"
+			className="text-muted-foreground hidden text-xs tabular-nums md:inline-flex"
+			title={`${width} × ${height}, ${fps} fps. Open project settings`}
+			onClick={() => setActiveTab("settings")}
+		>
+			{Math.min(width, height)}p · {fps} fps
+		</Button>
 	);
 }
 

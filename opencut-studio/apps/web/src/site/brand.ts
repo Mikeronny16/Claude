@@ -9,5 +9,5 @@ export const SITE_INFO = {
 	favicon: "/favicon.ico",
 };
 
-// Placeholder mark until OpenCut Studio has its own logo.
+// Orbital Signature emblem; icon.svg beside it is the app icon.
 export const DEFAULT_LOGO_URL = "/logos/opencut-studio/logo.svg";

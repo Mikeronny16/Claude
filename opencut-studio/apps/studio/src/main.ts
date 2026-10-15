@@ -93,7 +93,8 @@ async function createMainWindow(): Promise<void> {
 		height: 900,
 		minWidth: 1024,
 		minHeight: 640,
-		backgroundColor: "#09090b",
+		backgroundColor: "#101114",
+		icon: join(app.getAppPath(), "assets/icon.png"),
 		show: false,
 		webPreferences: {
 			contextIsolation: true,

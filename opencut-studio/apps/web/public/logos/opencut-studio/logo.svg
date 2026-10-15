@@ -1,8 +1,13 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
-<rect width="32" height="32" fill="white"/>
-<path d="M10.5 10v12l10.2-6-10.2-6Z" fill="black"/>
-<path d="M23.5 1.5c.5 2.6 1.4 3.5 4 4-2.6.5-3.5 1.4-4 4-.5-2.6-1.4-3.5-4-4 2.6-.5 3.5-1.4 4-4Z" fill="black" transform="translate(3.6 -1.2) scale(1.05)"/>
-</mask>
-<rect width="32" height="32" rx="8" fill="white" mask="url(#m)"/>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- OpenCut Studio, Orbital Signature: a ring with a cut, an orbit passing through it, a satellite. -->
+<defs>
+<linearGradient id="ti" x1="12" y1="8" x2="52" y2="58" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#F7F8FA"/>
+<stop offset="0.55" stop-color="#C3C9D0"/>
+<stop offset="1" stop-color="#8A929C"/>
+</linearGradient>
+</defs>
+<path d="M52.67 24.48A22 22 0 1 1 43 12.95" stroke="url(#ti)" stroke-width="4.5" stroke-linecap="round"/>
+<ellipse cx="32" cy="32" rx="27" ry="8.5" transform="rotate(-38 32 32)" stroke="url(#ti)" stroke-width="2.25"/>
+<circle cx="53.3" cy="15.4" r="3.4" fill="#F7F8FA"/>
 </svg>
