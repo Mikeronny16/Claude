@@ -1,8 +1,14 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import { withBotId } from "botid/next/config";
 import { withContentCollections } from "@content-collections/next";
 
+// The monorepo root. Pinned so Next doesn't adopt a lockfile from a parent directory.
+const workspaceRoot = path.join(__dirname, "../..");
+
 const nextConfig: NextConfig = {
+	turbopack: { root: workspaceRoot },
+	outputFileTracingRoot: workspaceRoot,
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
 	},
